@@ -1,0 +1,4 @@
+
+* About blogit
+
+blogit is a blog generator based on org-mode and emacs
