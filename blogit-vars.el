@@ -48,8 +48,13 @@
   "Options for generating static pages using blogit."
   :tag "Org static page generator" :group 'org)
 
+
 (defconst blogit/temp-buffer-name "*Blogit Output*"
   "Name of the temporary buffer used by blogit.")
+
+(defcustom blogit/source-dir nil
+  "The source directory for blogit."
+  :group 'blogit :type 'string)
 
 (defcustom blogit/site-domain nil
   "The domain name of entire site, it is recommended to assign with prefix
