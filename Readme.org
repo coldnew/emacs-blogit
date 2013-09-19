@@ -1,4 +1,8 @@
 
+* NOTE
+
+This emacs file is under development, DO NOT use it until it finished.
+
 * About blogit
 
 blogit is a static blog generator based on org-mode and emacs, I write
@@ -10,5 +14,5 @@ this for my personal blog:
 
 blogit is based on following emacs blogging tools
 
-1. o-blog
-2. org-page
+1. [[https://github.com/renard/o-blog][o-blog]]
+2. [[https://github.com/kelvinh/org-page][org-page]]
