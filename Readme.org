@@ -1,4 +1,14 @@
 
 * About blogit
 
-blogit is a blog generator based on org-mode and emacs
+blogit is a static blog generator based on org-mode and emacs, I write
+this for my personal blog:
+
+[[http://coldnew.github.io][coldnew's blog]]
+
+* Many thanks to
+
+blogit is based on following emacs blogging tools
+
+1. o-blog
+2. org-page
