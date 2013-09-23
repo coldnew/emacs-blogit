@@ -49,54 +49,54 @@
   :tag "Org static page generator" :group 'org)
 
 
-(defconst blogit/temp-buffer-name "*Blogit Output*"
+(defconst blogit-temp-buffer-name "*Blogit Output*"
   "Name of the temporary buffer used by blogit.")
 
-(defcustom blogit/source-dir nil
+(defcustom blogit-source-dir nil
   "The source directory for blogit."
   :group 'blogit :type 'string)
 
-(defcustom blogit/site-domain nil
+(defcustom blogit-site-domain nil
   "The domain name of entire site, it is recommended to assign with prefix
 http:// or https://, http will be considered if not assigned."
   :group 'blogit :type 'string)
 
-(defcustom blogit/site-main-title "blogit"
+(defcustom blogit-site-main-title "blogit"
   "The main title of entire site."
   :group 'blogit :type 'string)
 
-(defcustom blogit/site-sub-title "static site generator"
+(defcustom blogit-site-sub-title "static site generator"
   "The subtitle of entire site."
   :group 'blogit :type 'string)
 
-(defcustom blogit/personal-github-link "https://github.com/coldnew/blogit"
+(defcustom blogit-personal-github-link "https://github.com/coldnew/blogit"
   "The personal github link."
   :group 'blogit :type 'string)
 
-(defcustom blogit/personal-disqus-shortname nil
+(defcustom blogit-personal-disqus-shortname nil
   "The personal disqus shortname."
   :group 'blogit :type 'string)
 
-(defcustom blogit/personal-google-analytics-id nil
+(defcustom blogit-personal-google-analytics-id nil
   "Personal google analytics id."
   :group 'blogit :type 'string)
 
-(defcustom blogit/template-dir "templates"
+(defcustom blogit-template-dir "templates"
   "Template directory."
   :group 'blogit :type 'string)
 
-(defcustom blogit/template-rss "rss.html"
+(defcustom blogit-template-rss "rss.html"
   "Template for generate rss files."
   :group 'blogit :type 'string)
 
-(defcustom blogit/template-readme "README.md"
+(defcustom blogit-template-readme "README.md"
   "Template to generate README.md for new blogit project."
   :group 'blogit :type 'string)
 
-(defcustom blogit/template-index "index.org"
+(defcustom blogit-template-index "index.org"
   "Template to generate index.org for new blogit project."
   :group 'blogit :type 'string)
 
-(defcustom blogit/template-about "about.org"
+(defcustom blogit-template-about "about.org"
   "Template to generate about.org for new blogit project."
   :group 'blogit :type 'string)

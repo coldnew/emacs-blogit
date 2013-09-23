@@ -40,3 +40,8 @@
 ;;      (require 'blogit)
 
 ;;; Code:
+
+(defun blogit-generate-readme (dir)
+  "Generate README.md for new blogit project."
+
+  )
