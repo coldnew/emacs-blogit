@@ -65,6 +65,11 @@
 ;;        ))
 ;;   )
 
+(defmacro blogit~generate-file (template dir)
+  "Generate file from template to dir with same name."
+  `(copy-file ,template
+	      (expand-file-name ,template dir)))
+
 (defun blogit~check-variables (var type &optional msg)
   "Check blogit variable is exit and matching type, include:
 

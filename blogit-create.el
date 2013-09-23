@@ -41,7 +41,16 @@
 
 ;;; Code:
 
+(require 'blogit-utils)
+
 (defun blogit-generate-readme (dir)
   "Generate README.md for new blogit project."
+  (blogit~generate-file blogit-template-readme dir))
 
-  )
+(defun blogit-generate-index (dir)
+  "Generate index.org for new blogit project."
+  (blogit~generate-file blogit-template-index dir))
+
+(defun blogit-generate-about (dir)
+  "Generate about.org for new blogit project."
+  (blogit~generate-file blogit-template-about dir))
