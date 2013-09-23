@@ -70,7 +70,7 @@
 
 `:dir': check directory is exist or not.
 `:file': check file is exist or not.
-`:other': check var is not null, this config can pass custom msg.
+`:not-nil': check var is not null, this config can pass custom msg.
 
   If check without error, return t, else nil.
 "
@@ -81,7 +81,7 @@
               (error "Directory `%s' is not configured or not exist." var-name)) t)
       (:file (unless (and var-value (file-exists-p var-value))
                (error "File `%s' is not configured or not exist." var-name)) t)
-      (:other (unless var-value
-                (if (string-or-null-p msg) (error msg var-name))
-                (error "Variable `%s' is not configured." var-name)) t))
+      (:not-nil (unless var-value
+                  (if (string-or-null-p msg) (error msg var-name))
+                  (error "Variable `%s' is not configured." var-name)) t))
     ))
