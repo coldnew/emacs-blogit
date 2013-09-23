@@ -4,8 +4,8 @@
 ;;
 ;; Author: coldnew <coldnew.tw@gmail.com>
 ;; Keywords:
-;; X-URL: http://github.com/coldnew/blogit
-;; Version: 0.2
+;; X-URL: http://github.com/coldnew/emacs-blogit
+;; Version: 0.1
 
 ;; This file is not part of GNU Emacs.
 
