@@ -88,3 +88,15 @@ http:// or https://, http will be considered if not assigned."
 (defcustom blogit/template-rss "rss.html"
   "Template for generate rss files."
   :group 'blogit :type 'string)
+
+(defcustom blogit/template-readme "README.md"
+  "Template to generate README.md for new blogit project."
+  :group 'blogit :type 'string)
+
+(defcustom blogit/template-index "index.org"
+  "Template to generate index.org for new blogit project."
+  :group 'blogit :type 'string)
+
+(defcustom blogit/template-about "about.org"
+  "Template to generate about.org for new blogit project."
+  :group 'blogit :type 'string)
