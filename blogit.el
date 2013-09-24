@@ -44,6 +44,10 @@
 (require 'ox)
 (require 'ht)
 
+(require 'blogit-utils)
+(require 'blogit-vars)
+(require 'blogit-create)
+
 ;; TODO:
 (defun blogit-publish-html ()
   "Publish blog from org file to html files."
