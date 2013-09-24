@@ -54,3 +54,6 @@
 (defun blogit-generate-about (dir)
   "Generate about.org for new blogit project."
   (blogit~generate-file blogit-template-about dir))
+
+
+(provide 'blogit-create)

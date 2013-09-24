@@ -100,3 +100,6 @@ http:// or https://, http will be considered if not assigned."
 (defcustom blogit-template-about "about.org"
   "Template to generate about.org for new blogit project."
   :group 'blogit :type 'string)
+
+
+(provide 'blogit-vars)

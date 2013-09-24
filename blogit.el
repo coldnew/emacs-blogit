@@ -52,3 +52,6 @@
 (defun blogit-publish-html ()
   "Publish blog from org file to html files."
   )
+
+
+(provide 'blogit)

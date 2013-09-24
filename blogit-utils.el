@@ -90,3 +90,6 @@
                   (if (string-or-null-p msg) (error msg var-name))
                   (error "Variable `%s' is not configured." var-name)) t))
     ))
+
+
+(provide 'blogit-utils)
