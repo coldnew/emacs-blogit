@@ -53,5 +53,14 @@
   "Publish blog from org file to html files."
   )
 
+(defun blogit-create-site (dir)
+  "Create new static site for blogit."
+  (interactive (read-directory-name
+		"Specify a directory for blogit site: " nil nil nil))
+  (mkdir (expand-file-name dir t))
+  (blogit-generate-readme dir)
+  (blogit-generate-about dir)
+  (blogit-generate-index dir))
+
 
 (provide 'blogit)
