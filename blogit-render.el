@@ -1,4 +1,4 @@
-;;; blogit.el --- .
+;;; blogit-render.el --- .
 
 ;; Copyright (c) 2013 Yen-Chin, Lee.
 ;;
@@ -48,25 +48,6 @@
 (require 'blogit-vars)
 (require 'blogit-create)
 
-;; TODO:
-(defun blogit-publish-html ()
-  "Publish blog from org file to html files."
+
+(defun blogit-render-content ()
   )
-
-(defun blogit-create-site (dir)
-  "Create new static site for blogit."
-  (interactive (read-directory-name
-		"Specify a directory for blogit site: " nil nil nil))
-  (mkdir (expand-file-name dir t))
-  (blogit-generate-readme dir)
-  (blogit-generate-about dir)
-  (blogit-generate-index dir))
-
-(defun blogit-publish-changes ()
-"1. Publish org file th html
- 2. update index pages"
-
-)
-
-
-(provide 'blogit)
