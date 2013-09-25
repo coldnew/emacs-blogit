@@ -75,10 +75,24 @@
   "Read the content of FILE in template dir and return it as string."
   (blogit-file-to-string (concat blogit-template-dir file)))
 
+(defun blogit-string-to-file (string gile &optional mode)
+  "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
+mode, format the string with MODE's format settings."
+  (with-temp-buffer
+    (insert string)
+    (set-buffer-file-coding-system 'utf-8-unix)
+    (when (and mode (functionp mode))
+      (funcall mode)
+      (flush-lines "^[ \\t]*$" (point-min) (point-max))
+      (delete-trailing-whitespace (point-min) (point-max))
+      (indent-region (point-min) (point-max)))
+    (when (file-writable-p file)
+      (write-region (point-min) (point-max) file))))
+
 (defmacro blogit~generate-file (template dir)
   "Generate file from template to dir with same name."
   `(copy-file ,template
-	      (expand-file-name ,template dir)))
+              (expand-file-name ,template dir)))
 
 (defun blogit~check-variables (var type &optional msg)
   "Check blogit variable is exit and matching type, include:
