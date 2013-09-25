@@ -81,8 +81,16 @@ http:// or https://, http will be considered if not assigned."
   "Personal google analytics id."
   :group 'blogit :type 'string)
 
-(defcustom blogit-template-dir "templates"
+(defcustom blogit-template-dir "templates/"
   "Template directory."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-template-header "header.html"
+  "Template for generate html header."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-template-content "post.html"
+  "Template for generate html contents."
   :group 'blogit :type 'string)
 
 (defcustom blogit-template-rss "rss.html"

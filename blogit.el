@@ -48,6 +48,13 @@
 (require 'blogit-vars)
 (require 'blogit-create)
 
+(defvar blogit-version "0.1"
+  "Blogit version string.")
+
+(defvar blogit-generator-string
+  (concat "emacs-blogit ver. " blogit-version)
+  "Generator string to indicate blogit version.")
+
 ;; TODO:
 (defun blogit-publish-html ()
   "Publish blog from org file to html files."

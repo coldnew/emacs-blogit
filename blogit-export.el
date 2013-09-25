@@ -1,4 +1,4 @@
-;;; blogit-render.el --- .
+;;; blogit-export.el --- .
 
 ;; Copyright (c) 2013 Yen-Chin, Lee.
 ;;
@@ -41,33 +41,19 @@
 
 ;;; Code:
 
+(require 'format-spec)
 (require 'ox)
 (require 'ht)
-(require 'mustache)
-(require 'blogit-utils)
-(require 'blogit-vars)
-(require 'blogit-create)
+(require 'dash)
 
 
-(let ((context (ht ("name" "J. Random user"))))
-  ;; evaluates to: "Hello J. Random user!"
-  (mustache-render "Hello {{name}}!" context))
-
-
-(defun blogit-render-header ()
-  "Render the header on each page."
-  (mustache-render
-   (blogit-template-to-string blogit-template-header)
-   (ht ("TITLE"  (or (blogit-parse-option "TITLE")) "Untitled")
-       ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
-       ("GENERATOR" blogit-generator-string)
-       ("DESCRIPTION" (blogit-parse-option "DESCRIPTION"))
-       ("KEYWORDS" (blogit-parse-option "KEYWORDS"))
-       )))
-
-
-(defun blogit-render-content ()
-  (mustache-render
-   (blogit-template-to-string blogit-template-content)
-   (ht ("title" (or (op/read-org-option "TITLE") "Untitled"))
-       ("content" (org-export-as 'html nil nil t nil)))))
+(defun blogit-parse-option (option)
+  "Read option value of org file opened in current buffer.
+e.g:
+#+TITLE: this is title
+will return \"this is title\" if OPTION is \"TITLE\""
+  (let ((match-regexp (org-make-options-regexp `(,option))))
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward match-regexp nil t)
+        (match-string-no-properties 2 nil)))))

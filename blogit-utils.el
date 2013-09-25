@@ -65,6 +65,16 @@
 ;;        ))
 ;;   )
 
+(defun blogit-file-to-string (file)
+  "Read the content of FILE and return it as a string."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (buffer-string)))
+
+(defun blogit-template-to-string (file)
+  "Read the content of FILE in template dir and return it as string."
+  (blogit-file-to-string (concat blogit-template-dir file)))
+
 (defmacro blogit~generate-file (template dir)
   "Generate file from template to dir with same name."
   `(copy-file ,template
