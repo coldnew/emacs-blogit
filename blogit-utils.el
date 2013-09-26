@@ -75,7 +75,7 @@
   "Read the content of FILE in template dir and return it as string."
   (blogit-file-to-string (concat blogit-template-dir file)))
 
-(defun blogit-string-to-file (string gile &optional mode)
+(defun blogit-string-to-file (string file &optional mode)
   "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
 mode, format the string with MODE's format settings."
   (with-temp-buffer
@@ -88,6 +88,10 @@ mode, format the string with MODE's format settings."
       (indent-region (point-min) (point-max)))
     (when (file-writable-p file)
       (write-region (point-min) (point-max) file))))
+
+(defun blogit-sanitize-string (s)
+  "Sanitize string, this function is used to generate blog post url if not specified."
+  (s-left 5 (sha1 s)))
 
 (defmacro blogit~generate-file (template dir)
   "Generate file from template to dir with same name."

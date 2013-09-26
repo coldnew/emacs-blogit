@@ -60,9 +60,5 @@ will return \"this is title\" if OPTION is \"TITLE\""
 
 (defun blogit-publish-file ()
   (blogit-string-to-file
-   (mustache-render
-    (blogit-template-to-string blogit-template-content)
-    (ht ("HEADER" )
-     ("TITLE" (or (op/read-org-option "TITLE") "Untitled"))
-     ("CONTENT" (org-export-as 'html nil nil t nil)))))
-  )
+   (blogit-render-post)
+   (blogit-generate-url)))
