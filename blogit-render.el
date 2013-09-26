@@ -88,5 +88,5 @@
 				(buffer-file-name (current-buffer)))))
    ".html"))
 
-
+(find-dired "." "-name *.el")
 (provide 'blogit-render)

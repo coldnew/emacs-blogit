@@ -109,5 +109,9 @@ http:// or https://, http will be considered if not assigned."
   "Template to generate about.org for new blogit project."
   :group 'blogit :type 'string)
 
+(defcustom blogit-date-format "%Y-%m-%d"
+  "Format for printing a date in the sitemap.
+See `format-time-string' for allowed formatters."
+  :group 'blogit :type 'string)
 
 (provide 'blogit-vars)

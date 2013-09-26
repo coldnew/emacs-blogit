@@ -76,6 +76,8 @@
 
 )
 
+(defun blogit-publish-current-file ())
+
 
 (provide 'blogit)
 
