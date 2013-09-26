@@ -47,6 +47,7 @@
 (require 'blogit-utils)
 (require 'blogit-vars)
 (require 'blogit-create)
+(require 'blogit-render)
 
 (defvar blogit-version "0.1"
   "Blogit version string.")
@@ -77,3 +78,6 @@
 
 
 (provide 'blogit)
+
+;; (add-to-list 'load-path (file-name-directory (buffer-file-name)))
+;;

@@ -62,3 +62,6 @@ will return \"this is title\" if OPTION is \"TITLE\""
   (blogit-string-to-file
    (blogit-render-post)
    (blogit-generate-url)))
+
+
+;; (directory-files "." nil ".el")

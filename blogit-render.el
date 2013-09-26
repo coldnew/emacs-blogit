@@ -87,3 +87,6 @@
        (blogit-sanitize-string (file-name-base
 				(buffer-file-name (current-buffer)))))
    ".html"))
+
+
+(provide 'blogit-render)
