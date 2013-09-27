@@ -56,8 +56,8 @@
 
 (defun blogit-render-header ()
   "Render the header on each page."
-  (mustache-render
-   (blogit-template-to-string blogit-template-header)
+  (blogit-template-render
+   :header
    (ht ("TITLE"  (or (blogit-parse-option "TITLE") "Untitled"))
        ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
        ("GENERATOR" blogit-generator-string)
@@ -73,13 +73,12 @@
 
 (defun blogit-render-post ()
   "Render full post."
-  (mustache-render
-   (blogit-template-to-string blogit-template-content)
+  (blogit-template-render
+   :content
    (ht ("HEADER" (blogit-render-header))
        ("TITLE" (or (blogit-parse-option "TITLE") "Untitled"))
        ("CONTENT" (org-export-as 'html nil nil t nil))
        )))
-
 
 (defun blogit-generate-url ()
   ()

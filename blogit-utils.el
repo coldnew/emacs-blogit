@@ -75,6 +75,15 @@
   "Read the content of FILE in template dir and return it as string."
   (blogit-file-to-string (concat blogit-template-dir file)))
 
+(defun blogit-template-render (type context)
+  "Read the file contents, then render it with a hashtable context."
+  (let ((file (case type
+		(:index   blogit-template-index)
+		(:header  blogit-template-header)
+		(:content blogit-template-content)
+		(t type))))
+  (mustache-render (blogit-template-to-string file) context)))
+
 (defun blogit-string-to-file (string file &optional mode)
   "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
 mode, format the string with MODE's format settings."
