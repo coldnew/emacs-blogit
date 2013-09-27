@@ -80,12 +80,15 @@
        ("CONTENT" (org-export-as 'html nil nil t nil))
        )))
 
+
 (defun blogit-generate-url ()
   ()
   (concat
+   (directory-file-name blogit-output-dir) "/"
+   (directory-file-name (or (blogit-parse-option "CREATED") "")) "/"
    (or (blogit-parse-option "URL")
        (blogit-sanitize-string (file-name-base
-				(buffer-file-name (current-buffer)))))
+                                (buffer-file-name (current-buffer)))))
    ".html"))
 
 (find-dired "." "-name *.el")

@@ -33,11 +33,11 @@
 
 ;; If you have `melpa` and `emacs24` installed, simply type:
 ;;
-;; 	M-x package-install blogit
+;;      M-x package-install blogit
 ;;
 ;; In your .emacs
 ;;
-;; 	(require 'blogit)
+;;      (require 'blogit)
 
 ;;; Code:
 
@@ -48,7 +48,7 @@
 
 ;; import extra files in blogit
 (mapcar (lambda (x) (require (intern (format "blogit-%s" x)) nil t))
-	'("utils" "vars" "create" "test"))
+        '("utils" "vars" "create" "test" "export"))
 
 
 (defconst blogit-version "0.1"
@@ -100,27 +100,18 @@ See `format-time-string' for allowed formatters."
   "Template for generate rss files."
   :group 'blogit :type 'string)
 
-;; TODO:
-(defun blogit-publish-html ()
-  "Publish blog from org file to html files."
-  )
 
-(defun blogit-create-site (dir)
-  "Create new static site for blogit."
-  (interactive (read-directory-name
-		"Specify a directory for blogit site: " nil nil nil))
-  (mkdir (expand-file-name dir t))
-  (blogit-generate-readme dir)
-  (blogit-generate-about dir)
-  (blogit-generate-index dir))
 
-(defun blogit-publish-changes ()
-"1. Publish org file th html
- 2. update index pages"
 
-)
-
-(defun blogit-publish-current-file ())
+(defun blogit-publish-current-file ()
+  (interactive)
+  (let ((out-dir (file-name-directory (blogit-generate-url))))
+    ;; create dir for output files
+    (mkdir out-dir t)
+    ;; generate file
+    (blogit-string-to-file
+     (blogit-render-post)
+     (blogit-generate-url))))
 
 
 (provide 'blogit)
