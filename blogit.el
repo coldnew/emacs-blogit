@@ -45,6 +45,7 @@
 (require 'ht)
 (require 'dash)
 (require 's)
+(require 'mustache)
 
 ;; import extra files in blogit
 (mapcar (lambda (x) (require (intern (format "blogit-%s" x)) nil t))
@@ -121,6 +122,17 @@ See `format-time-string' for allowed formatters."
 		(:content blogit-template-content)
 		(t type))))
   (mustache-render (blogit-template-to-string file) context)))
+
+(defun blogit-parse-option (option)
+  "Read option value of org file opened in current buffer.
+e.g:
+#+TITLE: this is title
+will return \"this is title\" if OPTION is \"TITLE\""
+  (let ((match-regexp (org-make-options-regexp `(,option))))
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward match-regexp nil t)
+        (match-string-no-properties 2 nil)))))
 
 (defun blogit-string-to-file (string file &optional mode)
   "Write STRING into FILE, only when FILE is writable. If MODE is a valid major

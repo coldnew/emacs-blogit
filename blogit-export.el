@@ -47,17 +47,6 @@
 (require 'dash)
 
 
-(defun blogit-parse-option (option)
-  "Read option value of org file opened in current buffer.
-e.g:
-#+TITLE: this is title
-will return \"this is title\" if OPTION is \"TITLE\""
-  (let ((match-regexp (org-make-options-regexp `(,option))))
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward match-regexp nil t)
-        (match-string-no-properties 2 nil)))))
-
 (defun blogit-publish-file ()
   (blogit-string-to-file
    (blogit-render-post)
