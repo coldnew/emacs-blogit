@@ -98,9 +98,7 @@ mode, format the string with MODE's format settings."
     (when (file-writable-p file)
       (write-region (point-min) (point-max) file))))
 
-(defun blogit-sanitize-string (s)
-  "Sanitize string, this function is used to generate blog post url if not specified."
-  (s-left 5 (sha1 s)))
+
 
 (defmacro blogit~generate-file (template dir)
   "Generate file from template to dir with same name."
