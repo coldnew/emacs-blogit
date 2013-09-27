@@ -167,6 +167,7 @@ This function is used to generate blog post url if not specified."
 			 "^_+\\|_+$" ""
 			 (mapconcat 'identity ret "")))))
 
+;;;###autoload
 (defun blogit-publish-current-file ()
   (interactive)
   (let ((out-dir (file-name-directory (blogit-generate-url))))
