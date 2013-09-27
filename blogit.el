@@ -103,6 +103,39 @@ See `format-time-string' for allowed formatters."
 
 ;;;; Internal functions
 
+(defun blogit-file-to-string (file)
+  "Read the content of FILE and return it as a string."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (buffer-string)))
+
+(defun blogit-template-to-string (file)
+  "Read the content of FILE in template dir and return it as string."
+  (blogit-file-to-string (concat blogit-template-dir file)))
+
+(defun blogit-template-render (type context)
+  "Read the file contents, then render it with a hashtable context."
+  (let ((file (case type
+		(:index   blogit-template-index)
+		(:header  blogit-template-header)
+		(:content blogit-template-content)
+		(t type))))
+  (mustache-render (blogit-template-to-string file) context)))
+
+(defun blogit-string-to-file (string file &optional mode)
+  "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
+mode, format the string with MODE's format settings."
+  (with-temp-buffer
+    (insert string)
+    (set-buffer-file-coding-system 'utf-8-unix)
+    (when (and mode (functionp mode))
+      (funcall mode)
+      (flush-lines "^[ \\t]*$" (point-min) (point-max))
+      (delete-trailing-whitespace (point-min) (point-max))
+      (indent-region (point-min) (point-max)))
+    (when (file-writable-p file)
+      (write-region (point-min) (point-max) file))))
+
 (defun blogit-sanitize-string (s)
   "Sanitize string S by:
 
