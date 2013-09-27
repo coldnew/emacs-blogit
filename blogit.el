@@ -48,17 +48,57 @@
 
 ;; import extra files in blogit
 (mapcar (lambda (x) (require (intern (format "blogit-%s" x)) nil t))
-	'("utils" "vars" "create"))
+	'("utils" "vars" "create" "test"))
 
-(defvar blogit-version "0.1"
+
+(defconst blogit-version "0.1"
   "Blogit version string.")
 
-(defvar blogit-generator-string
+(defconst blogit-generator-string
   (concat "emacs-blogit ver. " blogit-version)
   "Generator string to indicate blogit version.")
 
-(defvar blogit-bug-report-url "https://github.com/coldnew/emacs-blogit/issues/new"
-  "Url for bug report.")
+;;; Customize Variables
+
+(defgroup blogit nil
+  "Options for generating static pages using blogit."
+  :tag "Org static page generator" :group 'org)
+
+(defcustom blogit-source-dir nil
+  "The source directory for blogit."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-output-dir nil
+  "The output directory for blogit."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-site-domain nil
+  "The domain name of entire site, it is recommended to assign with prefix
+http:// or https://, http will be considered if not assigned."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-date-format "%Y-%m-%d"
+  "Format for printing a date in the sitemap.
+See `format-time-string' for allowed formatters."
+  :group 'blogit :type 'string)
+
+;;; Templates
+
+(defcustom blogit-template-dir "templates/"
+  "Template directory."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-template-header "header.html"
+  "Template for generate html header."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-template-content "post.html"
+  "Template for generate html contents."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-template-rss "rss.html"
+  "Template for generate rss files."
+  :group 'blogit :type 'string)
 
 ;; TODO:
 (defun blogit-publish-html ()

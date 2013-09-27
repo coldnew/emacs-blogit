@@ -44,22 +44,10 @@
 (require 'ox)
 (require 'ht)
 
-(defgroup blogit nil
-  "Options for generating static pages using blogit."
-  :tag "Org static page generator" :group 'org)
-
 
 (defconst blogit-temp-buffer-name "*Blogit Output*"
   "Name of the temporary buffer used by blogit.")
 
-(defcustom blogit-source-dir nil
-  "The source directory for blogit."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-site-domain nil
-  "The domain name of entire site, it is recommended to assign with prefix
-http:// or https://, http will be considered if not assigned."
-  :group 'blogit :type 'string)
 
 (defcustom blogit-site-main-title "blogit"
   "The main title of entire site."
@@ -81,21 +69,6 @@ http:// or https://, http will be considered if not assigned."
   "Personal google analytics id."
   :group 'blogit :type 'string)
 
-(defcustom blogit-template-dir "templates/"
-  "Template directory."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-template-header "header.html"
-  "Template for generate html header."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-template-content "post.html"
-  "Template for generate html contents."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-template-rss "rss.html"
-  "Template for generate rss files."
-  :group 'blogit :type 'string)
 
 (defcustom blogit-template-readme "README.md"
   "Template to generate README.md for new blogit project."
@@ -109,9 +82,5 @@ http:// or https://, http will be considered if not assigned."
   "Template to generate about.org for new blogit project."
   :group 'blogit :type 'string)
 
-(defcustom blogit-date-format "%Y-%m-%d"
-  "Format for printing a date in the sitemap.
-See `format-time-string' for allowed formatters."
-  :group 'blogit :type 'string)
 
 (provide 'blogit-vars)
