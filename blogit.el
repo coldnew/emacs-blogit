@@ -126,13 +126,45 @@ See `format-time-string' for allowed formatters."
 (defun blogit-parse-option (option)
   "Read option value of org file opened in current buffer.
 e.g:
-#+TITLE: this is title
++TITLE: this is title
 will return \"this is title\" if OPTION is \"TITLE\""
   (let ((match-regexp (org-make-options-regexp `(,option))))
     (save-excursion
       (goto-char (point-min))
       (when (re-search-forward match-regexp nil t)
         (match-string-no-properties 2 nil)))))
+
+(defun blogit-insert-option (option value)
+  "Insert option value of org file opened in current buffer.
+If option does not exist, return nil."
+  (let ((match-regexp (org-make-options-regexp `(,option)))
+	(blank-regexp "^#\+\w*")
+	(insert-option '(insert (concat "#+" option ": " value)))
+	(mpoint))
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward match-regexp nil t)
+	  (progn
+	    (beginning-of-line)
+	    (kill-line)
+	    (eval insert-option))
+	;; no option found, insert it
+	(progn
+	  (goto-char (point-min))
+	  (while (re-search-forward blank-regexp nil t)
+	    (setq mpoint (point)))
+	  (if (not mpoint) (setq mpoint (point-min)))
+	  (goto-char mpoint)
+	  (when (not (= mpoint (point-min)))
+	      (end-of-line)
+	      (newline-and-indent))
+	  (eval insert-option)
+	  (if (= mpoint (point-min))
+	      (newline-and-indent))
+	  )
+	))))
+
+(blogit-insert-option "a3" "sas")
 
 (defun blogit-string-to-file (string file &optional mode)
   "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
