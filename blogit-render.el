@@ -49,11 +49,6 @@
 (require 'blogit-create)
 
 
-(let ((context (ht ("name" "J. Random user"))))
-  ;; evaluates to: "Hello J. Random user!"
-  (mustache-render "Hello {{name}}!" context))
-
-
 (defun blogit-render-header ()
   "Render the header on each page."
   (blogit-template-render
@@ -65,11 +60,6 @@
        ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") "")
         ))))
 
-;; (defun blogit-render-content ()
-;;   (mustache-render
-;;    (blogit-template-to-string blogit-template-content)
-;;    (ht ("title" (or (op/read-org-option "TITLE") "Untitled"))
-;;        ("content" (org-export-as 'html nil nil t nil)))))
 
 (defun blogit-render-post ()
   "Render full post."
