@@ -143,7 +143,7 @@ mode, format the string with MODE's format settings."
                 (:index   blogit-template-index)
                 (:header  blogit-template-header)
                 (:content blogit-template-content)
-		(:newpost blogit-template-newpost)
+                (:newpost blogit-template-newpost)
                 (t type))))
     (mustache-render (blogit-template-to-string file) context)))
 
@@ -162,7 +162,7 @@ will return \"this is title\" if OPTION is \"TITLE\""
   "Modify option value of org file opened in current buffer.
 If option does not exist, create it automatically."
   (let ((match-regexp (org-make-options-regexp `(,option)))
-	;; FIXME: This regexp may be not so accurate
+        ;; FIXME: This regexp may be not so accurate
         (blank-regexp "^#\+\w*")
         (insert-option '(insert (concat "#+" option ": " value)))
         (mpoint))
@@ -170,7 +170,7 @@ If option does not exist, create it automatically."
       (goto-char (point-min))
       (if (re-search-forward match-regexp nil t)
           (progn
-	    (goto-char (point-at-bol))
+            (goto-char (point-at-bol))
             (kill-line)
             (eval insert-option))
         ;; no option found, insert it
@@ -181,7 +181,7 @@ If option does not exist, create it automatically."
           (if (not mpoint) (setq mpoint (point-min)))
           (goto-char mpoint)
           (when (not (= mpoint (point-min)))
-	    (goto-char (point-at-eol))
+            (goto-char (point-at-eol))
             (newline-and-indent))
           (eval insert-option)
           (if (= mpoint (point-min))
@@ -220,27 +220,30 @@ This function is used to generate blog post url if not specified."
                          (mapconcat 'identity ret "")))))
 
 ;;;###autoload
-(defun blogit-insert-template ()
+(defun blogit-insert-template (&optional filename)
   "Insert blogit newpost template."
   (interactive)
-  (insert
-   (blogit-template-render
-    :newpost
-    (ht ("TITLE" (file-name-base filename))
-	("USER"  (or user-full-name user-login-name ""))
-	("EMAIL" (or user-mail-address ""))
-	("DATE"  (format-time-string blogit-date-format))
-	("URL"   (blogit-sanitize-string filename))
-	("LANGUAGE" (or blogit-default-language "en"))
-     )))
-  (newline-and-indent))
+  (save-excursion
+    (widen)
+    (goto-char (point-min))
+    (insert
+     (blogit-template-render
+      :newpost
+      (ht ("TITLE" (file-name-base (or filename "")))
+          ("USER"  (or user-full-name user-login-name ""))
+          ("EMAIL" (or user-mail-address ""))
+          ("DATE"  (format-time-string blogit-date-format))
+          ("URL"   (blogit-sanitize-string filename))
+          ("LANGUAGE" (or blogit-default-language "en"))
+          )))
+    (newline-and-indent)))
 
 ;;;###autoload
 (defun blogit-new-post (filename)
   "Create a new post in FILENAME."
   (interactive "sTitle for new post: ")
   (find-file (concat
-	      (file-name-as-directory blogit-source-dir) filename ".org"))
+              (file-name-as-directory blogit-source-dir) filename ".org"))
   (blogit-insert-template))
 
 ;;;###autoload
