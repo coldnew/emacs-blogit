@@ -1,3 +1,4 @@
+#+DATE: 2013/09/28 03:10 PM
 ;;; blogit-render.el --- .
 
 ;; Copyright (c) 2013 Yen-Chin, Lee.
@@ -174,13 +175,18 @@ T[0-9][0-9]:[0-9][0-9]" date-str)
 
 (defun blogit-generate-url ()
   ()
+  (let ((date-str
+	 (or (blogit-parse-option "DATE")
+	     (blogit-modify-option "DATE" (format-time-string blogit-date-format)))))
+  ;; create
   (concat
    (directory-file-name blogit-output-dir) "/"
-   (directory-file-name (or (blogit-parse-option "CREATED") "")) "/"
+   (directory-file-name (if date-str date-str
+			    (blogit-parse-option "DATE"))) "/"
    (or (blogit-parse-option "URL")
        (blogit-sanitize-string (file-name-base
                                 (buffer-file-name (current-buffer)))))
-   ".html"))
+   ".html")))
 
 (find-dired "." "-name *.el")
 (provide 'blogit-render)

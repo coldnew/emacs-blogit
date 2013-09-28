@@ -78,7 +78,13 @@
 http:// or https://, http will be considered if not assigned."
   :group 'blogit :type 'string)
 
-(defcustom blogit-date-format "%Y-%m-%d"
+(defcustom blogit-default-language "en"
+  "The default language for this site. This value will be set to `en' by default."
+  :group 'blogit :type 'string)
+
+(setq blogit-date-format "%Y/%m/%d %I:%M %p")
+
+(defcustom blogit-date-format "%Y/%m/%d %I:%M %p"
   "Format for printing a date in the sitemap.
 See `format-time-string' for allowed formatters."
   :group 'blogit :type 'string)
@@ -101,6 +107,9 @@ See `format-time-string' for allowed formatters."
   "Template for generate rss files."
   :group 'blogit :type 'string)
 
+(defcustom blogit-template-newpost "newpost.org"
+  "Template for new post."
+  :group 'blogit :type 'string)
 
 ;;;; Internal functions
 
@@ -109,6 +118,20 @@ See `format-time-string' for allowed formatters."
   (with-temp-buffer
     (insert-file-contents file)
     (buffer-string)))
+
+(defun blogit-string-to-file (string file &optional mode)
+  "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
+mode, format the string with MODE's format settings."
+  (with-temp-buffer
+    (insert string)
+    (set-buffer-file-coding-system 'utf-8-unix)
+    (when (and mode (functionp mode))
+      (funcall mode)
+      (flush-lines "^[ \\t]*$" (point-min) (point-max))
+      (delete-trailing-whitespace (point-min) (point-max))
+      (indent-region (point-min) (point-max)))
+    (when (file-writable-p file)
+      (write-region (point-min) (point-max) file))))
 
 (defun blogit-template-to-string (file)
   "Read the content of FILE in template dir and return it as string."
@@ -120,6 +143,7 @@ See `format-time-string' for allowed formatters."
                 (:index   blogit-template-index)
                 (:header  blogit-template-header)
                 (:content blogit-template-content)
+		(:newpost blogit-template-newpost)
                 (t type))))
     (mustache-render (blogit-template-to-string file) context)))
 
@@ -164,20 +188,6 @@ If option does not exist, create it automatically."
               (newline-and-indent))
           )))))
 
-(defun blogit-string-to-file (string file &optional mode)
-  "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
-mode, format the string with MODE's format settings."
-  (with-temp-buffer
-    (insert string)
-    (set-buffer-file-coding-system 'utf-8-unix)
-    (when (and mode (functionp mode))
-      (funcall mode)
-      (flush-lines "^[ \\t]*$" (point-min) (point-max))
-      (delete-trailing-whitespace (point-min) (point-max))
-      (indent-region (point-min) (point-max)))
-    (when (file-writable-p file)
-      (write-region (point-min) (point-max) file))))
-
 (defun blogit-sanitize-string (s)
   "Sanitize string S by:
 
@@ -208,6 +218,24 @@ This function is used to generate blog post url if not specified."
                         (replace-regexp-in-string
                          "^_+\\|_+$" ""
                          (mapconcat 'identity ret "")))))
+
+;;;###autoload
+(defun blogit-new-post (filename)
+  "Create a new post in FILENAME."
+  (interactive "sTitle for new post: ")
+  (find-file (concat
+	      (file-name-as-directory blogit-source-dir) filename ".org"))
+  (insert
+   (blogit-template-render
+    :newpost
+    (ht ("TITLE" (file-name-base filename))
+	("USER"  (or user-full-name user-login-name ""))
+	("EMAIL" (or user-mail-address ""))
+	("DATE"  (format-time-string blogit-date-format))
+	("URL"   (blogit-sanitize-string filename))
+	("LANGUAGE" (or blogit-default-language "en"))
+     )))
+  (newline-and-indent))
 
 ;;;###autoload
 (defun blogit-publish-current-file ()
