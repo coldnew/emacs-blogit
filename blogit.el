@@ -138,6 +138,7 @@ will return \"this is title\" if OPTION is \"TITLE\""
   "Insert option value of org file opened in current buffer.
 If option does not exist, return nil."
   (let ((match-regexp (org-make-options-regexp `(,option)))
+	;; FIXME: This regexp may be not so accurate
         (blank-regexp "^#\+\w*")
         (insert-option '(insert (concat "#+" option ": " value)))
         (mpoint))
