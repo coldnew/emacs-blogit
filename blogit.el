@@ -117,16 +117,16 @@ See `format-time-string' for allowed formatters."
 (defun blogit-template-render (type context)
   "Read the file contents, then render it with a hashtable context."
   (let ((file (case type
-		(:index   blogit-template-index)
-		(:header  blogit-template-header)
-		(:content blogit-template-content)
-		(t type))))
-  (mustache-render (blogit-template-to-string file) context)))
+                (:index   blogit-template-index)
+                (:header  blogit-template-header)
+                (:content blogit-template-content)
+                (t type))))
+    (mustache-render (blogit-template-to-string file) context)))
 
 (defun blogit-parse-option (option)
   "Read option value of org file opened in current buffer.
 e.g:
-+TITLE: this is title
+#+TITLE: this is title
 will return \"this is title\" if OPTION is \"TITLE\""
   (let ((match-regexp (org-make-options-regexp `(,option))))
     (save-excursion
@@ -138,33 +138,30 @@ will return \"this is title\" if OPTION is \"TITLE\""
   "Insert option value of org file opened in current buffer.
 If option does not exist, return nil."
   (let ((match-regexp (org-make-options-regexp `(,option)))
-	(blank-regexp "^#\+\w*")
-	(insert-option '(insert (concat "#+" option ": " value)))
-	(mpoint))
+        (blank-regexp "^#\+\w*")
+        (insert-option '(insert (concat "#+" option ": " value)))
+        (mpoint))
     (save-excursion
       (goto-char (point-min))
       (if (re-search-forward match-regexp nil t)
-	  (progn
-	    (beginning-of-line)
-	    (kill-line)
-	    (eval insert-option))
-	;; no option found, insert it
-	(progn
-	  (goto-char (point-min))
-	  (while (re-search-forward blank-regexp nil t)
-	    (setq mpoint (point)))
-	  (if (not mpoint) (setq mpoint (point-min)))
-	  (goto-char mpoint)
-	  (when (not (= mpoint (point-min)))
-	      (end-of-line)
-	      (newline-and-indent))
-	  (eval insert-option)
-	  (if (= mpoint (point-min))
-	      (newline-and-indent))
-	  )
-	))))
-
-(blogit-insert-option "a3" "sas")
+          (progn
+	    (goto-char (point-at-bol))
+            (kill-line)
+            (eval insert-option))
+        ;; no option found, insert it
+        (progn
+          (goto-char (point-min))
+          (while (re-search-forward blank-regexp nil t)
+            (setq mpoint (point)))
+          (if (not mpoint) (setq mpoint (point-min)))
+          (goto-char mpoint)
+          (when (not (= mpoint (point-min)))
+	    (goto-char (point-at-eol))
+            (newline-and-indent))
+          (eval insert-option)
+          (if (= mpoint (point-min))
+              (newline-and-indent))
+          )))))
 
 (defun blogit-string-to-file (string file &optional mode)
   "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
@@ -190,26 +187,26 @@ mode, format the string with MODE's format settings."
 
 This function is used to generate blog post url if not specified."
   (loop for c across s
-	with cd
-	with gc
-	with ret
-	do (progn
-	     (setf gc (get-char-code-property c 'general-category))
-	     (setf cd (get-char-code-property c 'decomposition)))
-	if (or (member gc '(Lu Ll Nd)) (= ?_ c) (= ?- c))
-	collect (downcase
-		 (char-to-string (if cd (car cd)  c)))
-	into ret
-	else if (member gc '(Zs))
-	collect "_" into ret
-	else if (member gc '(Lo))
-	collect (s-left 2 (sha1 (char-to-string (if cd (car cd) c))))
-	into ret
-	finally return (replace-regexp-in-string
-			"--+" "_"
-			(replace-regexp-in-string
-			 "^_+\\|_+$" ""
-			 (mapconcat 'identity ret "")))))
+        with cd
+        with gc
+        with ret
+        do (progn
+             (setf gc (get-char-code-property c 'general-category))
+             (setf cd (get-char-code-property c 'decomposition)))
+        if (or (member gc '(Lu Ll Nd)) (= ?_ c) (= ?- c))
+        collect (downcase
+                 (char-to-string (if cd (car cd)  c)))
+        into ret
+        else if (member gc '(Zs))
+        collect "_" into ret
+        else if (member gc '(Lo))
+        collect (s-left 2 (sha1 (char-to-string (if cd (car cd) c))))
+        into ret
+        finally return (replace-regexp-in-string
+                        "--+" "_"
+                        (replace-regexp-in-string
+                         "^_+\\|_+$" ""
+                         (mapconcat 'identity ret "")))))
 
 ;;;###autoload
 (defun blogit-publish-current-file ()
