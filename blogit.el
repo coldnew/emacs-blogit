@@ -219,6 +219,53 @@ This function is used to generate blog post url if not specified."
                          "^_+\\|_+$" ""
                          (mapconcat 'identity ret "")))))
 
+(defun blogit~~generate-dir-string (date-str yn mn dn)
+  "Helper function to regenerte date string fot `blogit-generate-dir-string'."
+  (concat (format "%04d" (string-to-int (match-string yn date-str))) "/"
+          (format "%02d" (string-to-int (match-string mn date-str))) "/"
+          (format "%02d" (string-to-int (match-string dn date-str)))))
+
+(defun blogit-generate-dir-string (date-string)
+  "Returns yyyy/mm/dd format of date-string
+For examples:
+   [Nov. 28, 1994]     => [1994/11/28]
+   [November 28, 1994] => [1994/11/28]
+   [11/28/1994]        => [1994/11/28]
+Any \"day of week\", or \"time\" info, or any other parts of the string, are
+discarded.
+
+This function is used to create directory for new blog post.
+"
+  (let ((date-str date-string)
+        date-list year month date yyyy mm dd)
+    (setq date-str (replace-regexp-in-string "^ *\\(.+\\) *$" "\\1" date-str))
+    (cond
+     ;; USA convention of mm/dd/yyyy
+     ((string-match
+       "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
+      (blogit~~generate-dir-string date-str 3 1 2))
+
+     ;; yyyy/mm/dd
+     ((string-match
+       "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
+      (blogit~~generate-dir-string date-str 1 2 3))
+
+     ;; some ISO 8601. yyyy-mm-dd
+     ((string-match
+       "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
+      (blogit~~generate-dir-string date-str 1 2 3))
+
+     (t (progn
+          (setq date-list (parse-time-string date-str))
+          (setq year (nth 5 date-list))
+          (setq month (nth 4 date-list))
+          (setq date (nth 3 date-list))
+          (setq yyyy (number-to-string year))
+          (setq mm (if month (format "%02d" month) ""))
+          (setq dd (if date (format "%02d" date) ""))
+          (concat yyyy "/" mm "/" dd))))))
+
+
 ;;;###autoload
 (defun blogit-insert-template (&optional filename)
   "Insert blogit newpost template."
