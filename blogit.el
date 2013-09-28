@@ -220,11 +220,9 @@ This function is used to generate blog post url if not specified."
                          (mapconcat 'identity ret "")))))
 
 ;;;###autoload
-(defun blogit-new-post (filename)
-  "Create a new post in FILENAME."
-  (interactive "sTitle for new post: ")
-  (find-file (concat
-	      (file-name-as-directory blogit-source-dir) filename ".org"))
+(defun blogit-insert-template ()
+  "Insert blogit newpost template."
+  (interactive)
   (insert
    (blogit-template-render
     :newpost
@@ -236,6 +234,14 @@ This function is used to generate blog post url if not specified."
 	("LANGUAGE" (or blogit-default-language "en"))
      )))
   (newline-and-indent))
+
+;;;###autoload
+(defun blogit-new-post (filename)
+  "Create a new post in FILENAME."
+  (interactive "sTitle for new post: ")
+  (find-file (concat
+	      (file-name-as-directory blogit-source-dir) filename ".org"))
+  (blogit-insert-template))
 
 ;;;###autoload
 (defun blogit-publish-current-file ()
