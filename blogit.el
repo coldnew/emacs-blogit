@@ -134,9 +134,9 @@ will return \"this is title\" if OPTION is \"TITLE\""
       (when (re-search-forward match-regexp nil t)
         (match-string-no-properties 2 nil)))))
 
-(defun blogit-insert-option (option value)
-  "Insert option value of org file opened in current buffer.
-If option does not exist, return nil."
+(defun blogit-modify-option (option value)
+  "Modify option value of org file opened in current buffer.
+If option does not exist, create it automatically."
   (let ((match-regexp (org-make-options-regexp `(,option)))
 	;; FIXME: This regexp may be not so accurate
         (blank-regexp "^#\+\w*")
