@@ -111,7 +111,7 @@ See `format-time-string' for allowed formatters."
 
 (defun blogit-get-template (key)
   "Get match template filename according to key."
-  (cdr (assoc key blogit-template-alist)))
+  (cdr (assoc key blogit-template-list)))
 
 (defun blogit-file-to-string (file)
   "Read the content of FILE and return it as a string."
@@ -263,7 +263,7 @@ This function is used to create directory for new blog post.
 (defun blogit-render-header ()
   "Render the header on each page."
   (blogit-template-render
-   :header
+   :page_header
    (ht ("TITLE"  (or (blogit-parse-option "TITLE") "Untitled"))
        ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
        ("GENERATOR" blogit-generator-string)
@@ -275,27 +275,25 @@ This function is used to create directory for new blog post.
 (defun blogit-render-post ()
   "Render full post."
   (blogit-template-render
-   :content
+   :blog_post
    (ht ("HEADER" (blogit-render-header))
        ("TITLE" (or (blogit-parse-option "TITLE") "Untitled"))
        ("CONTENT" (org-export-as 'html nil nil t nil))
        )))
 
-
 (defun blogit-generate-url ()
   ()
-  (let ((date-str
-         (or (blogit-parse-option "DATE")
-             (blogit-modify-option "DATE" (format-time-string blogit-date-format)))))
-    ;; create
-    (concat
-     (directory-file-name blogit-output-dir) "/"
-     (directory-file-name (if date-str date-str
-                            (blogit-parse-option "DATE"))) "/"
-                            (or (blogit-parse-option "URL")
-                                (blogit-sanitize-string (file-name-base
-                                                         (buffer-file-name (current-buffer)))))
-                            ".html")))
+  ;; Check if #+DATE: option exist, create it if not exist.
+  (or (blogit-parse-option "DATE")
+      (blogit-modify-option "DATE" (format-time-string blogit-date-format)))
+  ;; create
+  (concat
+   (directory-file-name blogit-output-dir) "/"
+   (directory-file-name (blogit-generate-dir-string (blogit-parse-option "DATE"))) "/"
+   (or (blogit-parse-option "URL")
+       (blogit-sanitize-string (file-name-base
+                                (buffer-file-name (current-buffer)))))
+   ".html"))
 
 ;;;###autoload
 (defun blogit-insert-template (&optional filename)
@@ -322,7 +320,7 @@ This function is used to create directory for new blog post.
   (interactive "sTitle for new post: ")
   (find-file (concat
               (file-name-as-directory blogit-source-dir) filename ".org"))
-  (blogit-insert-template))
+  (blogit-insert-template filename))
 
 ;;;###autoload
 (defun blogit-publish-current-file ()
@@ -340,3 +338,9 @@ This function is used to create directory for new blog post.
 
 ;; (add-to-list 'load-path (file-name-directory (buffer-file-name)))
 ;;
+
+
+;; for test
+
+(setq blogit-source-dir ".")
+(setq blogit-output-dir "../test-dir")
