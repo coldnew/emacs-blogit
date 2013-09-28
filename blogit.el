@@ -157,8 +157,7 @@ will return \"this is title\" if OPTION is \"TITLE\""
   "Modify option value of org file opened in current buffer.
 If option does not exist, create it automatically."
   (let ((match-regexp (org-make-options-regexp `(,option)))
-        ;; FIXME: This regexp may be not so accurate
-        (blank-regexp "^#\+\w*")
+        (blank-regexp "^#\\+\\(\\w*\\):[ 	]*\\(.*\\)")
         (insert-option '(insert (concat "#+" option ": " value)))
         (mpoint))
     (save-excursion
@@ -345,4 +344,4 @@ This function is used to create directory for new blog post.
 ;; for test
 
 (setq blogit-source-dir ".")
-(setq blogit-output-dir "../test-dir")
+(setq blogit-output-dir ".")
