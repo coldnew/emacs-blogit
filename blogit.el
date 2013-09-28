@@ -104,7 +104,8 @@ See `format-time-string' for allowed formatters."
     (:plugin_analytics . "plugin_analytics.html")
     (:plugin_disqus    . "plugin_disqus.html")
     (:newpost          . "newpost.org")
-    ))
+    )
+  "Template filename define for blogit to parse.")
 
 ;;;; Internal functions
 
