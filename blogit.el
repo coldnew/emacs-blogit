@@ -95,23 +95,22 @@ See `format-time-string' for allowed formatters."
   "Template directory."
   :group 'blogit :type 'string)
 
-(defcustom blogit-template-header "header.html"
-  "Template for generate html header."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-template-content "post.html"
-  "Template for generate html contents."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-template-rss "rss.html"
-  "Template for generate rss files."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-template-newpost "newpost.org"
-  "Template for new post."
-  :group 'blogit :type 'string)
+(defvar blogit-template-list
+  '((:page_header      . "page_header.html")
+    (:page_footer      . "page_footer.html")
+    (:index            . "index.html")
+    (:blog_post        . "blog_post.html")
+    (:blog_rss         . "blog_rss.html")
+    (:plugin_analytics . "plugin_analytics.html")
+    (:plugin_disqus    . "plugin_disqus.html")
+    (:newpost          . "newpost.org")
+    ))
 
 ;;;; Internal functions
+
+(defun blogit-get-template (key)
+  "Get match template filename according to key."
+  (cdr (assoc key blogit-template-alist)))
 
 (defun blogit-file-to-string (file)
   "Read the content of FILE and return it as a string."
@@ -139,12 +138,7 @@ mode, format the string with MODE's format settings."
 
 (defun blogit-template-render (type context)
   "Read the file contents, then render it with a hashtable context."
-  (let ((file (case type
-                (:index   blogit-template-index)
-                (:header  blogit-template-header)
-                (:content blogit-template-content)
-                (:newpost blogit-template-newpost)
-                (t type))))
+  (let ((file (or (blogit-get-template type) type)))
     (mustache-render (blogit-template-to-string file) context)))
 
 (defun blogit-parse-option (option)

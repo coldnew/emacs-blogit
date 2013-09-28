@@ -1,3 +1,0 @@
-#+TITLE: Index
-
-This is the home page of [[https://github.com/coldnew/emacs-blogit][emacs-blogit]].
