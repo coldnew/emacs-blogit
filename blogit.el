@@ -265,6 +265,42 @@ This function is used to create directory for new blog post.
           (setq dd (if date (format "%02d" date) ""))
           (concat yyyy "/" mm "/" dd))))))
 
+(defun blogit-render-header ()
+  "Render the header on each page."
+  (blogit-template-render
+   :header
+   (ht ("TITLE"  (or (blogit-parse-option "TITLE") "Untitled"))
+       ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
+       ("GENERATOR" blogit-generator-string)
+       ("DESCRIPTION" (or (blogit-parse-option "DESCRIPTION") ""))
+       ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") "")
+        ))))
+
+
+(defun blogit-render-post ()
+  "Render full post."
+  (blogit-template-render
+   :content
+   (ht ("HEADER" (blogit-render-header))
+       ("TITLE" (or (blogit-parse-option "TITLE") "Untitled"))
+       ("CONTENT" (org-export-as 'html nil nil t nil))
+       )))
+
+
+(defun blogit-generate-url ()
+  ()
+  (let ((date-str
+         (or (blogit-parse-option "DATE")
+             (blogit-modify-option "DATE" (format-time-string blogit-date-format)))))
+    ;; create
+    (concat
+     (directory-file-name blogit-output-dir) "/"
+     (directory-file-name (if date-str date-str
+                            (blogit-parse-option "DATE"))) "/"
+                            (or (blogit-parse-option "URL")
+                                (blogit-sanitize-string (file-name-base
+                                                         (buffer-file-name (current-buffer)))))
+                            ".html")))
 
 ;;;###autoload
 (defun blogit-insert-template (&optional filename)
