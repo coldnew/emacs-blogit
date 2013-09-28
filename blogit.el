@@ -281,12 +281,14 @@ This function is used to create directory for new blog post.
        ("CONTENT" (org-export-as 'html nil nil t nil))
        )))
 
+;; TODO: rewrite this function
 (defun blogit-generate-url ()
   ()
   ;; Check if #+DATE: option exist, create it if not exist.
   (or (blogit-parse-option "DATE")
       (blogit-modify-option "DATE" (format-time-string blogit-date-format)))
-  ;; create
+  ;; Update #+LAST_MODIFIED: option according to blogit-date-format.
+  (blogit-modify-option "LAST_MODIFIED" (format-time-string blogit-date-format))
   (concat
    (directory-file-name blogit-output-dir) "/"
    (directory-file-name (blogit-generate-dir-string (blogit-parse-option "DATE"))) "/"
