@@ -59,6 +59,10 @@
   (concat "emacs-blogit ver. " blogit-version)
   "Generator string to indicate blogit version.")
 
+(defconst blogit-generator-url
+  "<a ref=\"http://github.com/coldnew/emacs-blogit\"> emacs-blogit </a>"
+  "Url for blogit.")
+
 ;;; Customize Variables
 
 (defgroup blogit nil
@@ -76,6 +80,14 @@
 (defcustom blogit-site-domain nil
   "The domain name of entire site, it is recommended to assign with prefix
 http:// or https://, http will be considered if not assigned."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-site-main-title "blogit"
+  "The main title of entire site."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-site-sub-title "static site generator"
+  "The subtitle of entire site."
   :group 'blogit :type 'string)
 
 (defcustom blogit-default-language "en"
@@ -103,6 +115,7 @@ See `format-time-string' for allowed formatters."
 
 (defvar blogit-template-list
   '((:page_header      . "page_header.html")
+    (:page_navigator   . "page_navigator.html")
     (:page_footer      . "page_footer.html")
     (:index            . "index.html")
     (:blog_post        . "blog_post.html")
@@ -294,11 +307,20 @@ ex:
    :page_header
    (ht ("TITLE"  (or (blogit-parse-option "TITLE") "Untitled"))
        ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
-       ("GENERATOR" blogit-generator-string)
+       ("BLOGIT" blogit-generator-string)
        ("DESCRIPTION" (or (blogit-parse-option "DESCRIPTION") ""))
        ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") ""))
        ("ROOT" (blogit-path-to-root (file-name-directory url)))
        )))
+
+(defun blogit-render-navigator (url)
+  "Render the navigator on each page."
+  (blogit-template-render
+   :page_navigator
+   (ht
+    ("MAIN_TITLE" (or blogit-site-main-title ""))
+    ("SUB_TITLE"  (or blogit-site-sub-title ""))
+    )))
 
 (defun blogit-render-footer (url)
   "Render the footer on each page."
@@ -308,7 +330,7 @@ ex:
        ("DISQUS" (blogit-render-disqus))
        ("ANALYTICS" (blogit-render-google-analytics))
        ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
-       ("GENERATOR" blogit-generator-string)
+       ("BLOGIT_URL" blogit-generator-url)
        )))
 
 (defun blogit-render-disqus ()
@@ -330,6 +352,7 @@ ex:
   (blogit-template-render
    :blog_post
    (ht ("HEADER" (blogit-render-header url))
+       ("NAVIGATOR" (blogit-render-navigator url))
        ("TITLE" (or (blogit-parse-option "TITLE") "Untitled"))
        ("CONTENT" (org-export-as 'html nil nil t nil))
        ("FOOTER" (blogit-render-footer url))
