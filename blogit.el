@@ -303,10 +303,12 @@ ex:
 (defun blogit-render-footer (url)
   "Render the footer on each page."
   (blogit-template-render
-   :page_header
+   :page_footer
    (ht ("ROOT" (blogit-path-to-root (file-name-directory url)))
        ("DISQUS" (blogit-render-disqus))
        ("ANALYTICS" (blogit-render-google-analytics))
+       ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
+       ("GENERATOR" blogit-generator-string)
        )))
 
 (defun blogit-render-disqus ()
