@@ -59,7 +59,7 @@
   "Generator string to indicate blogit version.")
 
 (defconst blogit-generator-url
-  "<a ref=\"http://github.com/coldnew/emacs-blogit\"> emacs-blogit </a>"
+  "<a href=\"http://github.com/coldnew/emacs-blogit\"> emacs-blogit </a>"
   "Url for blogit.")
 
 ;;; Customize Variables
