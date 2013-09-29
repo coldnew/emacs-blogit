@@ -319,6 +319,7 @@ many useful context is predefined here, but you can overwrite it.
     ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
     ("EMAIL" (or user-mail-address ""))
     ("DATE" (or (blogit-parse-option "DATE") ""))
+    ("YEAR" (format-time-string "%Y")
     ("BLOGIT" blogit-generator-string)
     ("BLOGIT_URL" blogit-generator-url)
     ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
