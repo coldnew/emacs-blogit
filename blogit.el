@@ -49,8 +49,7 @@
 
 ;; import extra files in blogit
 (mapcar (lambda (x) (require (intern (format "blogit-%s" x)) nil t))
-        '("utils" "vars" "create" "test" "export"))
-
+        '("utils" "vars" "create" "test"))
 
 (defconst blogit-version "0.1"
   "Blogit version string.")
@@ -301,62 +300,69 @@ ex:
     ;; remove last / and return
     (s-left (- (string-width nroot) 1) nroot)))
 
+(defmacro blogit-context (&rest pairs)
+  "Create a hash table with the key-value pairs given.
+Keys are compared with `equal'.
+
+\(fn (KEY-1 VALUE-1) (KEY-2 VALUE-2) ...)"
+  `(ht
+    ("MAIN_TITLE" (or blogit-site-main-title ""))
+    ("SUB_TITLE"  (or blogit-site-sub-title ""))
+    ("TITLE"  (or (blogit-parse-option "TITLE") "Untitled"))
+    ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
+    ("EMAIL" (or user-mail-address ""))
+    ("BLOGIT" blogit-generator-string)
+    ("BLOGIT_URL" blogit-generator-url)
+    ("ROOT" (blogit-path-to-root (file-name-directory url)))
+    ("DISQUS" (blogit-render-disqus))
+    ("ANALYTICS" (blogit-render-google-analytics))
+    ,@pairs))
+
 (defun blogit-render-header (url)
   "Render the header on each page."
   (blogit-template-render
    :page_header
-   (ht ("TITLE"  (or (blogit-parse-option "TITLE") "Untitled"))
-       ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
-       ("BLOGIT" blogit-generator-string)
-       ("DESCRIPTION" (or (blogit-parse-option "DESCRIPTION") ""))
-       ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") ""))
-       ("ROOT" (blogit-path-to-root (file-name-directory url)))
-       )))
+   (blogit-context
+    ("DESCRIPTION" (or (blogit-parse-option "DESCRIPTION") ""))
+    ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") ""))
+    )))
 
 (defun blogit-render-navigator (url)
   "Render the navigator on each page."
   (blogit-template-render
    :page_navigator
-   (ht
-    ("MAIN_TITLE" (or blogit-site-main-title ""))
-    ("SUB_TITLE"  (or blogit-site-sub-title ""))
-    )))
+   (blogit-context)))
 
 (defun blogit-render-footer (url)
   "Render the footer on each page."
   (blogit-template-render
    :page_footer
-   (ht ("ROOT" (blogit-path-to-root (file-name-directory url)))
-       ("DISQUS" (blogit-render-disqus))
-       ("ANALYTICS" (blogit-render-google-analytics))
-       ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
-       ("BLOGIT_URL" blogit-generator-url)
-       )))
+   (blogit-context)))
 
 (defun blogit-render-disqus ()
   (if blogit-disqus-shortname
       (blogit-template-render
        :plugin_disqus
-       (ht ("DISQUS" blogit-disqus-shortname)))
+       (blogit-context))
     ""))
 
 (defun blogit-render-google-analytics ()
   (if blogit-google-analytics-id
       (blogit-template-render
        :plugin_analytics
-       (ht ("ANALYTICS" blogit-google-analytics-id)))
+       (blogit-context))
     ""))
 
 (defun blogit-render-post (url)
   "Render full post."
   (blogit-template-render
    :blog_post
-   (ht ("HEADER" (blogit-render-header url))
-       ("NAVIGATOR" (blogit-render-navigator url))
-       ("TITLE" (or (blogit-parse-option "TITLE") "Untitled"))
-       ("CONTENT" (org-export-as 'html nil nil t nil))
-       ("FOOTER" (blogit-render-footer url))
-       )))
+   (blogit-context
+    ("HEADER" (blogit-render-header url))
+    ("NAVIGATOR" (blogit-render-navigator url))
+    ("CONTENT" (org-export-as 'html nil nil t nil))
+    ("FOOTER" (blogit-render-footer url))
+    )))
 
 ;; TODO: rewrite this function
 (defun blogit-generate-url ()
@@ -379,13 +385,12 @@ ex:
     (insert
      (blogit-template-render
       :newpost
-      (ht ("TITLE" (file-name-base (or filename "")))
-          ("USER"  (or user-full-name user-login-name ""))
-          ("EMAIL" (or user-mail-address ""))
-          ("DATE"  (format-time-string blogit-date-format))
-          ("URL"   (blogit-sanitize-string filename))
-          ("LANGUAGE" (or blogit-default-language "en"))
-          )))
+      (blogit-context
+       ("TITLE" (file-name-base (or filename "")))
+       ("DATE"  (format-time-string blogit-date-format))
+       ("URL"   (blogit-sanitize-string filename))
+       ("LANGUAGE" (or blogit-default-language "en"))
+       )))
     (newline-and-indent)))
 
 ;;;###autoload
@@ -400,10 +405,10 @@ ex:
 (defun blogit-publish-current-file ()
   (interactive)
   (let ((out-dir (file-name-directory (blogit-generate-url)))
-	(url (blogit-generate-url)))
+        (url (blogit-generate-url)))
     ;; Check if #+DATE: option exist, create it if not exist.
     (or (blogit-parse-option "DATE")
-	(blogit-modify-option "DATE" (format-time-string blogit-date-format)))
+        (blogit-modify-option "DATE" (format-time-string blogit-date-format)))
     ;; Update #+LAST_MODIFIED: option according to blogit-date-format.
     (blogit-modify-option "LAST_MODIFIED" (format-time-string blogit-date-format))
     ;; create dir for output files

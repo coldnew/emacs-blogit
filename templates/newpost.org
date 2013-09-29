@@ -1,5 +1,5 @@
 #+TITLE: {{TITLE}}
-#+AUTHOR: {{USER}}
+#+AUTHOR: {{AUTHOR}}
 #+EMAIL:  {{EMAIL}}
 #+DATE:   {{DATE}}
 #+LANGUAGE: {{LANGUAGE}}
