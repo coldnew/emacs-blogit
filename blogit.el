@@ -82,11 +82,17 @@ http:// or https://, http will be considered if not assigned."
   "The default language for this site. This value will be set to `en' by default."
   :group 'blogit :type 'string)
 
-(setq blogit-date-format "%Y/%m/%d %I:%M %p")
-
 (defcustom blogit-date-format "%Y/%m/%d %I:%M %p"
   "Format for printing a date in the sitemap.
 See `format-time-string' for allowed formatters."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-google-analytics-id nil
+  "Personal google analytics id."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-disqus-shortname nil
+  "Personal disqus shortname."
   :group 'blogit :type 'string)
 
 ;;; Templates
@@ -294,6 +300,14 @@ ex:
        ("ROOT" (blogit-path-to-root (file-name-directory url)))
        )))
 
+(defun blogit-render-footer (url)
+  "Render the footer on each page."
+  (blogit-template-render
+   :page_header
+   (ht ("ROOT" (blogit-path-to-root (file-name-directory url)))
+
+       )))
+
 (defun blogit-render-post (url)
   "Render full post."
   (blogit-template-render
@@ -301,6 +315,7 @@ ex:
    (ht ("HEADER" (blogit-render-header url))
        ("TITLE" (or (blogit-parse-option "TITLE") "Untitled"))
        ("CONTENT" (org-export-as 'html nil nil t nil))
+       ("FOOTER" (blogit-render-footer url))
        )))
 
 ;; TODO: rewrite this function
