@@ -304,13 +304,18 @@ ex:
   "Create a hash table with the key-value pairs given.
 Keys are compared with `equal'.
 
-\(fn (KEY-1 VALUE-1) (KEY-2 VALUE-2) ...)"
+\(fn (KEY-1 VALUE-1) (KEY-2 VALUE-2) ...)
+
+This function is used to create context for blogit-render function,
+many useful context is predefined here, but you can overwrite it.
+"
   `(ht
     ("MAIN_TITLE" (or blogit-site-main-title ""))
     ("SUB_TITLE"  (or blogit-site-sub-title ""))
     ("TITLE"  (or (blogit-parse-option "TITLE") "Untitled"))
     ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
     ("EMAIL" (or user-mail-address ""))
+    ("DATE" (or (blogit-parse-option "DATE") ""))
     ("BLOGIT" blogit-generator-string)
     ("BLOGIT_URL" blogit-generator-url)
     ("ROOT" (blogit-path-to-root (file-name-directory url)))
