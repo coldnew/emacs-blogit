@@ -250,32 +250,35 @@ This function is used to create directory for new blog post.
 "
   (let ((date-str date-string)
         date-list year month date yyyy mm dd)
-    (setq date-str (replace-regexp-in-string "^ *\\(.+\\) *$" "\\1" date-str))
-    (cond
-     ;; USA convention of mm/dd/yyyy
-     ((string-match
-       "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
-      (blogit~~generate-dir-string date-str 3 1 2))
+    (if date-str
+        (progn
+          (setq date-str (replace-regexp-in-string "^ *\\(.+\\) *$" "\\1" date-str))
+          (cond
+           ;; USA convention of mm/dd/yyyy
+           ((string-match
+             "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
+            (blogit~~generate-dir-string date-str 3 1 2))
 
-     ;; yyyy/mm/dd
-     ((string-match
-       "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
-      (blogit~~generate-dir-string date-str 1 2 3))
+           ;; yyyy/mm/dd
+           ((string-match
+             "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
+            (blogit~~generate-dir-string date-str 1 2 3))
 
-     ;; some ISO 8601. yyyy-mm-dd
-     ((string-match
-       "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
-      (blogit~~generate-dir-string date-str 1 2 3))
+           ;; some ISO 8601. yyyy-mm-dd
+           ((string-match
+             "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
+            (blogit~~generate-dir-string date-str 1 2 3))
 
-     (t (progn
-          (setq date-list (parse-time-string date-str))
-          (setq year (nth 5 date-list))
-          (setq month (nth 4 date-list))
-          (setq date (nth 3 date-list))
-          (setq yyyy (number-to-string year))
-          (setq mm (if month (format "%02d" month) ""))
-          (setq dd (if date (format "%02d" date) ""))
-          (concat yyyy "/" mm "/" dd))))))
+           (t (progn
+                (setq date-list (parse-time-string date-str))
+                (setq year (nth 5 date-list))
+                (setq month (nth 4 date-list))
+                (setq date (nth 3 date-list))
+                (setq yyyy (number-to-string year))
+                (setq mm (if month (format "%02d" month) ""))
+                (setq dd (if date (format "%02d" date) ""))
+                (concat yyyy "/" mm "/" dd))))))
+    ""))
 
 (defun blogit-path-to-root (path)
   "Return path to site root.
@@ -318,12 +321,12 @@ many useful context is predefined here, but you can overwrite it.
     ("DATE" (or (blogit-parse-option "DATE") ""))
     ("BLOGIT" blogit-generator-string)
     ("BLOGIT_URL" blogit-generator-url)
-    ("ROOT" (blogit-path-to-root (file-name-directory url)))
+    ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
     ("DISQUS" (blogit-render-disqus))
     ("ANALYTICS" (blogit-render-google-analytics))
     ,@pairs))
 
-(defun blogit-render-header (url)
+(defun blogit-render-header ()
   "Render the header on each page."
   (blogit-template-render
    :page_header
@@ -332,23 +335,19 @@ many useful context is predefined here, but you can overwrite it.
     ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") ""))
     )))
 
-(defun blogit-render-navigator (url)
+(defun blogit-render-navigator ()
   "Render the navigator on each page."
-  (blogit-template-render
-   :page_navigator
-   (blogit-context)))
+  (blogit-template-render :page_navigator (blogit-context)))
 
-(defun blogit-render-footer (url)
+(defun blogit-render-footer ()
   "Render the footer on each page."
-  (blogit-template-render
-   :page_footer
-   (blogit-context)))
+  (blogit-template-render :page_footer (blogit-context)))
 
 (defun blogit-render-disqus ()
+  "Render disqus comment plugin on each page. If
+`blogit-disqus-shortname' is nil, return empty string."
   (if blogit-disqus-shortname
-      (blogit-template-render
-       :plugin_disqus
-       (blogit-context))
+      (blogit-template-render :plugin_disqus (blogit-context ""))
     ""))
 
 (defun blogit-render-google-analytics ()
@@ -358,15 +357,15 @@ many useful context is predefined here, but you can overwrite it.
        (blogit-context))
     ""))
 
-(defun blogit-render-post (url)
+(defun blogit-render-post ()
   "Render full post."
   (blogit-template-render
    :blog_post
    (blogit-context
-    ("HEADER" (blogit-render-header url))
-    ("NAVIGATOR" (blogit-render-navigator url))
+    ("HEADER" (blogit-render-header))
+    ("NAVIGATOR" (blogit-render-navigator))
     ("CONTENT" (org-export-as 'html nil nil t nil))
-    ("FOOTER" (blogit-render-footer url))
+    ("FOOTER" (blogit-render-footer))
     )))
 
 ;; TODO: rewrite this function
@@ -419,7 +418,7 @@ many useful context is predefined here, but you can overwrite it.
     ;; create dir for output files
     (mkdir out-dir t)
     ;; generate file
-    (blogit-string-to-file (blogit-render-post url) url)))
+    (blogit-string-to-file (blogit-render-post) url)))
 
 (provide 'blogit)
 
