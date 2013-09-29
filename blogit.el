@@ -305,8 +305,23 @@ ex:
   (blogit-template-render
    :page_header
    (ht ("ROOT" (blogit-path-to-root (file-name-directory url)))
-
+       ("DISQUS" (blogit-render-disqus))
+       ("ANALYTICS" (blogit-render-google-analytics))
        )))
+
+(defun blogit-render-disqus ()
+  (if blogit-disqus-shortname
+      (blogit-template-render
+       :plugin_disqus
+       (ht ("DISQUS" blogit-disqus-shortname)))
+    ""))
+
+(defun blogit-render-google-analytics ()
+  (if blogit-google-analytics-id
+      (blogit-template-render
+       :plugin_analytics
+       (ht ("ANALYTICS" blogit-google-analytics-id)))
+    ""))
 
 (defun blogit-render-post (url)
   "Render full post."
