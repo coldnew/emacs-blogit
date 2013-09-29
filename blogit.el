@@ -157,7 +157,7 @@ will return \"this is title\" if OPTION is \"TITLE\""
   "Modify option value of org file opened in current buffer.
 If option does not exist, create it automatically."
   (let ((match-regexp (org-make-options-regexp `(,option)))
-        (blank-regexp "^#\\+\\(\\w*\\):[ 	]*\\(.*\\)")
+        (blank-regexp "^#\\+\\(\\w*\\):[        ]*\\(.*\\)")
         (insert-option '(insert (concat "#+" option ": " value)))
         (mpoint))
     (save-excursion
@@ -259,6 +259,29 @@ This function is used to create directory for new blog post.
           (setq dd (if date (format "%02d" date) ""))
           (concat yyyy "/" mm "/" dd))))))
 
+(defun blogit-path-to-root (path)
+  "Return path to site root.
+ex:
+    (root)/2013/12/23/test.html -> ../../..
+    (root)/theme                -> ..
+"
+  (let* ((root (expand-file-name blogit-output-dir))
+         (rpath (file-relative-name
+                 (expand-file-name path) root))
+         (dpath (directory-file-name
+                 (or (file-name-directory rpath) "")))
+         (nroot "")
+         npath)
+    ;; if dpath is null, it means that the `path' we get
+    ;; is a dir, set it to rpath.
+    (if (string= dpath "") (setq dpath rpath))
+    ;; calculate relative dir to root
+    ;; make string like 2013/03/23 become to ../../../
+    (setq npath (split-string dpath "/"))
+    (dolist (d npath) (setq nroot (concat nroot "../")))
+    ;; remove last / and return
+    (s-left (- (string-width nroot) 1) nroot)))
+
 (defun blogit-render-header ()
   "Render the header on each page."
   (blogit-template-render
@@ -267,9 +290,9 @@ This function is used to create directory for new blog post.
        ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
        ("GENERATOR" blogit-generator-string)
        ("DESCRIPTION" (or (blogit-parse-option "DESCRIPTION") ""))
-       ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") "")
-        ))))
-
+       ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") ""))
+       ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
+       )))
 
 (defun blogit-render-post ()
   "Render full post."
