@@ -237,6 +237,7 @@ This function is used to generate blog post url if not specified."
           (format "%02d" (string-to-int (match-string mn date-str))) "/"
           (format "%02d" (string-to-int (match-string dn date-str)))))
 
+;; FIXME: this function may be has some error when date-string is nil
 (defun blogit-generate-dir-string (date-string)
   "Returns yyyy/mm/dd format of date-string
 For examples:
@@ -250,35 +251,34 @@ This function is used to create directory for new blog post.
 "
   (let ((date-str date-string)
         date-list year month date yyyy mm dd)
-    (if date-str
-        (progn
-          (setq date-str (replace-regexp-in-string "^ *\\(.+\\) *$" "\\1" date-str))
-          (cond
-           ;; USA convention of mm/dd/yyyy
-           ((string-match
-             "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
-            (blogit~~generate-dir-string date-str 3 1 2))
+    (setq date-str (replace-regexp-in-string "^ *\\(.+\\) *$" "\\1" date-str))
+    (cond
+     ;; USA convention of mm/dd/yyyy
+     ((string-match
+       "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
+      (blogit~~generate-dir-string date-str 3 1 2))
 
-           ;; yyyy/mm/dd
-           ((string-match
-             "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
-            (blogit~~generate-dir-string date-str 1 2 3))
+     ;; yyyy/mm/dd
+     ((string-match
+       "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
+      (blogit~~generate-dir-string date-str 1 2 3))
 
-           ;; some ISO 8601. yyyy-mm-dd
-           ((string-match
-             "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
-            (blogit~~generate-dir-string date-str 1 2 3))
+     ;; some ISO 8601. yyyy-mm-dd
+     ((string-match
+       "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
+      (blogit~~generate-dir-string date-str 1 2 3))
 
-           (t (progn
-                (setq date-list (parse-time-string date-str))
-                (setq year (nth 5 date-list))
-                (setq month (nth 4 date-list))
-                (setq date (nth 3 date-list))
-                (setq yyyy (number-to-string year))
-                (setq mm (if month (format "%02d" month) ""))
-                (setq dd (if date (format "%02d" date) ""))
-                (concat yyyy "/" mm "/" dd))))))
-    ""))
+     (t (progn
+          (setq date-list (parse-time-string date-str))
+          (setq year (nth 5 date-list))
+          (setq month (nth 4 date-list))
+          (setq date (nth 3 date-list))
+          (setq yyyy (number-to-string year))
+          (setq mm (if month (format "%02d" month) ""))
+          (setq dd (if date (format "%02d" date) ""))
+          (concat yyyy "/" mm "/" dd)))))
+  )
+
 
 (defun blogit-path-to-root (path)
   "Return path to site root.
@@ -319,7 +319,7 @@ many useful context is predefined here, but you can overwrite it.
     ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
     ("EMAIL" (or user-mail-address ""))
     ("DATE" (or (blogit-parse-option "DATE") ""))
-    ("YEAR" (format-time-string "%Y")
+    ("YEAR" (format-time-string "%Y"))
     ("BLOGIT" blogit-generator-string)
     ("BLOGIT_URL" blogit-generator-url)
     ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
@@ -353,9 +353,7 @@ many useful context is predefined here, but you can overwrite it.
 
 (defun blogit-render-google-analytics ()
   (if blogit-google-analytics-id
-      (blogit-template-render
-       :plugin_analytics
-       (blogit-context))
+      (blogit-template-render :plugin_analytics (blogit-context))
     ""))
 
 (defun blogit-render-post ()
