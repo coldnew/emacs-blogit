@@ -282,7 +282,7 @@ ex:
     ;; remove last / and return
     (s-left (- (string-width nroot) 1) nroot)))
 
-(defun blogit-render-header ()
+(defun blogit-render-header (url)
   "Render the header on each page."
   (blogit-template-render
    :page_header
@@ -291,14 +291,14 @@ ex:
        ("GENERATOR" blogit-generator-string)
        ("DESCRIPTION" (or (blogit-parse-option "DESCRIPTION") ""))
        ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") ""))
-       ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
+       ("ROOT" (blogit-path-to-root (file-name-directory url)))
        )))
 
-(defun blogit-render-post ()
+(defun blogit-render-post (url)
   "Render full post."
   (blogit-template-render
    :blog_post
-   (ht ("HEADER" (blogit-render-header))
+   (ht ("HEADER" (blogit-render-header url))
        ("TITLE" (or (blogit-parse-option "TITLE") "Untitled"))
        ("CONTENT" (org-export-as 'html nil nil t nil))
        )))
@@ -306,11 +306,6 @@ ex:
 ;; TODO: rewrite this function
 (defun blogit-generate-url ()
   ()
-  ;; Check if #+DATE: option exist, create it if not exist.
-  (or (blogit-parse-option "DATE")
-      (blogit-modify-option "DATE" (format-time-string blogit-date-format)))
-  ;; Update #+LAST_MODIFIED: option according to blogit-date-format.
-  (blogit-modify-option "LAST_MODIFIED" (format-time-string blogit-date-format))
   (concat
    (directory-file-name blogit-output-dir) "/"
    (directory-file-name (blogit-generate-dir-string (blogit-parse-option "DATE"))) "/"
@@ -349,14 +344,17 @@ ex:
 ;;;###autoload
 (defun blogit-publish-current-file ()
   (interactive)
-  (let ((out-dir (file-name-directory (blogit-generate-url))))
+  (let ((out-dir (file-name-directory (blogit-generate-url)))
+	(url (blogit-generate-url)))
+    ;; Check if #+DATE: option exist, create it if not exist.
+    (or (blogit-parse-option "DATE")
+	(blogit-modify-option "DATE" (format-time-string blogit-date-format)))
+    ;; Update #+LAST_MODIFIED: option according to blogit-date-format.
+    (blogit-modify-option "LAST_MODIFIED" (format-time-string blogit-date-format))
     ;; create dir for output files
     (mkdir out-dir t)
     ;; generate file
-    (blogit-string-to-file
-     (blogit-render-post)
-     (blogit-generate-url))))
-
+    (blogit-string-to-file (blogit-render-post url) url)))
 
 (provide 'blogit)
 
