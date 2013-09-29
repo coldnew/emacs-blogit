@@ -1,0 +1,175 @@
+
+
+body {
+    width:70%;
+    margin: 0 auto;
+    font-family: arial, sans-serif, "SimSun", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    font-size: 18px;
+    line-height: 150%;
+}
+
+H1 {
+    font-family: STKaiti, "Kaiti SC", "SimSun", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+
+H2 {
+    font-family: STKaiti, "Kaiti SC", "SimSun", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    margin-bottom: 60px;
+    margin-bottom: 40px;
+    padding: 5px;
+    border-bottom: 2px LightGrey solid;
+    width: 90%;
+    line-height: 150%;
+    color: DarkGreen;
+}
+
+
+H3 {
+    font-family: STKaiti, "Kaiti SC", "SimSun", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    margin-top: 40px;
+    margin-bottom: 30px;
+    border-bottom: 1px LightGrey solid;
+    width: 80%;
+    line-height: 150%;
+    color: DarkBlue;
+}
+
+
+H4 {
+    font-family: STKaiti, "Kaiti SC", "SimSun", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    margin-top: 40px;
+    margin-bottom: 30px;
+    border-bottom: 1px LightGrey solid;
+    width: 80%;
+    line-height: 150%;
+    color: DarkBlue;
+}
+
+.title {
+/*font-size: 18px;*/
+}
+pre {
+    font-family: Monaco, Consolas, Inconsolata, "DEJA VU SANS MONO", "DROID SANS MONO", Proggy, monospace;
+    color: black;
+    background-color: #efefef;
+    font-size: 85%;
+    border: 1px solid #dddddd;
+
+    padding: 10px;
+    line-height: 140%;
+    margin-left: 10px;
+    width: 95%;
+
+    -webkit-box-shadow: 0px 0px 4px rgba(0,0,0,0.23);
+    -moz-box-shadow: 0px 0px 4px rgba(0,0,0,0.23);
+    box-shadow: 0px 0px 4px rgba(0,0,0,0.23);
+}
+
+pre.src { background-color:#2e3436; color: #eeeeec;}
+
+code {
+    font-family: Inconsolata, Consolas, "DEJA VU SANS MONO", "DROID SANS MONO", Proggy, monospace;
+    font-size: 90%;
+}
+
+a {
+    text-decoration: none;
+    /*cursor: crosshair;*/
+    padding: 1px;
+    color: black;
+}
+
+#content a {
+    border-bottom: 1px dashed Red;
+}
+
+a:hover {
+    background-color: LightGrey;
+}
+
+img {
+    margin-left: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+hr {
+    color: LightGrey;
+}
+
+/*end basic tag css*/
+#footer {
+    min-height: 50px;
+    margin-top: 30px;
+    text-align: center;
+}
+#footer ul{
+    list-style: none;
+}
+#footer li {
+    float: left;
+    display: inline-block;
+    vertical-align: baseline;
+    padding: 0px 0px 0px 0.3em;
+    margin: 0px 0px 0px 0.6em;
+    margin: 0px none;
+}
+#footer ul li a {
+    color: blue;
+}
+
+#table-of-contents {
+    position: fixed;
+    display: block;
+    top: 50%;
+    right: 0;
+    background: transparent url(/static/img/body_dark_bg.png);
+    padding: 10px 20px 10px 10px;
+    margin-top: -100px;
+    border-bottom-left-radius: 42px;
+    border-top-left-radius: 42px;
+
+    outline: none;
+    color: #6D6E71;
+    font-size: 20px;
+    font-weight: bold;
+    display: block;
+    height: 64px;
+    width: 64px;
+
+}
+#table-of-contents h2 {
+    background: transparent url(/static/img/go_bg.png) no-repeat 0 0;
+    height: 64px;
+    width: 64px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    content: " ";
+    float: left;
+    text-indent: -9999px;
+
+}
+
+#table-of-contents #text-table-of-contents{
+    display: none;
+    text-align: left;
+}
+
+#table-of-contents:hover #text-table-of-contents {
+    display: block;
+    padding-right: 3px;
+    background: transparent url(/static/img/body_dark_bg.png);
+    font-size: 10pt;
+    max-height: 80%;
+    min-height: 40%;
+    overflow: auto;
+    position: fixed;
+    right: 0;
+    text-align: left;
+    top: 10%;
+    z-index: 1;
+}
