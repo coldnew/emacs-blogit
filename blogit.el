@@ -276,9 +276,8 @@ This function is used to create directory for new blog post.
           (setq yyyy (number-to-string year))
           (setq mm (if month (format "%02d" month) ""))
           (setq dd (if date (format "%02d" date) ""))
-          (concat yyyy "/" mm "/" dd)))))
-  )
-
+          (concat yyyy "/" mm "/" dd))))
+    ))
 
 (defun blogit-path-to-root (path)
   "Return path to site root.
@@ -323,8 +322,6 @@ many useful context is predefined here, but you can overwrite it.
     ("BLOGIT" blogit-generator-string)
     ("BLOGIT_URL" blogit-generator-url)
     ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
-    ("DISQUS" (blogit-render-disqus))
-    ("ANALYTICS" (blogit-render-google-analytics))
     ,@pairs))
 
 (defun blogit-render-header ()
@@ -348,12 +345,16 @@ many useful context is predefined here, but you can overwrite it.
   "Render disqus comment plugin on each page. If
 `blogit-disqus-shortname' is nil, return empty string."
   (if blogit-disqus-shortname
-      (blogit-template-render :plugin_disqus (blogit-context ""))
+      (blogit-template-render
+       :plugin_disqus
+       (blogit-context ("DISQUS" (blogit-render-disqus))))
     ""))
 
 (defun blogit-render-google-analytics ()
   (if blogit-google-analytics-id
-      (blogit-template-render :plugin_analytics (blogit-context))
+      (blogit-template-render
+       :plugin_analytics
+       (blogit-context ("ANALYTICS" (blogit-render-google-analytics))))
     ""))
 
 (defun blogit-render-post ()
@@ -429,3 +430,6 @@ many useful context is predefined here, but you can overwrite it.
 
 (setq blogit-source-dir ".")
 (setq blogit-output-dir ".")
+
+(setq blogit-disqus-shortname "coldnew")
+(setq blogit-google-analytics-id "UA-42122243-1")
