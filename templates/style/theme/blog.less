@@ -1,0 +1,74 @@
+@import "base.less";
+@import "toc.less";
+
+body {
+    width:70%;
+    margin: 0 auto;
+    font-size: 18px;
+    line-height: 150%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Yanone Kaffeesatz", "Helvetica Neue", Helvetica, Arial, sans-serif;
+//    font-family: STKaiti, "Kaiti SC", "SimSun", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+
+h2, h3, h4, h5, h6 {
+    border-bottom: 2px LightGrey solid;
+    line-height: 150%;
+}
+
+h2 {
+    margin-bottom: 60px;
+    margin-bottom: 40px;
+    padding: 5px;
+    width: 90%;
+    color: DarkGreen;
+}
+
+h3 {
+    margin-top: 40px;
+    margin-bottom: 30px;
+    border-bottom: 1px LightGrey solid;
+    width: 80%;
+    color: DarkBlue;
+}
+
+h4 {
+    margin-top: 40px;
+    margin-bottom: 30px;
+    border-bottom: 1px LightGrey solid;
+    width: 80%;
+    color: DarkBlue;
+}
+
+pre.src, .modal-body > pre {
+    .resizable(both);
+    .box-shadow(0 3px 7px rgba(0,0,0,0.3));
+    //    border: 1px solid @grayLighter;
+    border: 1px solid #dddddd;
+    background: @blog-background;
+    color: @blog-foreground;
+}
+
+a {
+    text-decoration: none;
+    padding: 1px;
+    color: @linkColor;
+}
+
+#footer {
+    min-height: 50px;
+    margin-top: 30px;
+    text-align: center;
+}
+#footer ul{
+    list-style: none;
+}
+#footer li {
+    float: center;
+    display: inline-block;
+    vertical-align: baseline;
+    padding: 0px 0px 0px 0.3em;
+    margin: 0px 0px 0px 0.6em;
+}

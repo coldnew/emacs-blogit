@@ -319,6 +319,7 @@ many useful context is predefined here, but you can overwrite it.
     ("EMAIL" (or user-mail-address ""))
     ("DATE" (or (blogit-parse-option "DATE") ""))
     ("YEAR" (format-time-string "%Y"))
+    ("LANG" (or blogit-default-language "en"))
     ("BLOGIT" blogit-generator-string)
     ("BLOGIT_URL" blogit-generator-url)
     ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
@@ -339,7 +340,12 @@ many useful context is predefined here, but you can overwrite it.
 
 (defun blogit-render-footer ()
   "Render the footer on each page."
-  (blogit-template-render :page_footer (blogit-context)))
+  (blogit-template-render
+   :page_footer
+   (blogit-context
+    ("DISQUS" (blogit-render-disqus))
+    ("ANALYTICS" (blogit-render-google-analytics))
+    )))
 
 (defun blogit-render-disqus ()
   "Render disqus comment plugin on each page. If
@@ -347,14 +353,14 @@ many useful context is predefined here, but you can overwrite it.
   (if blogit-disqus-shortname
       (blogit-template-render
        :plugin_disqus
-       (blogit-context ("DISQUS" (blogit-render-disqus))))
+       (blogit-context ("DISQUS" blogit-disqus-shortname)))
     ""))
 
 (defun blogit-render-google-analytics ()
   (if blogit-google-analytics-id
       (blogit-template-render
        :plugin_analytics
-       (blogit-context ("ANALYTICS" (blogit-render-google-analytics))))
+       (blogit-context ("ANALYTICS" blogit-google-analytics-id)))
     ""))
 
 (defun blogit-render-post ()

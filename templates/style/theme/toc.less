@@ -1,0 +1,52 @@
+#table-of-contents {
+    position: fixed;
+    display: block;
+    top: 50%;
+    right: 0;
+    // background: transparent url(/static/img/body_dark_bg.png);
+    padding: 10px 20px 10px 10px;
+    margin-top: -100px;
+    border-bottom-left-radius: 42px;
+    border-top-left-radius: 42px;
+
+    outline: none;
+    color: #6D6E71;
+    font-size: 20px;
+    font-weight: bold;
+    display: block;
+    height: 64px;
+    width: 64px;
+}
+
+#table-of-contents h2 {
+    background: transparent url(/static/img/go_bg.png) no-repeat 0 0;
+    height: 64px;
+    width: 64px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    content: " ";
+    float: left;
+    text-indent: -9999px;
+
+}
+
+#table-of-contents #text-table-of-contents{
+    display: none;
+    text-align: left;
+}
+
+#table-of-contents:hover #text-table-of-contents {
+    display: block;
+    padding-right: 3px;
+    //background: transparent url(/static/img/body_dark_bg.png);
+    font-size: 10pt;
+    max-height: 80%;
+    min-height: 40%;
+    overflow: auto;
+    position: fixed;
+    right: 0;
+    text-align: left;
+    top: 10%;
+    z-index: 1;
+}
