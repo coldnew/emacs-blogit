@@ -4,3 +4,6 @@
 [submodule "templates/style/less.js"]
 	path = templates/style/less.js
 	url = https://github.com/cloudhead/less.js.git
+[submodule "templates/style/Font-Awesome"]
+	path = templates/style/Font-Awesome
+	url = https://github.com/FortAwesome/Font-Awesome.git
