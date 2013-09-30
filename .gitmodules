@@ -1,3 +1,6 @@
 [submodule "templates/style/bootstrap"]
 	path = templates/style/bootstrap
 	url = https://github.com/twbs/bootstrap.git
+[submodule "templates/style/less.js"]
+	path = templates/style/less.js
+	url = https://github.com/cloudhead/less.js.git
