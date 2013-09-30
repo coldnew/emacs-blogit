@@ -164,6 +164,8 @@ mode, format the string with MODE's format settings."
   "Read option value of org file opened in current buffer.
 e.g:
 #+TITLE: this is title
+##+DATE: 2013/09/30 11:43 PM
+#+LAST_MODIFIED: 2013/09/30 11:43 PM
 will return \"this is title\" if OPTION is \"TITLE\""
   (let ((match-regexp (org-make-options-regexp `(,option))))
     (save-excursion
@@ -249,35 +251,36 @@ discarded.
 
 This function is used to create directory for new blog post.
 "
-  (let ((date-str date-string)
-        date-list year month date yyyy mm dd)
-    (setq date-str (replace-regexp-in-string "^ *\\(.+\\) *$" "\\1" date-str))
-    (cond
-     ;; USA convention of mm/dd/yyyy
-     ((string-match
-       "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
-      (blogit~~generate-dir-string date-str 3 1 2))
+  (if (not (stringp date-string)) ""
+    (let ((date-str date-string)
+          date-list year month date yyyy mm dd)
+      (setq date-str (replace-regexp-in-string "^ *\\(.+\\) *$" "\\1" date-str))
+      (cond
+       ;; USA convention of mm/dd/yyyy
+       ((string-match
+         "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
+        (blogit~~generate-dir-string date-str 3 1 2))
 
-     ;; yyyy/mm/dd
-     ((string-match
-       "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
-      (blogit~~generate-dir-string date-str 1 2 3))
+       ;; yyyy/mm/dd
+       ((string-match
+         "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
+        (blogit~~generate-dir-string date-str 1 2 3))
 
-     ;; some ISO 8601. yyyy-mm-dd
-     ((string-match
-       "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
-      (blogit~~generate-dir-string date-str 1 2 3))
+       ;; some ISO 8601. yyyy-mm-dd
+       ((string-match
+         "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
+        (blogit~~generate-dir-string date-str 1 2 3))
 
-     (t (progn
-          (setq date-list (parse-time-string date-str))
-          (setq year (nth 5 date-list))
-          (setq month (nth 4 date-list))
-          (setq date (nth 3 date-list))
-          (setq yyyy (number-to-string year))
-          (setq mm (if month (format "%02d" month) ""))
-          (setq dd (if date (format "%02d" date) ""))
-          (concat yyyy "/" mm "/" dd))))
-    ))
+       (t (progn
+            (setq date-list (parse-time-string date-str))
+            (setq year (nth 5 date-list))
+            (setq month (nth 4 date-list))
+            (setq date (nth 3 date-list))
+            (setq yyyy (number-to-string year))
+            (setq mm (if month (format "%02d" month) ""))
+            (setq dd (if date (format "%02d" date) ""))
+            (concat yyyy "/" mm "/" dd))))
+      )))
 
 (defun blogit-path-to-root (path)
   "Return path to site root.
