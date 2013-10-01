@@ -118,6 +118,7 @@ See `format-time-string' for allowed formatters."
     (:page_footer      . "page_footer.html")
     (:index            . "index.html")
     (:blog_post        . "blog_post.html")
+    (:blog_index       . "blog_index.html")
     (:blog_rss         . "blog_rss.html")
     (:plugin_analytics . "plugin_analytics.html")
     (:plugin_disqus    . "plugin_disqus.html")
@@ -322,7 +323,7 @@ many useful context is predefined here, but you can overwrite it.
     ("EMAIL" (or user-mail-address ""))
     ("DATE" (or (blogit-parse-option "DATE") ""))
     ("YEAR" (format-time-string "%Y"))
-    ("LANG" (or blogit-default-language "en"))
+    ("LANGUAGE" (or (blogit-parse-option "LANGUAGE") blogit-default-language "en"))
     ("BLOGIT" blogit-generator-string)
     ("BLOGIT_URL" blogit-generator-url)
     ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
@@ -427,7 +428,13 @@ many useful context is predefined here, but you can overwrite it.
     ;; create dir for output files
     (mkdir out-dir t)
     ;; generate file
-    (blogit-string-to-file (blogit-render-post) url)))
+    (blogit-string-to-file (blogit-render-post) url)
+    ;; update index file
+    (blogit-update-index)))
+
+(defun blogit-update-index ()
+
+)
 
 (provide 'blogit)
 
