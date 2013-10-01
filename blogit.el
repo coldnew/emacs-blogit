@@ -437,11 +437,16 @@ many useful context is predefined here, but you can overwrite it.
   (org-publish-project `("s"
                          :base-directory ,blogit-source-dir
                          :publishing-directory "/Volumes/ramdisk/tmp"
-                         :index-function org-publish-collect-index
+                         ;;:index-function org-publish-collect-index
                          :publishing-function org-html-publish-to-html
                          :auto-index t
+			 :recursive t
                          :index-filename "index.org"
                          :index-title "Title of my Blog"
+			 :link-home "index.html"
+			 :auto-sitemap t
+			 :sitemap-filename "sitemap.org"  ; ... call it sitemap.org (it's the default)...
+			 :sitemap-title "Sitemap"         ; ... with title 'Sitemap'.
                          )
                        )
   )
