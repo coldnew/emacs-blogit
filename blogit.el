@@ -442,3 +442,6 @@ many useful context is predefined here, but you can overwrite it.
 
 (setq blogit-disqus-shortname "coldnew")
 (setq blogit-google-analytics-id "UA-42122243-1")
+
+(setq blogit-site-main-title "coldnew's blog")
+(setq blogit-site-sub-title "test blogit")

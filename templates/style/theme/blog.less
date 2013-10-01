@@ -1,4 +1,5 @@
 @import "base.less";
+@import "header.less";
 @import "toc.less";
 
 body {
@@ -10,7 +11,6 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: "Yanone Kaffeesatz", "Helvetica Neue", Helvetica, Arial, sans-serif;
-//    font-family: STKaiti, "Kaiti SC", "SimSun", "Palatino Linotype", "Book Antiqua", Palatino, serif;
 }
 
 h2, h3, h4, h5, h6 {
@@ -42,11 +42,13 @@ h4 {
     color: DarkBlue;
 }
 
+// TODO: why bootstrap failed?
+@grayLighter: #eee;
 pre.src, .modal-body > pre {
     .resizable(both);
     .box-shadow(0 3px 7px rgba(0,0,0,0.3));
-    //    border: 1px solid @grayLighter;
-    border: 1px solid #dddddd;
+    border: 1px solid @grayLighter;
+//    border: 1px solid #dddddd;
     background: @blog-background;
     color: @blog-foreground;
 }
