@@ -16,3 +16,4 @@ blogit is based on following emacs blogging tools
 
 1. [[https://github.com/renard/o-blog][o-blog]]
 2. [[https://github.com/kelvinh/org-page][org-page]]
+3. [[http://www.emacswiki.org/emacs/org-blog.el][org-blog.el]]
