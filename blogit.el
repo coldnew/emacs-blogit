@@ -431,10 +431,21 @@ many useful context is predefined here, but you can overwrite it.
     (blogit-string-to-file (blogit-render-post) url)
     ;; update index file
     (blogit-update-index)))
-
+(require 'ox-publish)
 (defun blogit-update-index ()
+  ;;  (org-publish-get-base-files `("s"
+  (org-publish-project `("s"
+                         :base-directory ,blogit-source-dir
+                         :publishing-directory "/Volumes/ramdisk/tmp"
+                         :index-function org-publish-collect-index
+                         :publishing-function org-html-publish-to-html
+                         :auto-index t
+                         :index-filename "index.org"
+                         :index-title "Title of my Blog"
+                         )
+                       )
+  )
 
-)
 
 (provide 'blogit)
 
