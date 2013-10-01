@@ -439,16 +439,3 @@ many useful context is predefined here, but you can overwrite it.
 (provide 'blogit)
 
 ;; (add-to-list 'load-path (file-name-directory (buffer-file-name)))
-;;
-
-
-;; for test
-
-(setq blogit-source-dir ".")
-(setq blogit-output-dir ".")
-
-(setq blogit-disqus-shortname "coldnew")
-(setq blogit-google-analytics-id "UA-42122243-1")
-
-(setq blogit-site-main-title "coldnew's blog")
-(setq blogit-site-sub-title "test blogit")
