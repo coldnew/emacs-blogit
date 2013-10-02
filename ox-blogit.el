@@ -38,6 +38,17 @@
 
 (eval-when-compile (require 'cl))
 
+(defconst blogit-version "0.1"
+  "Blogit version string.")
+
+(defconst blogit-string
+  (concat "emacs-blogit ver. " blogit-version)
+  "Generator string to indicate blogit version.")
+
+(defconst blogit-url
+  "<a href=\"http://github.com/coldnew/emacs-blogit\"> emacs-blogit </a>"
+  "Url for blogit.")
+
 
 ;;; User Configuration Variables
 
