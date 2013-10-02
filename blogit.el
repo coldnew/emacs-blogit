@@ -130,7 +130,8 @@ See `format-time-string' for allowed formatters."
 
 (defun blogit-get-template (key)
   "Get match template filename according to key."
-  (cdr (assoc key blogit-template-list)))
+  (concat blogit-source-dir "/" blogit-template-dir
+	  (cdr (assoc key blogit-template-list))))
 
 (defun blogit-file-to-string (file)
   "Read the content of FILE and return it as a string."
@@ -432,12 +433,12 @@ many useful context is predefined here, but you can overwrite it.
     ;; update index file
     (blogit-update-index)))
 (require 'ox-publish)
-(setq org-publish-timestamp-directory (convert-standard-filename blogit-output-dir))
+;;(setq org-publish-timestamp-directory (convert-standard-filename blogit-output-dir))
 
 (defun blogit-update-index ()
   (let* ((org-publish-timestamp-directory (convert-standard-filename (concat blogit-output-dir "/"))))
     ;;  (org-publish-get-base-files `("s"
-    (org-publish-project `("123k12lllpsadkkkpnopkkkookk"
+    (org-publish-project `("123k12lllpsadkkkpnopkkkookkkkk"
                            :base-directory ,blogit-source-dir
                            :publishing-directory ,blogit-output-dir
                            :publishing-function org-blogit-publish-to-html
