@@ -326,7 +326,7 @@ many useful context is predefined here, but you can overwrite it.
     ("LANGUAGE" (or (blogit-parse-option "LANGUAGE") blogit-default-language "en"))
     ("BLOGIT" blogit-generator-string)
     ("BLOGIT_URL" blogit-generator-url)
-    ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
+    ;;    ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
     ,@pairs))
 
 (defun blogit-render-header ()
@@ -386,7 +386,7 @@ many useful context is predefined here, but you can overwrite it.
    (directory-file-name (blogit-generate-dir-string (blogit-parse-option "DATE"))) "/"
    (or (blogit-parse-option "URL")
        (blogit-sanitize-string (file-name-base
-                                (buffer-file-name (current-buffer)))))
+                                (buffer-file-name))))
    ".html"))
 
 ;;;###autoload
@@ -432,25 +432,23 @@ many useful context is predefined here, but you can overwrite it.
     ;; update index file
     (blogit-update-index)))
 (require 'ox-publish)
+(setq org-publish-timestamp-directory (convert-standard-filename blogit-output-dir))
+
 (defun blogit-update-index ()
-  ;;  (org-publish-get-base-files `("s"
-  (org-publish-project `("s"
-                         :base-directory ,blogit-source-dir
-                         :publishing-directory "/Volumes/ramdisk/tmp"
-                         ;;:index-function org-publish-collect-index
-                         :publishing-function org-html-publish-to-html
-                         :auto-index t
-			 :recursive t
-                         :index-filename "index.org"
-                         :index-title "Title of my Blog"
-			 :link-home "index.html"
-			 :auto-sitemap t
-			 :sitemap-filename "sitemap.org"  ; ... call it sitemap.org (it's the default)...
-			 :sitemap-title "Sitemap"         ; ... with title 'Sitemap'.
-                         )
-                       )
+  (let* ((org-publish-timestamp-directory (convert-standard-filename (concat blogit-output-dir "/"))))
+    ;;  (org-publish-get-base-files `("s"
+    (org-publish-project `("123k12lllpsadkkkpnopkkkookk"
+                           :base-directory ,blogit-source-dir
+                           :publishing-directory ,blogit-output-dir
+                           :publishing-function org-blogit-publish-to-html
+                           :recursive t
+;;			   :html-head-include-default-style nil
+;;			   :html-head ,(blogit-render-header)
+                           ))
+    )
   )
 
+(blogit-update-index)
 
 (provide 'blogit)
 
