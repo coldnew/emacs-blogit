@@ -205,6 +205,7 @@ many useful context is predefined here, but you can overwrite it.
     ("AUTHOR" (or (blogit--parse-option info :author) user-full-name "Unknown"))
     ("EMAIL" (or (blogit--parse-option info :email) user-mail-address ""))
     ("DATE" (or (blogit--parse-option info :date) ""))
+    ("URL" (or (blogit--parse-option info :url) ""))
     ("LANGUAGE" (or (blogit--parse-option info :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option info :description) ""))
     ("KEYWORDS" (or (blogit--parse-option info :keywords) ""))
@@ -220,6 +221,7 @@ many useful context is predefined here, but you can overwrite it.
   '(
     (:analytics         "ANALYTICS"         nil   nil   t)
     (:disqus            "DISQUS"            nil   nil   t)
+    (:url               "URL"               nil   nil   t)
 
     ;; disable org-html default style
     (:html-head-include-default-style nil "html-style" nil)
