@@ -253,9 +253,11 @@ many useful context is predefined here, but you can overwrite it.
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((meta-info (org-html--build-meta-info info))
-        (preamble-info (org-html--build-pre/postamble 'preamble info))
-        (postamble-info (org-html--build-pre/postamble 'postamble info)))
+  (let* ((meta-info (org-html--build-meta-info info))
+         (preamble-info (org-html--build-pre/postamble 'preamble info))
+         ;;(postamble-info (org-html--build-pre/postamble 'postamble info))
+	 ;; FIXME: discard postamble info, this method is not elegant
+         (postamble-info ""))
     ;; we override some of function in org-html-template to make it
     ;; more easy to build our template
     (flet ((org-html--build-meta-info (info)
