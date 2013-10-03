@@ -254,8 +254,8 @@ holding export options."
   (let ((meta-info (org-html--build-meta-info info))
         (preamble-info (org-html--build-pre/postamble 'preamble info))
         (postamble-info (org-html--build-pre/postamble 'postamble info)))
-    ;; we override the org-html--build-meta-info to insert our
-    ;; html header.
+    ;; we override some of function in org-html-template to make it
+    ;; more easy to build our template
     (flet ((org-html--build-meta-info (info)
                                       (concat
                                        meta-info
