@@ -207,6 +207,7 @@ many useful context is predefined here, but you can overwrite it.
     ("DATE" (or (blogit--parse-option :date) ""))
     ("LANGUAGE" (or (blogit--parse-option :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option info :description) ""))
+    ("KEYWORDS" (or (blogit-parse-option :keywords) ""))
     ,@pairs))
 
 
