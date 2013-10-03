@@ -199,7 +199,13 @@ many useful context is predefined here, but you can overwrite it.
   `(ht
     ("BLOGIT" (concat "emacs-blogit ver." blogit-version))
     ("BLOGIT_URL" (format "<a href=\"%s\"> emacs-blogit </a>" blogit-url))
+    ("MAIN_TITLE" (or blogit-site-main-title ""))
+    ("SUB_TITLE"  (or blogit-site-sub-title ""))
+    ("TITLE"  (or (blogit--parse-option :title) "Untitled"))
     ("AUTHOR" (or (blogit--parse-option info :author) user-full-name "Unknown"))
+    ("EMAIL" (or (blogit--parse-option :email) user-mail-address ""))
+    ("DATE" (or (blogit--parse-option :date) ""))
+    ("LANGUAGE" (or (blogit--parse-option :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option info :description) ""))
     ,@pairs))
 
