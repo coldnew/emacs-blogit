@@ -201,13 +201,15 @@ many useful context is predefined here, but you can overwrite it.
     ("BLOGIT_URL" (format "<a href=\"%s\"> emacs-blogit </a>" blogit-url))
     ("MAIN_TITLE" (or blogit-site-main-title ""))
     ("SUB_TITLE"  (or blogit-site-sub-title ""))
-    ("TITLE"  (or (blogit--parse-option :title) "Untitled"))
+    ("TITLE"  (or (blogit--parse-option info :title) "Untitled"))
     ("AUTHOR" (or (blogit--parse-option info :author) user-full-name "Unknown"))
-    ("EMAIL" (or (blogit--parse-option :email) user-mail-address ""))
-    ("DATE" (or (blogit--parse-option :date) ""))
-    ("LANGUAGE" (or (blogit--parse-option :language) "en"))
+    ("EMAIL" (or (blogit--parse-option info :email) user-mail-address ""))
+    ("DATE" (or (blogit--parse-option info :date) ""))
+    ("LANGUAGE" (or (blogit--parse-option info :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option info :description) ""))
-    ("KEYWORDS" (or (blogit-parse-option :keywords) ""))
+    ("KEYWORDS" (or (blogit--parse-option info :keywords) ""))
+    ;;    ("DISQUS" (blogit--render-disqus-template info))
+    ;;    ("ANALYTICS" (blogit--render-analytics-template info))
     ,@pairs))
 
 
@@ -227,22 +229,41 @@ many useful context is predefined here, but you can overwrite it.
   :translate-alist
   '((template     . org-blogit-template)))
 
-(defun blogit--build-header-info (info)
+(defun blogit--render-header-template (info)
   (blogit--render-template :page_header (blogit--build-context info)))
+
+(defun blogit--render-footer-template (info)
+  (blogit--render-template :page_footer (blogit--build-context info)))
+
+(defun blogit--render-disqus-template (info)
+  (if (or blogit-disqus-shortname (blogit--parse-option :disqus))
+      (blogit-template-render
+       :plugin_disqus
+       (blogit-context (or ("DISQUS" blogit-disqus-shortname) (blogit--parse-option :disqus))))
+    ""))
+
 
 (defun org-blogit-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((meta-info (org-html--build-meta-info info)))
+  (let ((meta-info (org-html--build-meta-info info))
+        (preamble-info (org-html--build-pre/postamble 'preamble info))
+        (postamble-info (org-html--build-pre/postamble 'postamble info)))
     ;; we override the org-html--build-meta-info to insert our
     ;; html header.
     (flet ((org-html--build-meta-info (info)
                                       (concat
                                        meta-info
-                                       (blogit--build-header-info info))))
-      (org-html-template contents info))
-    ))
+                                       (blogit--render-header-template info)))
+           (org-html--build-pre/postamble (type info)
+                                          (cond
+					   ((eq type 'preamble) preamble-info)
+					   ((eq type 'postamble)
+					    (concat postamble-info
+						    (blogit--render-footer-template info))))))
+
+      (org-html-template contents info))))
 
 
 ;;; End-user functions
