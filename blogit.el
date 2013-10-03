@@ -449,7 +449,6 @@ many useful context is predefined here, but you can overwrite it.
     )
   )
 
-(blogit-update-index)
 
 (provide 'blogit)
 
