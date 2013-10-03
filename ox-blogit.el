@@ -208,8 +208,8 @@ many useful context is predefined here, but you can overwrite it.
     ("LANGUAGE" (or (blogit--parse-option info :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option info :description) ""))
     ("KEYWORDS" (or (blogit--parse-option info :keywords) ""))
-    ;;    ("DISQUS" (blogit--render-disqus-template info))
-    ;;    ("ANALYTICS" (blogit--render-analytics-template info))
+    ("DISQUS" (or (blogit--render-disqus-template info) ""))
+    ("ANALYTICS" (or (blogit--render-analytics-template info) ""))
     ,@pairs))
 
 
@@ -236,12 +236,16 @@ many useful context is predefined here, but you can overwrite it.
   (blogit--render-template :page_footer (blogit--build-context info)))
 
 (defun blogit--render-disqus-template (info)
-  (if (or blogit-disqus-shortname (blogit--parse-option :disqus))
-      (blogit-template-render
-       :plugin_disqus
-       (blogit-context (or ("DISQUS" blogit-disqus-shortname) (blogit--parse-option :disqus))))
-    ""))
+  (when (or (blogit--parse-option info :disqus) blogit-disqus-shortname)
+    (blogit--render-template
+     :plugin_disqus
+     (ht ("DISQUS" (or (blogit--parse-option info :disqus) blogit-disqus-shortname))))))
 
+(defun blogit--render-analytics-template (info)
+  (when (or (blogit--parse-option info :analytics) blogit-google-analytics-id)
+    (blogit--render-template
+     :plugin_analytics
+     (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) blogit-google-analytics-id))))))
 
 (defun org-blogit-template (contents info)
   "Return complete document string after HTML conversion.
@@ -258,10 +262,10 @@ holding export options."
                                        (blogit--render-header-template info)))
            (org-html--build-pre/postamble (type info)
                                           (cond
-					   ((eq type 'preamble) preamble-info)
-					   ((eq type 'postamble)
-					    (concat postamble-info
-						    (blogit--render-footer-template info))))))
+                                           ((eq type 'preamble) preamble-info)
+                                           ((eq type 'postamble)
+                                            (concat postamble-info
+                                                    (blogit--render-footer-template info))))))
 
       (org-html-template contents info))))
 
