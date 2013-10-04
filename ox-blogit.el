@@ -139,6 +139,14 @@ Currently blogit only support following format:
 
 ;;; Internal functions
 
+(defun blogit--get-post-type (info)
+  "Get current post type, return `blogit-default-type' if not found."
+  (let ((type (blogit--parse-option info :type)))
+    (cond
+     ((eq type 'blog) 'blog)
+     ((eq type 'static) 'static)
+     (t blogit-default-type))))
+
 (defun blogit--file-to-string (file)
   "Read the content of FILE and return it as a string."
   (with-temp-buffer (insert-file-contents file) (buffer-string)))
@@ -249,12 +257,14 @@ This function is used to create directory for new blog post.
             (setq dd (if date (format "%02d" date) ""))
             (blogit--parse-date-string1 (concat yyyy "/" mm "/" dd) 1 2 3)))))))
 
-;; TODO: make static
 (defun blogit--build-export-dir (info)
   "Build export dir path according to #+DATE: option."
   (let* ((time-str  (blogit--parse-option info :date))
          (time-list (blogit--parse-date-string time-str))
-         (dir-1 (split-string blogit-blog-dir-format "/"))
+         (type (blogit--get-post-type info))
+         (dir-1 (split-string (cond
+			       ((eq type 'blog) blogit-blog-dir-format)
+			       ((eq type 'static) blogit-static-dir-format)) "/"))
          (dir ""))
     (dolist (d dir-1)
       (cond
