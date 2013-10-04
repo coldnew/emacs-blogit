@@ -332,7 +332,7 @@ If parsing failed, use regexp to get the options, else return nil.
             (when (re-search-forward match-regexp nil t)
               (match-string-no-properties 2 nil)))))))
 
-(defun blogit--modify-org-option (option value)
+(defun blogit--modify-option (option value)
   "Modify option value of org file opened in current buffer.
 If option does not exist, create it automatically."
   (let ((match-regexp (org-make-options-regexp `(,option)))
@@ -360,6 +360,23 @@ If option does not exist, create it automatically."
           (if (= mpoint (point-min))
               (newline-and-indent))
           )))))
+
+(defun blogit--do-copy (src dst &optional copyf args)
+  "Copy SRC into DST. If `dired-do-sync' is found it would be
+preferred. Otherwise, `copy-directory' or `copy-files' would be
+used.
+
+A copy function COPYF and its arguments ARGS could be specified."
+  (let* ((dirp (file-directory-p src))
+	 (copyf (cond
+		 (copyf copyf)
+		 ((functionp 'dired-do-sync) 'dired-do-sync)
+		 (dirp 'copy-directory)
+		 (t 'copy-file)))
+	 (args (or args
+		   (when (eq 'copy-file copyf) '(t t t)))))
+    (when (file-exists-p src)
+	(apply copyf src dst args))))
 
 (defmacro blogit--build-context (info &rest pairs)
   "Create a hash table with the key-value pairs given.
