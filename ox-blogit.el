@@ -147,6 +147,13 @@ Currently blogit only support following format:
      ((eq type 'static) 'static)
      (t blogit-default-type))))
 
+(defun blogit--get-post-filename (info)
+  "Get current post export filename."
+  (let ((name (blogit--parse-option info :url)))
+    ;; (if name name
+    ;;   (blogit--sanitize-string ()))
+    ))
+
 (defun blogit--file-to-string (file)
   "Read the content of FILE and return it as a string."
   (with-temp-buffer (insert-file-contents file) (buffer-string)))
@@ -263,8 +270,8 @@ This function is used to create directory for new blog post.
          (time-list (blogit--parse-date-string time-str))
          (type (blogit--get-post-type info))
          (dir-1 (split-string (cond
-			       ((eq type 'blog) blogit-blog-dir-format)
-			       ((eq type 'static) blogit-static-dir-format)) "/"))
+                               ((eq type 'blog) blogit-blog-dir-format)
+                               ((eq type 'static) blogit-static-dir-format)) "/"))
          (dir ""))
     (dolist (d dir-1)
       (cond
@@ -273,7 +280,7 @@ This function is used to create directory for new blog post.
        ((string= d "%d") (setq dir (concat dir (plist-get time-list :day))))
        (t (setq dir (concat dir d))))
       (setq dir (concat dir "/")))
-    (format "%s" (replace-regexp-in-string "//*" "/" dir))))
+    (format "%s/%s" (directory-file-name blogit-output-dir) (replace-regexp-in-string "//*" "/" dir))))
 
 (defun blogit--render-template (type context)
   "Read the file contents, then render it with a hashtable context."
@@ -418,6 +425,106 @@ holding export options."
       (org-html-template contents info))))
 
 
+;;; Rewrite some org function to make blogit work more properly
+
+(defun blogit-export-output-file-name (extension &optional subtreep pub-dir)
+  "Return output file's name according to buffer specifications.
+
+EXTENSION is a string representing the output file extension,
+with the leading dot.
+
+With a non-nil optional argument SUBTREEP, try to determine
+output file's name by looking for \"EXPORT_FILE_NAME\" property
+of subtree at point.
+
+When optional argument PUB-DIR is set, use it as the publishing
+directory.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Return file name as a string.
+
+This function is rewrite from `org-export-output-file-name'."
+  (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
+         (base-name
+          ;; File name may come from EXPORT_FILE_NAME subtree
+          ;; property, assuming point is at beginning of said
+          ;; sub-tree.
+          (file-name-sans-extension
+           (or (and subtreep
+                    (org-entry-get
+                     (save-excursion
+                       (ignore-errors (org-back-to-heading) (point)))
+                     "EXPORT_FILE_NAME" t))
+               ;; File name may be extracted from buffer's associated
+               ;; file, if any.
+               (and visited-file (file-name-nondirectory visited-file))
+               ;; Can't determine file name on our own: Ask user.
+               (let ((read-file-name-function
+                      (and org-completion-use-ido 'ido-read-file-name)))
+                 (read-file-name
+                  "Output file: " pub-dir nil nil nil
+                  (lambda (name)
+                    (string= (file-name-extension name t) extension)))))))
+         (output-file
+          ;; Build file name.  Enforce EXTENSION over whatever user
+          ;; may have come up with.  PUB-DIR, if defined, always has
+          ;; precedence over any provided path.
+          (cond
+           (pub-dir
+            (concat (file-name-as-directory pub-dir)
+                    (file-name-nondirectory base-name)
+                    extension))
+           ((file-name-absolute-p base-name) (concat base-name extension))
+           (t (concat (file-name-as-directory ".") base-name extension)))))
+    ;; If writing to OUTPUT-FILE would overwrite original file, append
+    ;; EXTENSION another time to final name.
+    (if (and visited-file (org-file-equal-p visited-file output-file))
+        (concat output-file extension)
+      output-file)))
+
+(defun blogit-publish-org-to (backend filename extension plist &optional pub-dir)
+  "Publish an Org file to a specified back-end.
+
+BACKEND is a symbol representing the back-end used for
+transcoding.  FILENAME is the filename of the Org file to be
+published.  EXTENSION is the extension used for the output
+string, with the leading dot.  PLIST is the property list for the
+given project.
+
+Optional argument PUB-DIR, when non-nil is the publishing
+directory.
+
+Return output file name.
+
+This function is rewrite from `org-publish-org-to'."
+  (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
+  ;; Check if a buffer visiting FILENAME is already open.
+  (let* ((org-inhibit-startup t)
+         (visitingp (find-buffer-visiting filename))
+         (work-buffer (or visitingp (find-file-noselect filename))))
+    (prog1 (with-current-buffer work-buffer
+             (let ((output-file
+                    (blogit-export-output-file-name extension nil pub-dir))
+                   (body-p (plist-get plist :body-only)))
+               (org-export-to-file backend output-file
+                 nil nil nil body-p
+                 ;; Add `org-publish-collect-numbering' and
+                 ;; `org-publish-collect-index' to final output
+                 ;; filters.  The latter isn't dependent on
+                 ;; `:makeindex', since we want to keep it up-to-date
+                 ;; in cache anyway.
+                 (org-combine-plists
+                  plist
+                  `(:filter-final-output
+                    ,(cons 'org-publish-collect-numbering
+                           (cons 'org-publish-collect-index
+                                 (plist-get plist :filter-final-output))))))))
+      ;; Remove opened buffer in the process.
+      (unless visitingp (kill-buffer work-buffer)))))
+
+
 ;;; End-user functions
 
 ;;;###autoload
@@ -447,10 +554,10 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
-  (org-publish-org-to 'blogit filename
-                      (concat "." (or (plist-get plist :html-extension)
-                                      org-html-extension "html"))
-                      plist pub-dir))
+  (blogit-publish-org-to 'blogit filename
+                         (concat "." (or (plist-get plist :html-extension)
+                                         org-html-extension "html"))
+                         plist pub-dir))
 
 ;;;###autoload
 (defun blogit-publish-blog ()
