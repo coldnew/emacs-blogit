@@ -369,15 +369,15 @@ used.
 
 A copy function COPYF and its arguments ARGS could be specified."
   (let* ((dirp (file-directory-p src))
-	 (copyf (cond
-		 (copyf copyf)
-		 ((functionp 'dired-do-sync) 'dired-do-sync)
-		 (dirp 'copy-directory)
-		 (t 'copy-file)))
-	 (args (or args
-		   (when (eq 'copy-file copyf) '(t t t)))))
+         (copyf (cond
+                 (copyf copyf)
+                 ((functionp 'dired-do-sync) 'dired-do-sync)
+                 (dirp 'copy-directory)
+                 (t 'copy-file)))
+         (args (or args
+                   (when (eq 'copy-file copyf) '(t t t)))))
     (when (file-exists-p src)
-	(apply copyf src dst args))))
+      (apply copyf src dst args))))
 
 (defmacro blogit--build-context (info &rest pairs)
   "Create a hash table with the key-value pairs given.
@@ -620,3 +620,82 @@ Return output file name."
     (if (file-exists-p org-publish-timestamp-directory)
         (delete-directory org-publish-timestamp-directory t nil))
     (org-publish-project blogit-project-list)))
+
+(defvar blogit-linked-file-cache nil)
+
+(defun blogit--add-linked-file-to-cache ()
+  "Copy files (defined by \"file:\" link prefix) to page related directory."
+  (save-match-data
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "\\(\\[file:\\)\\([^]]+\\)\\(\\]\\)" nil t)
+        (let ((prefix (match-string-no-properties 1))
+              (file  (match-string-no-properties 2))
+              (suffix (match-string-no-properties 3)))
+          (when (file-exists-p file)
+	    (message (format "%s . %s . %s" prefix file suffix))
+	    (add-to-list 'blogit-linked-file-cache file)
+            ))))))
+
+[[file:templates][s]]
+[[file:~/SparkleShare/coldnew.github.io/blog-src/files/2013/USE-isolater.jpg]]
+(blogit--add-linked-file-to-cache)
+
+(defun o-blog-publish-linked-files()
+  "Copy files (defined by \"file:\" link prefix) to page related directory."
+  (save-match-data
+    (save-excursion
+      (goto-char (point-min))
+      (let (ret)
+        (while (re-search-forward "\\(\\[file:\\)\\([^]]+\\)\\(\\]\\)" nil t)
+          (let ((prefix (match-string-no-properties 1))
+                (file  (match-string-no-properties 2))
+                (suffix (match-string-no-properties 3)))
+
+            (when (file-exists-p file)
+              (replace-match
+               (if page
+                   (format "%s%s/%s%s"
+                           prefix
+                           (or (file-name-directory htmlfile) ".")
+                           (file-name-nondirectory file) suffix)
+
+                 (format "%s%s/%s/%s%s"
+                         prefix
+                         (file-relative-name "." filepath)
+                         (file-name-sans-extension htmlfile)
+                         (file-name-nondirectory file) suffix ))
+
+               (add-to-list 'ret file)))))
+
+        (when ret
+          (unless page
+            ;; create a redirection page as index.html into files' directory
+            (with-temp-buffer
+              (insert
+               (mapconcat 'identity
+                          `(,(format "* Redirect from (%s)" title)
+                            ":PROPERTIES:"
+                            ,(format ":PAGE: %s/index.html" (file-name-sans-extension htmlfile))
+                            ":TEMPLATE: page_redirect.html"
+                            ":END:")
+                          "\n"))
+              (org-mode)
+              (goto-char (point-min))
+              (setf STATIC (append STATIC (list (ob-parse-entry))))))
+
+          ;; copy all files into their target directory.
+          (loop for f in ret
+                do (let ((target
+                          (if page
+                              (format "%s/%s"
+                                      (ob:blog-publish-dir BLOG)
+                                      (file-name-nondirectory f))
+                            (format "%s/%s/%s"
+                                    (ob:blog-publish-dir BLOG)
+                                    ;; file path is nil when exporting static page?
+                                    ;;(or filepath ".")
+                                    (file-name-sans-extension htmlfile)
+                                    (file-name-nondirectory f)))))
+                     (mkdir (file-name-directory target) t)
+                     (ob-do-copy f target))))))))
