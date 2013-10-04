@@ -147,12 +147,12 @@ Currently blogit only support following format:
      ((eq type 'static) 'static)
      (t blogit-default-type))))
 
-(defun blogit--get-post-filename (info)
+(defun blogit--get-post-filename (info &optional filename)
   "Get current post export filename."
   (let ((name (blogit--parse-option info :url)))
-    ;; (if name name
-    ;;   (blogit--sanitize-string ()))
-    ))
+    (if name name
+      (blogit--sanitize-string (or filename
+                                   (file-name-base (buffer-file-name (buffer-base-buffer))))))))
 
 (defun blogit--file-to-string (file)
   "Read the content of FILE and return it as a string."
@@ -447,6 +447,7 @@ Return file name as a string.
 
 This function is rewrite from `org-export-output-file-name'."
   (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
+         (pub-dir (blogit--build-export-dir nil))
          (base-name
           ;; File name may come from EXPORT_FILE_NAME subtree
           ;; property, assuming point is at beginning of said
@@ -471,13 +472,13 @@ This function is rewrite from `org-export-output-file-name'."
           ;; Build file name.  Enforce EXTENSION over whatever user
           ;; may have come up with.  PUB-DIR, if defined, always has
           ;; precedence over any provided path.
-          (cond
-           (pub-dir
-            (concat (file-name-as-directory pub-dir)
-                    (file-name-nondirectory base-name)
-                    extension))
-           ((file-name-absolute-p base-name) (concat base-name extension))
-           (t (concat (file-name-as-directory ".") base-name extension)))))
+          (concat (file-name-as-directory (blogit--build-export-dir nil))
+                  (file-name-nondirectory (blogit--get-post-filename nil base-name))
+                  extension)))
+
+    ;; If output dir does not exist, create it
+    (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
+
     ;; If writing to OUTPUT-FILE would overwrite original file, append
     ;; EXTENSION another time to final name.
     (if (and visited-file (org-file-equal-p visited-file output-file))
@@ -508,6 +509,7 @@ This function is rewrite from `org-publish-org-to'."
              (let ((output-file
                     (blogit-export-output-file-name extension nil pub-dir))
                    (body-p (plist-get plist :body-only)))
+               (message output-file)
                (org-export-to-file backend output-file
                  nil nil nil body-p
                  ;; Add `org-publish-collect-numbering' and
