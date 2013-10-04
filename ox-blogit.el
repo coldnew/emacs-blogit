@@ -282,6 +282,29 @@ This function is used to create directory for new blog post.
       (setq dir (concat dir "/")))
     (format "%s/%s" (directory-file-name blogit-output-dir) (replace-regexp-in-string "//*" "/" dir))))
 
+(defun blogit--path-to-root (path)
+  "Return path to site root.
+ex:
+    (root)/2013/12/23/test.html -> ../../..
+    (root)/theme                -> ..
+"
+  (let* ((root (expand-file-name blogit-output-dir))
+         (rpath (file-relative-name
+                 (expand-file-name path) root))
+         (dpath (directory-file-name
+                 (or (file-name-directory rpath) "")))
+         (nroot "")
+         npath)
+    ;; if dpath is null, it means that the `path' we get
+    ;; is a dir, set it to rpath.
+    (if (string= dpath "") (setq dpath rpath))
+    ;; calculate relative dir to root
+    ;; make string like 2013/03/23 become to ../../../
+    (setq npath (split-string dpath "/"))
+    (dolist (d npath) (setq nroot (concat nroot "../")))
+    ;; remove last / and return
+    (s-left (- (string-width nroot) 1) nroot)))
+
 (defun blogit--render-template (type context)
   "Read the file contents, then render it with a hashtable context."
   (let ((file (or (blogit--template-fullfile type) type)))
@@ -362,6 +385,7 @@ many useful context is predefined here, but you can overwrite it.
     ("KEYWORDS" (or (blogit--parse-option info :keywords) ""))
     ("DISQUS" (or (blogit--render-disqus-template info) ""))
     ("ANALYTICS" (or (blogit--render-analytics-template info) ""))
+    ("ROOT" (blogit--path-to-root (blogit--build-export-dir info)))
     ,@pairs))
 
 
