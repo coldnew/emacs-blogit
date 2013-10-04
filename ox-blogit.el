@@ -169,6 +169,37 @@ mode, format the string with MODE's format settings."
    (concat blogit-source-dir "/" blogit-template-dir
            (cdr (assoc key blogit-template-list)))))
 
+(defun blogit--sanitize-string (s)
+  "Sanitize string S by:
+
+- converting all charcters to pure ASCII
+- replacing non alphanumerical by the first char of sha1 algorithm
+- downcasing all letters
+- trimming leading and tailing \"_\"
+
+This function is used to generate blog post url if not specified."
+  (loop for c across s
+        with cd
+        with gc
+        with ret
+        do (progn
+             (setf gc (get-char-code-property c 'general-category))
+             (setf cd (get-char-code-property c 'decomposition)))
+        if (or (member gc '(Lu Ll Nd)) (= ?_ c) (= ?- c))
+        collect (downcase
+                 (char-to-string (if cd (car cd)  c)))
+        into ret
+        else if (member gc '(Zs))
+        collect "_" into ret
+        else if (member gc '(Lo))
+        collect (s-left 2 (sha1 (char-to-string (if cd (car cd) c))))
+        into ret
+        finally return (replace-regexp-in-string
+                        "--+" "_"
+                        (replace-regexp-in-string
+                         "^_+\\|_+$" ""
+                         (mapconcat 'identity ret "")))))
+
 (defun blogit--parse-date-string1 (date-str yn mn dn)
   "Helper function to return date list for `blogit--parse-date-string'."
   (list
