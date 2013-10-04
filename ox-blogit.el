@@ -84,6 +84,44 @@
         :recursive t
         ))
 
+(defcustom blogit-default-type 'blog
+  "Configure default blogit page type."
+  :group 'blogit
+  :type '(choice
+          (const :tag "blog" blog)
+          (const :tag "static" static)))
+
+(defcustom blogit-date-format "%Y/%02m/%02d %02H:%02M:%02S"
+  "Format for printing a date in the sitemap.
+See `format-time-string' for allowed formatters."
+  :group 'blogit :type 'string)
+
+(defvar blogit-blog-dir-format "blog/%y/%m/%d"
+  "Output dir formate for blog, use blogit-output-dir as root when
+this value is empty string.
+
+The dir will be format by `format-time-string', but the time is according to
+your #+DATE info.
+
+Currently blogit only support following format:
+
+    %y : year   eq: 2013
+    %m : month  eq: 03
+    %d : month  eq: 23")
+
+(defvar blogit-static-dir-format ""
+  "Output dir formate for static, use blogit-output-dir as root when
+this value is empty string.
+
+The dir will be format by `format-time-string', but the time is according to
+your #+DATE info.
+
+Currently blogit only support following format:
+
+    %y : year   eq: 2013
+    %m : month  eq: 03
+    %d : month  eq: 23")
+
 (defvar blogit-template-list
   '((:page_header      . "page_header.html")
     (:page_navigator   . "page_navigator.html")
@@ -125,15 +163,80 @@ mode, format the string with MODE's format settings."
   (blogit--file-to-string file))
 
 ;; FIXME: modify blogit-template-dir
-(defun blogit--get-template (key)
+(defun blogit--template-fullfile (key)
   "Get match template filename with fullpath according to key."
   (convert-standard-filename
    (concat blogit-source-dir "/" blogit-template-dir
            (cdr (assoc key blogit-template-list)))))
 
+(defun blogit--parse-date-string1 (date-str yn mn dn)
+  "Helper function to return date list for `blogit--parse-date-string'."
+  (list
+   :year (format "%04d" (string-to-int (match-string yn date-str)))
+   :month (format "%02d" (string-to-int (match-string mn date-str)))
+   :day (format "%02d" (string-to-int (match-string dn date-str)))))
+
+;; FIXME: this function may be has some error when date-string is nil
+(defun blogit--parse-date-string (date-string)
+  "Returns yyyy/mm/dd format of date-string
+For examples:
+   [Nov. 28, 1994]     => [1994/11/28]
+   [November 28, 1994] => [1994/11/28]
+   [11/28/1994]        => [1994/11/28]
+Any \"day of week\", or \"time\" info, or any other parts of the string, are
+discarded.
+
+This function is used to create directory for new blog post.
+"
+  (if (not (stringp date-string)) ""
+    (let ((date-str date-string)
+          date-list year month date yyyy mm dd)
+      (setq date-str (replace-regexp-in-string "^ *\\(.+\\) *$" "\\1" date-str))
+      (cond
+       ;; USA convention of mm/dd/yyyy
+       ((string-match
+         "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
+        (blogit--parse-date-string1 date-str 3 1 2))
+
+       ;; yyyy/mm/dd
+       ((string-match
+         "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
+        (blogit--parse-date-string1 date-str 1 2 3))
+
+       ;; some ISO 8601. yyyy-mm-dd
+       ((string-match
+         "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
+        (blogit--parse-date-string1 date-str 1 2 3))
+
+       (t (progn
+            (setq date-list (parse-time-string date-str))
+            (setq year (nth 5 date-list))
+            (setq month (nth 4 date-list))
+            (setq date (nth 3 date-list))
+            (setq yyyy (number-to-string year))
+            (setq mm (if month (format "%02d" month) ""))
+            (setq dd (if date (format "%02d" date) ""))
+            (blogit--parse-date-string1 (concat yyyy "/" mm "/" dd) 1 2 3)))))))
+
+;; TODO: make static
+(defun blogit--build-export-dir (info)
+  "Build export dir path according to #+DATE: option."
+  (let* ((time-str  (blogit--parse-option info :date))
+         (time-list (blogit--parse-date-string time-str))
+         (dir-1 (split-string blogit-blog-dir-format "/"))
+         (dir ""))
+    (dolist (d dir-1)
+      (cond
+       ((string= d "%y") (setq dir (concat dir (plist-get time-list :year))))
+       ((string= d "%m") (setq dir (concat dir (plist-get time-list :month))))
+       ((string= d "%d") (setq dir (concat dir (plist-get time-list :day))))
+       (t (setq dir (concat dir d))))
+      (setq dir (concat dir "/")))
+    (format "%s" (replace-regexp-in-string "//*" "/" dir))))
+
 (defun blogit--render-template (type context)
   "Read the file contents, then render it with a hashtable context."
-  (let ((file (or (blogit--get-template type) type)))
+  (let ((file (or (blogit--template-fullfile type) type)))
     (mustache-render (blogit--template-to-string file) context)))
 
 (defun blogit--parse-option (info key)
@@ -256,7 +359,7 @@ holding export options."
   (let* ((meta-info (org-html--build-meta-info info))
          (preamble-info (org-html--build-pre/postamble 'preamble info))
          ;;(postamble-info (org-html--build-pre/postamble 'postamble info))
-	 ;; FIXME: discard postamble info, this method is not elegant
+         ;; FIXME: discard postamble info, this method is not elegant
          (postamble-info ""))
     ;; we override some of function in org-html-template to make it
     ;; more easy to build our template
