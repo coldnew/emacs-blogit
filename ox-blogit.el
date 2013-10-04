@@ -35,6 +35,7 @@
 (require 'dash)
 (require 's)
 (require 'mustache)
+(require 'dired-sync nil t)
 
 (eval-when-compile (require 'cl))
 
