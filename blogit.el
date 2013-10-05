@@ -293,16 +293,16 @@ This function is used to create directory for new blog post.
 
 (defun blogit--build-export-dir (info)
   "Build export dir path according to #+DATE: option."
-  (let* ((time-str  (blogit--parse-option info :date))
-         (time-list (blogit--parse-date-string time-str))
+  (let* ((date-str  (blogit--parse-option info :date))
+         (date-list (blogit--parse-date-string date-str))
          (dir-format (blogit--get-post-dir-format info))
          (dir-1 (split-string dir-format "/"))
          (dir ""))
     (dolist (d dir-1)
       (cond
-       ((string= d "%y") (setq dir (concat dir (plist-get time-list :year))))
-       ((string= d "%m") (setq dir (concat dir (plist-get time-list :month))))
-       ((string= d "%d") (setq dir (concat dir (plist-get time-list :day))))
+       ((string= d "%y") (setq dir (concat dir (plist-get date-list :year))))
+       ((string= d "%m") (setq dir (concat dir (plist-get date-list :month))))
+       ((string= d "%d") (setq dir (concat dir (plist-get date-list :day))))
        (t (setq dir (concat dir d))))
       (setq dir (concat dir "/")))
     (format "%s/%s" (directory-file-name blogit-output-dir) (replace-regexp-in-string "//*" "/" dir))))
