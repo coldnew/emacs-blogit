@@ -102,7 +102,7 @@ See `format-time-string' for allowed formatters."
     :blog-dir   "blog/%y/%m/%d"
     :static-type static
     :static-dir  ""
-    ))
+    )
   "Output dir formate for blogit, use blogit-output-dir as root when
 this value is empty string.
 
