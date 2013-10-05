@@ -718,8 +718,7 @@ Return output file name."
   (blogit-publish-org-to 'blogit filename
                          (concat "." (or (plist-get plist :html-extension)
                                          org-html-extension "html"))
-                         plist pub-dir)
-  )
+                         plist pub-dir))
 
 ;;;###autoload
 (defun blogit-publish-blog ()
