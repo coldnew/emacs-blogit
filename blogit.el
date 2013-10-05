@@ -128,19 +128,21 @@ Currently blogit only support following format:
 
     %y : year   eq: 2013
     %m : month  eq: 03
-    %d : day  eq: 23")
+    %d : day    eq: 23")
 
 (defvar blogit-template-list
   '((:page_header      . "page_header.html")
-    (:page_navigator   . "page_navigator.html")
     (:page_footer      . "page_footer.html")
-    (:index            . "index.html")
-    (:blog_post        . "blog_post.html")
-    (:blog_index       . "blog_index.html")
-    (:blog_rss         . "blog_rss.html")
     (:plugin_analytics . "plugin_analytics.html")
     (:plugin_disqus    . "plugin_disqus.html")
+
+    ;; FIXME: still not use
+    (:page_navigator   . "page_navigator.html")
     (:newpost          . "newpost.org")
+    (:blog_rss         . "blog_rss.html")
+    (:blog_post        . "blog_post.html")
+    (:blog_index       . "blog_index.html")
+    (:index            . "index.html")
     )
   "Template filename define for blogit to parse.")
 
