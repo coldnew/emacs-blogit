@@ -307,6 +307,15 @@ ex:
     ;; remove last / and return
     (s-left (- (string-width nroot) 1) nroot)))
 
+(defun blogit--calculate-post-relative-path (path)
+  "Calculate post path from root."
+  (let* ((epath (expand-file-name (blogit--get-post-url path)))
+	 (filename (file-name-nondirectory epath))
+	 (path-dir (file-name-directory epath))
+	 (rpath (s-replace (expand-file-name blogit-output-dir) "" path-dir)))
+    (replace-regexp-in-string "//*" "/"
+			      (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
+
 (defun blogit--render-template (type context)
   "Read the file contents, then render it with a hashtable context."
   (let ((file (or (blogit--template-fullfile type) type)))
@@ -418,9 +427,10 @@ many useful context is predefined here, but you can overwrite it.
     (:url               "URL"               nil   nil   t)
 
     ;; disable org-html default style
+    ;; WARNING: DO NOT edit folling since it may break blogit functions
     (:html-head-include-default-style nil "html-style" nil)
     (:html-head-include-scripts nil "html-scripts" nil)
-    (:html-link-org-as-html nil nil nil)
+    (:html-link-use-abs-url nil "html-link-use-abs-url" nil)
     )
 
   :translate-alist
@@ -468,6 +478,8 @@ many useful context is predefined here, but you can overwrite it.
       (format "%s%s.html" (blogit--build-export-dir nil)
               (blogit--get-post-filename nil file)))))
 
+
+
 (defun org-blogit-html-link (link desc info)
   "Transcode a LINK object from Org to HTML.
 
@@ -476,13 +488,13 @@ INFO is a plist holding contextual information.  See
 `org-export-data'.
 
 In this function, we also add link file"
-  (let* ((type (org-element-property :type link))
+  (let* ((org-html-link-org-files-as-html nil)
+         (type (org-element-property :type link))
          (raw-path (expand-file-name (org-element-property :path link)))
          (encode-path (expand-file-name (org-link-unescape raw-path)))
          (html-link (org-html-link link desc info))
-         (root-dir (blogit--build-export-dir info))
          (file-dir (file-name-base (blogit--get-post-filename info)))
-         (new-dir (concat root-dir file-dir))
+	 (link-prefix "<a href=\"")
          new-path file-to-cache)
     ;; file
     (when (string= type "file")
@@ -493,26 +505,33 @@ In this function, we also add link file"
         ;; file to cache.
         (if (blogit--check-post-file encode-path)
             ;; if file is really blogit post, get it url
-            (setq new-path (blogit--path-to-root (blogit--get-post-url encode-path)))
-          (setq file-to-cache encode-path)))
-       (t (setq file-to-cache encode-path)))
+            (setq new-path (blogit--calculate-post-relative-path encode-path))
+          (setq file-to-cache raw-path)))
+       (t (setq file-to-cache raw-path)))
       ;; add file to cache, we will use this cache to copy file
       (when file-to-cache
         (add-to-list 'blogit-linked-file-cache file-to-cache))
 
       (if (not new-path)
-          (setq new-path (concat (blogit--path-to-root new-dir) "/"
-				 (file-name-nondirectory encode-path))))
+          (setq new-path (concat file-dir "/"
+                                 (file-name-nondirectory encode-path))))
 
       (when new-path
-        (setq html-link (s-replace "file://" "" html-link))
+        ;; remove `file://' prefix from html-link when raw-path is
+        ;; absolute path
+        (if (file-name-absolute-p raw-path)
+            (setq html-link (s-replace (concat link-prefix "file://") link-prefix html-link)))
+
+        ;; Since some of raw-path use absolute dir, some use relative
+        ;; dir (like image), we make all raw-path to use relative path
+        ;; here if it is at the same dir as post.
+        (setq raw-path (s-replace (file-name-directory (buffer-file-name)) "" raw-path))
 
         ;; we also need to modify org-html-link to relative path
         ;; for our post
-        (setq html-link (s-replace raw-path new-path html-link)))
-      )
-    html-link
-    ))
+        (setq html-link (s-replace (concat "=\"" raw-path) (concat "=\"" new-path) html-link))))
+    ;; done and done, now return our new-link
+    html-link))
 
 (defun org-blogit-template (contents info)
   "Return complete document string after HTML conversion.
