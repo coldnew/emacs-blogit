@@ -1,9 +1,9 @@
-;;; blogit.el --- .
+;;; blogit.el ---
 
 ;; Copyright (c) 2013 Yen-Chin, Lee.
 ;;
 ;; Author: coldnew <coldnew.tw@gmail.com>
-;; Keywords:
+;; Keywords: html presentation
 ;; X-URL: http://github.com/coldnew/emacs-blogit
 ;; Version: 0.1
 
@@ -25,44 +25,29 @@
 
 ;;; Commentary:
 
-;;
-;;
-;;
-
-;;; Installation:
-
-;; If you have `melpa` and `emacs24` installed, simply type:
-;;
-;;      M-x package-install blogit
-;;
-;; In your .emacs
-;;
-;;      (require 'blogit)
-
 ;;; Code:
 
-(require 'ox)
+;;; Dependencies
+
+(require 'ox-html)
+(require 'ox-publish)
 (require 'ht)
 (require 'dash)
 (require 's)
 (require 'mustache)
+(require 'dired-sync nil t)
 
-;; import extra files in blogit
-(mapcar (lambda (x) (require (intern (format "blogit-%s" x)) nil t))
-        '("utils" "vars" "create" "test"))
+(eval-when-compile (require 'cl))
 
 (defconst blogit-version "0.1"
   "Blogit version string.")
 
-(defconst blogit-generator-string
-  (concat "emacs-blogit ver. " blogit-version)
-  "Generator string to indicate blogit version.")
-
-(defconst blogit-generator-url
-  "<a href=\"http://github.com/coldnew/emacs-blogit\"> emacs-blogit </a>"
+(defconst blogit-url
+  "http://github.com/coldnew/emacs-blogit"
   "Url for blogit.")
 
-;;; Customize Variables
+
+;;; User Configuration Variables
 
 (defgroup blogit nil
   "Options for generating static pages using blogit."
@@ -76,27 +61,9 @@
   "The output directory for blogit."
   :group 'blogit :type 'string)
 
-(defcustom blogit-site-domain nil
-  "The domain name of entire site, it is recommended to assign with prefix
-http:// or https://, http will be considered if not assigned."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-site-main-title "blogit"
-  "The main title of entire site."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-site-sub-title "static site generator"
-  "The subtitle of entire site."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-default-language "en"
-  "The default language for this site. This value will be set to `en' by default."
-  :group 'blogit :type 'string)
-
-(defcustom blogit-date-format "%Y/%m/%d %I:%M %p"
-  "Format for printing a date in the sitemap.
-See `format-time-string' for allowed formatters."
-  :group 'blogit :type 'string)
+(defcustom blogit-cache-dir
+  (concat blogit-output-dir "/.cache")
+  "The cache directory for blogit.")
 
 (defcustom blogit-google-analytics-id nil
   "Personal google analytics id."
@@ -106,11 +73,55 @@ See `format-time-string' for allowed formatters."
   "Personal disqus shortname."
   :group 'blogit :type 'string)
 
-;;; Templates
-
 (defcustom blogit-template-dir "templates/"
   "Template directory."
   :group 'blogit :type 'string)
+
+(setq blogit-project-list
+      `("blogit"
+        :base-directory ,blogit-source-dir
+        :publishing-directory ,blogit-output-dir
+        :publishing-function org-blogit-publish-to-html
+        :recursive t
+        ))
+
+(defcustom blogit-default-type 'blog
+  "Configure default blogit page type."
+  :group 'blogit
+  :type '(choice
+          (const :tag "blog" blog)
+          (const :tag "static" static)))
+
+(defcustom blogit-date-format "%Y/%02m/%02d %02H:%02M:%02S"
+  "Format for printing a date in the sitemap.
+See `format-time-string' for allowed formatters."
+  :group 'blogit :type 'string)
+
+(defvar blogit-blog-dir-format "blog/%y/%m/%d"
+  "Output dir formate for blog, use blogit-output-dir as root when
+this value is empty string.
+
+The dir will be format by `format-time-string', but the time is according to
+your #+DATE info.
+
+Currently blogit only support following format:
+
+    %y : year   eq: 2013
+    %m : month  eq: 03
+    %d : month  eq: 23")
+
+(defvar blogit-static-dir-format ""
+  "Output dir formate for static, use blogit-output-dir as root when
+this value is empty string.
+
+The dir will be format by `format-time-string', but the time is according to
+your #+DATE info.
+
+Currently blogit only support following format:
+
+    %y : year   eq: 2013
+    %m : month  eq: 03
+    %d : month  eq: 23")
 
 (defvar blogit-template-list
   '((:page_header      . "page_header.html")
@@ -126,20 +137,35 @@ See `format-time-string' for allowed formatters."
     )
   "Template filename define for blogit to parse.")
 
-;;;; Internal functions
+
+;;; Internal variables
 
-(defun blogit-get-template (key)
-  "Get match template filename according to key."
-  (concat blogit-source-dir "/" blogit-template-dir
-	  (cdr (assoc key blogit-template-list))))
+(defvar blogit-linked-file-cache nil
+  "Cache file to store which file will be copied to output dir.")
 
-(defun blogit-file-to-string (file)
+
+;;; Internal functions
+
+(defun blogit--get-post-type (info)
+  "Get current post type, return `blogit-default-type' if not found."
+  (let ((type (blogit--parse-option info :type)))
+    (cond
+     ((eq type 'blog) 'blog)
+     ((eq type 'static) 'static)
+     (t blogit-default-type))))
+
+(defun blogit--get-post-filename (info &optional filename)
+  "Get current post export filename."
+  (let ((name (blogit--parse-option info :url)))
+    (if name name
+      (blogit--sanitize-string (or filename
+                                   (file-name-base (buffer-file-name (buffer-base-buffer))))))))
+
+(defun blogit--file-to-string (file)
   "Read the content of FILE and return it as a string."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (buffer-string)))
+  (with-temp-buffer (insert-file-contents file) (buffer-string)))
 
-(defun blogit-string-to-file (string file &optional mode)
+(defun blogit--string-to-file (string file &optional mode)
   "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
 mode, format the string with MODE's format settings."
   (with-temp-buffer
@@ -153,58 +179,19 @@ mode, format the string with MODE's format settings."
     (when (file-writable-p file)
       (write-region (point-min) (point-max) file))))
 
-(defun blogit-template-to-string (file)
+;; FIXME:
+(defun blogit--template-to-string (file)
   "Read the content of FILE in template dir and return it as string."
-  (blogit-file-to-string (concat blogit-template-dir file)))
+  (blogit--file-to-string file))
 
-(defun blogit-template-render (type context)
-  "Read the file contents, then render it with a hashtable context."
-  (let ((file (or (blogit-get-template type) type)))
-    (mustache-render (blogit-template-to-string file) context)))
+;; FIXME: modify blogit-template-dir
+(defun blogit--template-fullfile (key)
+  "Get match template filename with fullpath according to key."
+  (convert-standard-filename
+   (concat blogit-source-dir "/" blogit-template-dir
+           (cdr (assoc key blogit-template-list)))))
 
-(defun blogit-parse-option (option)
-  "Read option value of org file opened in current buffer.
-e.g:
-#+TITLE: this is title
-##+DATE: 2013/09/30 11:43 PM
-#+LAST_MODIFIED: 2013/09/30 11:43 PM
-will return \"this is title\" if OPTION is \"TITLE\""
-  (let ((match-regexp (org-make-options-regexp `(,option))))
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward match-regexp nil t)
-        (match-string-no-properties 2 nil)))))
-
-(defun blogit-modify-option (option value)
-  "Modify option value of org file opened in current buffer.
-If option does not exist, create it automatically."
-  (let ((match-regexp (org-make-options-regexp `(,option)))
-        (blank-regexp "^#\\+\\(\\w*\\):[        ]*\\(.*\\)")
-        (insert-option '(insert (concat "#+" option ": " value)))
-        (mpoint))
-    (save-excursion
-      (goto-char (point-min))
-      (if (re-search-forward match-regexp nil t)
-          (progn
-            (goto-char (point-at-bol))
-            (kill-line)
-            (eval insert-option))
-        ;; no option found, insert it
-        (progn
-          (goto-char (point-min))
-          (while (re-search-forward blank-regexp nil t)
-            (setq mpoint (point)))
-          (if (not mpoint) (setq mpoint (point-min)))
-          (goto-char mpoint)
-          (when (not (= mpoint (point-min)))
-            (goto-char (point-at-eol))
-            (newline-and-indent))
-          (eval insert-option)
-          (if (= mpoint (point-min))
-              (newline-and-indent))
-          )))))
-
-(defun blogit-sanitize-string (s)
+(defun blogit--sanitize-string (s)
   "Sanitize string S by:
 
 - converting all charcters to pure ASCII
@@ -235,14 +222,15 @@ This function is used to generate blog post url if not specified."
                          "^_+\\|_+$" ""
                          (mapconcat 'identity ret "")))))
 
-(defun blogit~~generate-dir-string (date-str yn mn dn)
-  "Helper function to regenerte date string fot `blogit-generate-dir-string'."
-  (concat (format "%04d" (string-to-int (match-string yn date-str))) "/"
-          (format "%02d" (string-to-int (match-string mn date-str))) "/"
-          (format "%02d" (string-to-int (match-string dn date-str)))))
+(defun blogit--parse-date-string1 (date-str yn mn dn)
+  "Helper function to return date list for `blogit--parse-date-string'."
+  (list
+   :year (format "%04d" (string-to-int (match-string yn date-str)))
+   :month (format "%02d" (string-to-int (match-string mn date-str)))
+   :day (format "%02d" (string-to-int (match-string dn date-str)))))
 
 ;; FIXME: this function may be has some error when date-string is nil
-(defun blogit-generate-dir-string (date-string)
+(defun blogit--parse-date-string (date-string)
   "Returns yyyy/mm/dd format of date-string
 For examples:
    [Nov. 28, 1994]     => [1994/11/28]
@@ -261,17 +249,17 @@ This function is used to create directory for new blog post.
        ;; USA convention of mm/dd/yyyy
        ((string-match
          "^\\([0-9]+\\)/\\([0-9]+\\)/\\([0-9][0-9][0-9][0-9]\\)" date-str)
-        (blogit~~generate-dir-string date-str 3 1 2))
+        (blogit--parse-date-string1 date-str 3 1 2))
 
        ;; yyyy/mm/dd
        ((string-match
          "^\\([0-9][0-9][0-9][0-9]\\)/\\([0-9]+\\)/\\([0-9]+\\)" date-str)
-        (blogit~~generate-dir-string date-str 1 2 3))
+        (blogit--parse-date-string1 date-str 1 2 3))
 
        ;; some ISO 8601. yyyy-mm-dd
        ((string-match
          "^\\([0-9][0-9][0-9][0-9]\\)-\\([0-9]+\\)-\\([0-9]+\\)" date-str)
-        (blogit~~generate-dir-string date-str 1 2 3))
+        (blogit--parse-date-string1 date-str 1 2 3))
 
        (t (progn
             (setq date-list (parse-time-string date-str))
@@ -281,10 +269,28 @@ This function is used to create directory for new blog post.
             (setq yyyy (number-to-string year))
             (setq mm (if month (format "%02d" month) ""))
             (setq dd (if date (format "%02d" date) ""))
-            (concat yyyy "/" mm "/" dd))))
-      )))
+            (blogit--parse-date-string1 (concat yyyy "/" mm "/" dd) 1 2 3)))))))
 
-(defun blogit-path-to-root (path)
+(defun blogit--build-export-dir (info)
+  "Build export dir path according to #+DATE: option."
+  (let* ((time-str  (blogit--parse-option info :date))
+         (time-list (blogit--parse-date-string time-str))
+         (type (blogit--get-post-type info))
+         (dir-1 (split-string (cond
+                               ((eq type 'blog) blogit-blog-dir-format)
+                               ((eq type 'static) blogit-static-dir-format)) "/"))
+         (dir ""))
+    (dolist (d dir-1)
+      (cond
+       ((string= d "%y") (setq dir (concat dir (plist-get time-list :year))))
+       ((string= d "%m") (setq dir (concat dir (plist-get time-list :month))))
+       ((string= d "%d") (setq dir (concat dir (plist-get time-list :day))))
+       (t (setq dir (concat dir d))))
+      (setq dir (concat dir "/")))
+    (format "%s/%s" (directory-file-name blogit-output-dir) (replace-regexp-in-string "//*" "/" dir))))
+
+;; FIXME: what about ./ ?
+(defun blogit--path-to-root (path)
   "Return path to site root.
 ex:
     (root)/2013/12/23/test.html -> ../../..
@@ -307,7 +313,89 @@ ex:
     ;; remove last / and return
     (s-left (- (string-width nroot) 1) nroot)))
 
-(defmacro blogit-context (&rest pairs)
+(defun blogit--calculate-post-relative-path (path)
+  "Calculate post path from root."
+  (let* ((epath (expand-file-name (blogit--get-post-url path)))
+	 (filename (file-name-nondirectory epath))
+	 (path-dir (file-name-directory epath))
+	 (rpath (s-replace (expand-file-name blogit-output-dir) "" path-dir)))
+    (replace-regexp-in-string "//*" "/"
+			      (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
+
+(defun blogit--render-template (type context)
+  "Read the file contents, then render it with a hashtable context."
+  (let ((file (or (blogit--template-fullfile type) type)))
+    (mustache-render (blogit--template-to-string file) context)))
+
+(defun blogit--parse-option (info key)
+  "Read option value of org file opened in current buffer.
+
+This function will first use the standard way to parse org-option.
+If parsing failed, use regexp to get the options, else return nil.
+"
+  (flet ((plist-get-str (info key)
+                        (let ((r (plist-get info key)))
+                          (if (stringp r) r (or (car r) "")))))
+    (let* ((keystr1 (symbol-name key))
+           (keystr (upcase (s-right (- (length keystr1) 1) keystr1)))
+           (match-regexp (org-make-options-regexp `(,keystr)))
+           (option (plist-get-str info key)))
+
+      ;; if we can use plist-get to get org-option, use it
+      ;; else use regexp to find options
+      (or (if (not (string= "" option)) option)
+          (save-excursion
+            (goto-char (point-min))
+            (when (re-search-forward match-regexp nil t)
+              (match-string-no-properties 2 nil)))))))
+
+(defun blogit--modify-option (option value)
+  "Modify option value of org file opened in current buffer.
+If option does not exist, create it automatically."
+  (let ((match-regexp (org-make-options-regexp `(,option)))
+        (blank-regexp "^#\\+\\(\\w*\\):[        ]*\\(.*\\)")
+        (insert-option '(insert (concat "#+" option ": " value)))
+        (mpoint))
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward match-regexp nil t)
+          (progn
+            (goto-char (point-at-bol))
+            (kill-line)
+            (eval insert-option))
+        ;; no option found, insert it
+        (progn
+          (goto-char (point-min))
+          (while (re-search-forward blank-regexp nil t)
+            (setq mpoint (point)))
+          (if (not mpoint) (setq mpoint (point-min)))
+          (goto-char mpoint)
+          (when (not (= mpoint (point-min)))
+            (goto-char (point-at-eol))
+            (newline-and-indent))
+          (eval insert-option)
+          (if (= mpoint (point-min))
+              (newline-and-indent))
+          )))))
+
+(defun blogit--do-copy (src dst &optional copyf args)
+  "Copy SRC into DST. If `dired-do-sync' is found it would be
+preferred. Otherwise, `copy-directory' or `copy-files' would be
+used.
+
+A copy function COPYF and its arguments ARGS could be specified."
+  (let* ((dirp (file-directory-p src))
+         (copyf (cond
+                 (copyf copyf)
+                 ((functionp 'dired-do-sync) 'dired-do-sync)
+                 (dirp 'copy-directory)
+                 (t 'copy-file)))
+         (args (or args
+                   (when (eq 'copy-file copyf) '(t t t)))))
+    (when (file-exists-p src)
+      (apply copyf src dst args))))
+
+(defmacro blogit--build-context (info &rest pairs)
   "Create a hash table with the key-value pairs given.
 Keys are compared with `equal'.
 
@@ -317,139 +405,324 @@ This function is used to create context for blogit-render function,
 many useful context is predefined here, but you can overwrite it.
 "
   `(ht
+    ("BLOGIT" (concat "emacs-blogit ver." blogit-version))
+    ("BLOGIT_URL" (format "<a href=\"%s\"> emacs-blogit </a>" blogit-url))
     ("MAIN_TITLE" (or blogit-site-main-title ""))
     ("SUB_TITLE"  (or blogit-site-sub-title ""))
-    ("TITLE"  (or (blogit-parse-option "TITLE") "Untitled"))
-    ("AUTHOR" (or (blogit-parse-option "AUTHOR") user-full-name "Unknown Author"))
-    ("EMAIL" (or user-mail-address ""))
-    ("DATE" (or (blogit-parse-option "DATE") ""))
-    ("YEAR" (format-time-string "%Y"))
-    ("LANGUAGE" (or (blogit-parse-option "LANGUAGE") blogit-default-language "en"))
-    ("BLOGIT" blogit-generator-string)
-    ("BLOGIT_URL" blogit-generator-url)
-    ;;    ("ROOT" (blogit-path-to-root (file-name-directory (blogit-generate-url))))
+    ("TITLE"  (or (blogit--parse-option info :title) "Untitled"))
+    ("AUTHOR" (or (blogit--parse-option info :author) user-full-name "Unknown"))
+    ("EMAIL" (or (blogit--parse-option info :email) user-mail-address ""))
+    ("DATE" (or (blogit--parse-option info :date) ""))
+    ("URL" (or (blogit--parse-option info :url) ""))
+    ("LANGUAGE" (or (blogit--parse-option info :language) "en"))
+    ("DESCRIPTION" (or (blogit--parse-option info :description) ""))
+    ("KEYWORDS" (or (blogit--parse-option info :keywords) ""))
+    ("DISQUS" (or (blogit--render-disqus-template info) ""))
+    ("ANALYTICS" (or (blogit--render-analytics-template info) ""))
+    ("ROOT" (blogit--path-to-root (blogit--build-export-dir info)))
     ,@pairs))
 
-(defun blogit-render-header ()
-  "Render the header on each page."
-  (blogit-template-render
-   :page_header
-   (blogit-context
-    ("DESCRIPTION" (or (blogit-parse-option "DESCRIPTION") ""))
-    ("KEYWORDS" (or (blogit-parse-option "KEYWORDS") ""))
-    )))
+
+;;; Define Back-End for org-export
 
-(defun blogit-render-navigator ()
-  "Render the navigator on each page."
-  (blogit-template-render :page_navigator (blogit-context)))
+(org-export-define-derived-backend 'blogit 'html
+  :options-alist
+  '(
+    (:analytics         "ANALYTICS"         nil   nil   t)
+    (:disqus            "DISQUS"            nil   nil   t)
+    (:url               "URL"               nil   nil   t)
 
-(defun blogit-render-footer ()
-  "Render the footer on each page."
-  (blogit-template-render
-   :page_footer
-   (blogit-context
-    ("DISQUS" (blogit-render-disqus))
-    ("ANALYTICS" (blogit-render-google-analytics))
-    )))
-
-(defun blogit-render-disqus ()
-  "Render disqus comment plugin on each page. If
-`blogit-disqus-shortname' is nil, return empty string."
-  (if blogit-disqus-shortname
-      (blogit-template-render
-       :plugin_disqus
-       (blogit-context ("DISQUS" blogit-disqus-shortname)))
-    ""))
-
-(defun blogit-render-google-analytics ()
-  (if blogit-google-analytics-id
-      (blogit-template-render
-       :plugin_analytics
-       (blogit-context ("ANALYTICS" blogit-google-analytics-id)))
-    ""))
-
-(defun blogit-render-post ()
-  "Render full post."
-  (blogit-template-render
-   :blog_post
-   (blogit-context
-    ("HEADER" (blogit-render-header))
-    ("NAVIGATOR" (blogit-render-navigator))
-    ("CONTENT" (org-export-as 'html nil nil t nil))
-    ("FOOTER" (blogit-render-footer))
-    )))
-
-;; TODO: rewrite this function
-(defun blogit-generate-url ()
-  ()
-  (concat
-   (directory-file-name blogit-output-dir) "/"
-   (directory-file-name (blogit-generate-dir-string (blogit-parse-option "DATE"))) "/"
-   (or (blogit-parse-option "URL")
-       (blogit-sanitize-string (file-name-base
-                                (buffer-file-name))))
-   ".html"))
-
-;;;###autoload
-(defun blogit-insert-template (&optional filename)
-  "Insert blogit newpost template."
-  (interactive)
-  (save-excursion
-    (widen)
-    (goto-char (point-min))
-    (insert
-     (blogit-template-render
-      :newpost
-      (blogit-context
-       ("TITLE" (file-name-base (or filename "")))
-       ("DATE"  (format-time-string blogit-date-format))
-       ("URL"   (blogit-sanitize-string filename))
-       ("LANGUAGE" (or blogit-default-language "en"))
-       )))
-    (newline-and-indent)))
-
-;;;###autoload
-(defun blogit-new-post (filename)
-  "Create a new post in FILENAME."
-  (interactive "sTitle for new post: ")
-  (find-file (concat
-              (file-name-as-directory blogit-source-dir) filename ".org"))
-  (blogit-insert-template filename))
-
-;;;###autoload
-(defun blogit-publish-current-file ()
-  (interactive)
-  (let ((out-dir (file-name-directory (blogit-generate-url)))
-        (url (blogit-generate-url)))
-    ;; Check if #+DATE: option exist, create it if not exist.
-    (or (blogit-parse-option "DATE")
-        (blogit-modify-option "DATE" (format-time-string blogit-date-format)))
-    ;; Update #+LAST_MODIFIED: option according to blogit-date-format.
-    (blogit-modify-option "LAST_MODIFIED" (format-time-string blogit-date-format))
-    ;; create dir for output files
-    (mkdir out-dir t)
-    ;; generate file
-    (blogit-string-to-file (blogit-render-post) url)
-    ;; update index file
-    (blogit-update-index)))
-(require 'ox-publish)
-;;(setq org-publish-timestamp-directory (convert-standard-filename blogit-output-dir))
-
-(defun blogit-update-index ()
-  (let* ((org-publish-timestamp-directory (convert-standard-filename (concat blogit-output-dir "/"))))
-    ;;  (org-publish-get-base-files `("s"
-    (org-publish-project `("123k12lllpsadkkkpnopkkkookkkkk"
-                           :base-directory ,blogit-source-dir
-                           :publishing-directory ,blogit-output-dir
-                           :publishing-function org-blogit-publish-to-html
-                           :recursive t
-;;			   :html-head-include-default-style nil
-;;			   :html-head ,(blogit-render-header)
-                           ))
+    ;; disable org-html default style
+    ;; WARNING: DO NOT edit folling since it may break blogit functions
+    (:html-head-include-default-style nil "html-style" nil)
+    (:html-head-include-scripts nil "html-scripts" nil)
     )
-  )
+
+  :translate-alist
+  '((link . org-blogit-html-link)
+    (template     . org-blogit-template)))
+
+(defun blogit--render-header-template (info)
+  (blogit--render-template :page_header (blogit--build-context info)))
+
+(defun blogit--render-footer-template (info)
+  (blogit--render-template :page_footer (blogit--build-context info)))
+
+(defun blogit--render-disqus-template (info)
+  (when (or (blogit--parse-option info :disqus) blogit-disqus-shortname)
+    (blogit--render-template
+     :plugin_disqus
+     (ht ("DISQUS" (or (blogit--parse-option info :disqus) blogit-disqus-shortname))))))
+
+(defun blogit--render-analytics-template (info)
+  (when (or (blogit--parse-option info :analytics) blogit-google-analytics-id)
+    (blogit--render-template
+     :plugin_analytics
+     (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) blogit-google-analytics-id))))))
+
+
+;; FIXME:
+(defun blogit--check-post-file (file)
+  "If file is valid blogit post, return t, else nil."
+  (if (and (file-directory-p file) (file-exists-p file))
+      nil
+    (with-temp-buffer
+      (insert-file-contents file)
+      ;; all blogit valid post must contains #+DATE option.
+      (if (blogit--parse-option nil :date) t nil))))
+
+(defun blogit--get-post-url (file)
+  "Get the post url from file."
+  (if (and (file-directory-p file) (file-exists-p file))
+      nil
+    (with-temp-buffer
+      (insert-file-contents file)
+      ;; all blogit valid post must contains #+DATE option.
+      (format "%s%s.html" (blogit--build-export-dir nil)
+              (blogit--get-post-filename nil file)))))
+
+(defun org-blogit-html-link (link desc info)
+  "Transcode a LINK object from Org to HTML.
+
+DESC is the description part of the link, or the empty string.
+INFO is a plist holding contextual information.  See
+`org-export-data'.
+
+In this function, we also add link file"
+  (let* ((org-html-link-org-files-as-html nil)
+         (type (org-element-property :type link))
+         (raw-path (expand-file-name (org-element-property :path link)))
+         (encode-path (expand-file-name (org-link-unescape raw-path)))
+         (html-link (org-html-link link desc info))
+         (file-dir (file-name-base (blogit--get-post-filename info)))
+	 (link-prefix "<a href=\"")
+         new-path file-to-cache)
+    ;; file
+    (when (string= type "file")
+      (cond
+       ((string= ".org"
+                 (downcase (file-name-extension encode-path ".")))
+        ;; check if the file is also a blogit post, if t, not add
+        ;; file to cache.
+        (if (blogit--check-post-file encode-path)
+            ;; if file is really blogit post, get it url
+            (setq new-path (blogit--calculate-post-relative-path encode-path))
+          (setq file-to-cache raw-path)))
+       (t (setq file-to-cache raw-path)))
+      ;; add file to cache, we will use this cache to copy file
+      (when file-to-cache
+        (add-to-list 'blogit-linked-file-cache file-to-cache))
+
+      (if (not new-path)
+          (setq new-path (concat file-dir "/"
+                                 (file-name-nondirectory encode-path))))
+
+      (when new-path
+        ;; remove `file://' prefix from html-link when raw-path is
+        ;; absolute path
+        (if (file-name-absolute-p raw-path)
+            (setq html-link (s-replace (concat link-prefix "file://") link-prefix html-link)))
+
+        ;; Since some of raw-path use absolute dir, some use relative
+        ;; dir (like image), we make all raw-path to use relative path
+        ;; here if it is at the same dir as post.
+        (setq raw-path (s-replace (file-name-directory (buffer-file-name)) "" raw-path))
+
+        ;; we also need to modify org-html-link to relative path
+        ;; for our post
+        (setq html-link (s-replace (concat "=\"" raw-path) (concat "=\"" new-path) html-link))))
+    ;; done and done, now return our new-link
+    html-link))
+
+(defun org-blogit-template (contents info)
+  "Return complete document string after HTML conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options."
+  (let* ((meta-info (org-html--build-meta-info info))
+         (preamble-info (org-html--build-pre/postamble 'preamble info))
+         ;;(postamble-info (org-html--build-pre/postamble 'postamble info))
+         ;; FIXME: discard postamble info, this method is not elegant
+         (postamble-info ""))
+    ;; we override some of function in org-html-template to make it
+    ;; more easy to build our template
+    (flet ((org-html--build-meta-info (info)
+                                      (concat
+                                       meta-info
+                                       (blogit--render-header-template info)))
+           (org-html--build-pre/postamble (type info)
+                                          (cond
+                                           ((eq type 'preamble) preamble-info)
+                                           ((eq type 'postamble)
+                                            (concat postamble-info
+                                                    (blogit--render-footer-template info))))))
+
+      (org-html-template contents info))))
+
+
+;;; Rewrite some org function to make blogit work more properly
+
+(defun blogit-export-output-file-name (extension &optional subtreep pub-dir)
+  "Return output file's name according to buffer specifications.
+
+EXTENSION is a string representing the output file extension,
+with the leading dot.
+
+With a non-nil optional argument SUBTREEP, try to determine
+output file's name by looking for \"EXPORT_FILE_NAME\" property
+of subtree at point.
+
+When optional argument PUB-DIR is set, use it as the publishing
+directory.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Return file name as a string.
+
+This function is rewrite from `org-export-output-file-name'."
+  (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
+         (pub-dir (blogit--build-export-dir nil))
+         (base-name
+          ;; File name may come from EXPORT_FILE_NAME subtree
+          ;; property, assuming point is at beginning of said
+          ;; sub-tree.
+          (file-name-sans-extension
+           (or (and subtreep
+                    (org-entry-get
+                     (save-excursion
+                       (ignore-errors (org-back-to-heading) (point)))
+                     "EXPORT_FILE_NAME" t))
+               ;; File name may be extracted from buffer's associated
+               ;; file, if any.
+               (and visited-file (file-name-nondirectory visited-file))
+               ;; Can't determine file name on our own: Ask user.
+               (let ((read-file-name-function
+                      (and org-completion-use-ido 'ido-read-file-name)))
+                 (read-file-name
+                  "Output file: " pub-dir nil nil nil
+                  (lambda (name)
+                    (string= (file-name-extension name t) extension)))))))
+         (output-file
+          ;; Build file name.  Enforce EXTENSION over whatever user
+          ;; may have come up with.  PUB-DIR, if defined, always has
+          ;; precedence over any provided path.
+          (concat (file-name-as-directory (blogit--build-export-dir nil))
+                  (file-name-nondirectory (blogit--get-post-filename nil base-name))
+                  extension)))
+
+    ;; If output dir does not exist, create it
+    (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
+
+    ;; If writing to OUTPUT-FILE would overwrite original file, append
+    ;; EXTENSION another time to final name.
+    (if (and visited-file (org-file-equal-p visited-file output-file))
+        (concat output-file extension)
+      output-file)))
+
+(defun blogit-publish-org-to (backend filename extension plist &optional pub-dir)
+  "Publish an Org file to a specified back-end.
+
+BACKEND is a symbol representing the back-end used for
+transcoding.  FILENAME is the filename of the Org file to be
+published.  EXTENSION is the extension used for the output
+string, with the leading dot.  PLIST is the property list for the
+given project.
+
+Optional argument PUB-DIR, when non-nil is the publishing
+directory.
+
+Return output file name.
+
+This function is rewrite from `org-publish-org-to'."
+  (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
+  ;; Check if a buffer visiting FILENAME is already open.
+  (let* ((org-inhibit-startup t)
+         (visitingp (find-buffer-visiting filename))
+         (work-buffer (or visitingp (find-file-noselect filename))))
+    (prog1 (with-current-buffer work-buffer
+             (let ((output-file
+                    (blogit-export-output-file-name extension nil pub-dir))
+                   (body-p (plist-get plist :body-only)))
+               (message output-file)
+               (org-export-to-file backend output-file
+                 nil nil nil body-p
+                 ;; Add `org-publish-collect-numbering' and
+                 ;; `org-publish-collect-index' to final output
+                 ;; filters.  The latter isn't dependent on
+                 ;; `:makeindex', since we want to keep it up-to-date
+                 ;; in cache anyway.
+                 (org-combine-plists
+                  plist
+                  `(:filter-final-output
+                    ,(cons 'org-publish-collect-numbering
+                           (cons 'org-publish-collect-index
+                                 (plist-get plist :filter-final-output))))))))
+      ;; Remove opened buffer in the process.
+      (unless visitingp (kill-buffer work-buffer)))))
+
+
+;;; End-user functions
+
+;;;###autoload
+(defun blogit-export-as-html
+  (&optional async subtreep visible-only body-only ext-plist)
+  "Export current buffer to an HTML buffer.
+
+Export is done in a buffer named \"*Org HTML5 Slide Export*\", which
+will be displayed when `org-export-show-temporary-export-buffer'
+is non-nil."
+  (interactive)
+  (let ((outbuf (org-export-to-buffer
+                    'blogit "*Blogit Export*"
+                  subtreep visible-only body-only ext-plist))
+        (org-export-coding-system org-html-coding-system))
+    ;; Set major mode.
+    (with-current-buffer outbuf (set-auto-mode t))
+    (when org-export-show-temporary-export-buffer
+      (switch-to-buffer-other-window outbuf))))
+
+;;;###autoload
+(defun org-blogit-publish-to-html (plist filename pub-dir)
+  "Publish an org file to HTML.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (blogit-publish-org-to 'blogit filename
+                         (concat "." (or (plist-get plist :html-extension)
+                                         org-html-extension "html"))
+                         plist pub-dir))
+
+;;;###autoload
+(defun blogit-publish-blog ()
+  (interactive)
+  (let* ((org-publish-timestamp-directory
+          (convert-standard-filename (concat blogit-cache-dir "/")))
+         (org-publish-cache nil))
+    (org-publish-project blogit-project-list)))
+
+;;;###autoload
+(defun blogit-republish-blog ()
+  (interactive)
+  (let* ((org-publish-timestamp-directory
+          (convert-standard-filename (concat blogit-cache-dir "/")))
+         (org-publish-cache nil))
+    (if (file-exists-p org-publish-timestamp-directory)
+        (delete-directory org-publish-timestamp-directory t nil))
+    (org-publish-project blogit-project-list)))
+
+(defvar blogit-linked-file-cache nil)
+
+(defun blogit--check-post-file (file)
+  "If file is valid blogit post, return t, else nil."
+  (if (file-directory-p file) nil
+    (with-temp-buffer
+      (insert-file-contents file)
+      ;; all blogit valid post must contains #+DATE option.
+      (if (blogit--parse-option nil :date) t nil))))
 
 
 (provide 'blogit)
-
-;; (add-to-list 'load-path (file-name-directory (buffer-file-name)))
+;;; blogit.el ends here.
