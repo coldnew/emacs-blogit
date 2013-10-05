@@ -3,7 +3,7 @@
 ;; Copyright (c) 2013 Yen-Chin, Lee.
 ;;
 ;; Author: coldnew <coldnew.tw@gmail.com>
-;; Keywords: html presentation
+;; Keywords: html blog org-mode
 ;; X-URL: http://github.com/coldnew/emacs-blogit
 ;; Version: 0.1
 
