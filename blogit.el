@@ -86,7 +86,7 @@
         ))
 
 (defcustom blogit-default-type 'blog
-  "Configure default blogit page type."
+  "Configure default blogit page type. Currently we only support two type."
   :group 'blogit
   :type '(choice
           (const :tag "blog" blog)
@@ -97,21 +97,13 @@
 See `format-time-string' for allowed formatters."
   :group 'blogit :type 'string)
 
-(defvar blogit-blog-dir-format "blog/%y/%m/%d"
-  "Output dir formate for blog, use blogit-output-dir as root when
-this value is empty string.
-
-The dir will be format by `format-time-string', but the time is according to
-your #+DATE info.
-
-Currently blogit only support following format:
-
-    %y : year   eq: 2013
-    %m : month  eq: 03
-    %d : month  eq: 23")
-
-(defvar blogit-static-dir-format ""
-  "Output dir formate for static, use blogit-output-dir as root when
+(defvar blogit-output-format-list
+  '(:blog-type   blog
+    :blog-dir   "blog/%y/%m/%d"
+    :static-type static
+    :static-dir  ""
+    ))
+  "Output dir formate for blogit, use blogit-output-dir as root when
 this value is empty string.
 
 The dir will be format by `format-time-string', but the time is according to
@@ -148,11 +140,20 @@ Currently blogit only support following format:
 
 (defun blogit--get-post-type (info)
   "Get current post type, return `blogit-default-type' if not found."
-  (let ((type (blogit--parse-option info :type)))
+  (let* ((typestr (blogit--parse-option info :type))
+	(key (intern (format ":%s-type" typestr)))
+	(type (plist-get blogit-output-format-list key)))
     (cond
      ((eq type 'blog) 'blog)
      ((eq type 'static) 'static)
      (t blogit-default-type))))
+
+(defun blogit--get-post-dir-format (info)
+  "Get post output format according to post type."
+  (let* ((type (blogit--get-post-type info))
+	(key (intern (format ":%s-dir" (symbol-name type)))))
+
+    (plist-get blogit-output-format-list key)))
 
 (defun blogit--get-post-filename (info &optional filename)
   "Get current post export filename."
@@ -275,10 +276,8 @@ This function is used to create directory for new blog post.
   "Build export dir path according to #+DATE: option."
   (let* ((time-str  (blogit--parse-option info :date))
          (time-list (blogit--parse-date-string time-str))
-         (type (blogit--get-post-type info))
-         (dir-1 (split-string (cond
-                               ((eq type 'blog) blogit-blog-dir-format)
-                               ((eq type 'static) blogit-static-dir-format)) "/"))
+	 (dir-format (blogit--get-post-dir-format info))
+         (dir-1 (split-string dir-format))
          (dir ""))
     (dolist (d dir-1)
       (cond
