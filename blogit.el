@@ -61,13 +61,13 @@
   "The output directory for blogit."
   :group 'blogit :type 'string)
 
-(defcustom blogit-default-language "en"
-  "Default language for blogit post."
+(defcustom blogit-site-url nil
+  "Main url for your site."
   :group 'blogit :type 'string)
 
-(defcustom blogit-cache-dir
-  (concat blogit-output-dir "/.cache")
-  "The cache directory for blogit.")
+(defcustom blogit-rss-number 20
+  "How many post do you want to have in rss."
+  :group 'blogit :type 'integer)
 
 (defcustom blogit-google-analytics-id nil
   "Personal google analytics id."
@@ -75,6 +75,10 @@
 
 (defcustom blogit-disqus-shortname nil
   "Personal disqus shortname."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-default-language "en"
+  "Default language for blogit post."
   :group 'blogit :type 'string)
 
 (defcustom blogit-template-dir "templates/"
@@ -102,6 +106,7 @@ use `blogit-republish-blog'."
         :publishing-directory ,blogit-output-dir
         :base-extension "org"
         :publishing-function org-blogit-publish-to-html
+        :html-link-home ,blogit-site-url
         :recursive t
         ))
 
@@ -115,8 +120,8 @@ Type:
   :group 'blogit
   :type '(choice
           (const :tag "blog" blog)
-	  (const :tag "static" static)
-	  (const :tag "draft"  draft)))
+          (const :tag "static" static)
+          (const :tag "draft"  draft)))
 
 (defcustom blogit-date-format "%Y/%02m/%02d %02H:%02M:%02S"
   "Format for printing a date in the sitemap.
@@ -162,8 +167,14 @@ Currently blogit only support following format:
 
 ;;; Internal variables
 
-(defvar blogit-linked-file-cache nil
-  "Cache file to store which file will be copied to output dir.")
+(defvar blogit-rss-cache nil
+  "Cache to store which file will be add to rss.")
+
+(defvar blogit-linked-cache nil
+  "Cache to store which file will be copied to output dir.")
+
+(defvar blogit-cache-dir (concat blogit-output-dir "/.cache")
+  "The cache directory for blogit.")
 
 (defvar blogit-ignore-dir
   `(,blogit-template-dir ,blogit-style-dir)
@@ -327,12 +338,12 @@ This function is used to create directory for new blog post.
 
     ;; if `#+URL:' has backslah, add it as dir
     (let* ((pdir-str (blogit--get-post-filename info))
-    	   (pdir-1 (split-string pdir-str "/"))
-    	   (pdir (butlast pdir-1)))
+           (pdir-1 (split-string pdir-str "/"))
+           (pdir (butlast pdir-1)))
 
       (when pdir
-    	(dolist (d pdir)
-    	  (setq dir (concat dir d))))
+        (dolist (d pdir)
+          (setq dir (concat dir d))))
       (setq dir (concat dir "/")))
 
     ;; remove dulpicate /
@@ -575,7 +586,7 @@ In this function, we also add link file"
        (t (setq file-to-cache raw-path)))
       ;; add file to cache, we will use this cache to copy file
       (when file-to-cache
-        (add-to-list 'blogit-linked-file-cache file-to-cache))
+        (add-to-list 'blogit-linked-cache file-to-cache))
 
       (if (not new-path)
           (setq new-path (concat file-dir "/"
@@ -624,7 +635,7 @@ holding export options."
 
 (defun blogit-export-linked-file (output-file)
   "Copy all linked file to dst."
-  (let ((cache blogit-linked-file-cache)
+  (let ((cache blogit-linked-cache)
         (pub-dir (concat (file-name-directory output-file) (file-name-base output-file))))
 
     ;; copy file to blogit-output-dir if file in cache.
@@ -632,7 +643,11 @@ holding export options."
       (let ((dst (concat pub-dir "/" (file-name-nondirectory src))))
         (blogit--do-copy src dst)))
     ;; do not forget to clear cache
-    (setq blogit-linked-file-cache nil)))
+    (setq blogit-linked-cache nil)))
+
+;; TODO: finish this function
+(defun blogit-publish-rss ()
+  "Publish rss file for blogit.")
 
 
 ;;; Rewrite some org function to make blogit work more properly

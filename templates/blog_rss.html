@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>{{title}}</title>
-  <link>{{link}}</link>
-  <description>{{description}}</description>
-  <pubDate>{{date}}</pubDate>
-  <lastBuildDate>{{date}}</lastBuildDate>
-  <docs>http://www.rssboard.org/rss-specification</docs>
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+     xmlns:georss="http://www.georss.org/georss"
+     xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+     xmlns:media="http://search.yahoo.com/mrss/"><channel>
+  <title>{{MAIN_TITLE}}</title>
+  <link>{{SITE_URL}}</link>
+  <description><![CDATA[]]></description>
+  <pubDate>{{DATE}}</pubDate>
+  <lastBuildDate>{{DATE}}</lastBuildDate>
   <generator>Blogit static site generator (https://github.com/coldnew/blogit)</generator>
-  {{#items}}
+  <webMaster>{{EMAIL}} ({{AUTHOR}})</webMaster>
+
+  {{IMAGE}}
+
+  {{#ITEMS}}
   <item>
-    <title>{{item-title}}</title>
-    <link>{{item-link}}</link>
-    <description>{{item-description}}</description>
-    <pubDate>{{item-update-date}}</pubDate>
-    <guid>{{item-link}}</guid>
+    <title>{{ITEM-TITLE}}</title>
+    <link>{{ITEM-LINK}}</link>
+    <description>{{ITEM-DESCRIPTION}}</description>
+    <pubDate>{{ITEM-DATE}}</pubDate>
+    <guid>{{ITEM-LINK}}</guid>
   </item>
-  {{/items}}
+  {{/ITEMS}}
 </feed>
