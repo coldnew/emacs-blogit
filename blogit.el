@@ -378,6 +378,14 @@ If option does not exist, create it automatically."
               (newline-and-indent))
           )))))
 
+(defun blogit--check-post-file (file)
+  "If file is valid blogit post, return t, else nil."
+  (if (file-directory-p file) nil
+    (with-temp-buffer
+      (insert-file-contents file)
+      ;; all blogit valid post must contains #+DATE option.
+      (if (blogit--parse-option nil :date) t nil))))
+
 (defun blogit--do-copy (src dst &optional copyf args)
   "Copy SRC into DST. If `dired-do-sync' is found it would be
 preferred. Otherwise, `copy-directory' or `copy-files' would be
@@ -712,17 +720,6 @@ Return output file name."
     (if (file-exists-p org-publish-timestamp-directory)
         (delete-directory org-publish-timestamp-directory t nil))
     (org-publish-project blogit-project-list)))
-
-(defvar blogit-linked-file-cache nil)
-
-(defun blogit--check-post-file (file)
-  "If file is valid blogit post, return t, else nil."
-  (if (file-directory-p file) nil
-    (with-temp-buffer
-      (insert-file-contents file)
-      ;; all blogit valid post must contains #+DATE option.
-      (if (blogit--parse-option nil :date) t nil))))
-
 
 (provide 'blogit)
 ;;; blogit.el ends here.
