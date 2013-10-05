@@ -95,6 +95,7 @@ when use `blogit-publish-blog', else only do this when
 use `blogit-republish-blog'."
   :group 'blogit :type 'boolean)
 
+;; FIXME: move this to defvar
 (setq blogit-project-list
       `("blogit"
         :base-directory ,blogit-source-dir
