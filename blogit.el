@@ -220,7 +220,6 @@ mode, format the string with MODE's format settings."
   "Read the content of FILE in template dir and return it as string."
   (blogit--file-to-string file))
 
-;; FIXME: modify blogit-template-dir
 (defun blogit--template-fullfile (key)
   "Get match template filename with fullpath according to key."
   (convert-standard-filename
@@ -307,6 +306,9 @@ This function is used to create directory for new blog post.
             (setq dd (if date (format "%02d" date) ""))
             (blogit--parse-date-string1 (concat yyyy "/" mm "/" dd) 1 2 3)))))))
 
+(butlast '( "b"))
+
+
 (defun blogit--build-export-dir (info)
   "Build export dir path according to #+DATE: option."
   (let* ((date-str  (blogit--parse-option info :date))
@@ -314,6 +316,7 @@ This function is used to create directory for new blog post.
          (dir-format (blogit--get-post-dir-format info))
          (dir-1 (split-string dir-format "/"))
          (dir ""))
+    ;; Build dir according to export format
     (dolist (d dir-1)
       (cond
        ((string= d "%y") (setq dir (concat dir (plist-get date-list :year))))
@@ -321,7 +324,21 @@ This function is used to create directory for new blog post.
        ((string= d "%d") (setq dir (concat dir (plist-get date-list :day))))
        (t (setq dir (concat dir d))))
       (setq dir (concat dir "/")))
-    (format "%s/%s" (directory-file-name blogit-output-dir) (replace-regexp-in-string "//*" "/" dir))))
+
+    ;; if `#+URL:' has backslah, add it as dir
+    (let* ((pdir-str (blogit--get-post-filename info))
+    	   (pdir-1 (split-string pdir-str "/"))
+    	   (pdir (butlast pdir-1)))
+
+      (when pdir
+    	(dolist (d pdir)
+    	  (setq dir (concat dir d))))
+      (setq dir (concat dir "/")))
+
+    ;; remove dulpicate /
+    (replace-regexp-in-string
+     "//*" "/"
+     (format "%s/%s" (directory-file-name blogit-output-dir) dir))))
 
 ;; FIXME: what about ./ ?
 (defun blogit--path-to-root (path)
