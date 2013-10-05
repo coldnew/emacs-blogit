@@ -283,6 +283,7 @@ This function is used to create directory for new blog post.
       (setq dir (concat dir "/")))
     (format "%s/%s" (directory-file-name blogit-output-dir) (replace-regexp-in-string "//*" "/" dir))))
 
+;; FIXME: what about ./ ?
 (defun blogit--path-to-root (path)
   "Return path to site root.
 ex:
@@ -419,10 +420,12 @@ many useful context is predefined here, but you can overwrite it.
     ;; disable org-html default style
     (:html-head-include-default-style nil "html-style" nil)
     (:html-head-include-scripts nil "html-scripts" nil)
+    (:html-link-org-as-html nil nil nil)
     )
 
   :translate-alist
-  '((template     . org-blogit-template)))
+  '((link . org-blogit-html-link)
+    (template     . org-blogit-template)))
 
 (defun blogit--render-header-template (info)
   (blogit--render-template :page_header (blogit--build-context info)))
@@ -441,6 +444,75 @@ many useful context is predefined here, but you can overwrite it.
     (blogit--render-template
      :plugin_analytics
      (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) blogit-google-analytics-id))))))
+
+
+(setq blogit-linked-file-cache nil)
+
+;; FIXME:
+(defun blogit--check-post-file (file)
+  "If file is valid blogit post, return t, else nil."
+  (if (and (file-directory-p file) (file-exists-p file))
+      nil
+    (with-temp-buffer
+      (insert-file-contents file)
+      ;; all blogit valid post must contains #+DATE option.
+      (if (blogit--parse-option nil :date) t nil))))
+
+(defun blogit--get-post-url (file)
+  ""
+  (if (and (file-directory-p file) (file-exists-p file))
+      nil
+    (with-temp-buffer
+      (insert-file-contents file)
+      ;; all blogit valid post must contains #+DATE option.
+      (format "%s%s.html" (blogit--build-export-dir nil)
+              (blogit--get-post-filename nil file)))))
+
+(defun org-blogit-html-link (link desc info)
+  "Transcode a LINK object from Org to HTML.
+
+DESC is the description part of the link, or the empty string.
+INFO is a plist holding contextual information.  See
+`org-export-data'.
+
+In this function, we also add link file"
+  (let* ((type (org-element-property :type link))
+         (raw-path (expand-file-name (org-element-property :path link)))
+         (encode-path (expand-file-name (org-link-unescape raw-path)))
+         (html-link (org-html-link link desc info))
+         (root-dir (blogit--build-export-dir info))
+         (file-dir (file-name-base (blogit--get-post-filename info)))
+         (new-dir (concat root-dir file-dir))
+         new-path file-to-cache)
+    ;; file
+    (when (string= type "file")
+      (cond
+       ((string= ".org"
+                 (downcase (file-name-extension encode-path ".")))
+        ;; check if the file is also a blogit post, if t, not add
+        ;; file to cache.
+        (if (blogit--check-post-file encode-path)
+            ;; if file is really blogit post, get it url
+            (setq new-path (blogit--path-to-root (blogit--get-post-url encode-path)))
+          (setq file-to-cache encode-path)))
+       (t (setq file-to-cache encode-path)))
+      ;; add file to cache, we will use this cache to copy file
+      (when file-to-cache
+        (add-to-list 'blogit-linked-file-cache file-to-cache))
+
+      (if (not new-path)
+          (setq new-path (concat (blogit--path-to-root new-dir) "/"
+				 (file-name-nondirectory encode-path))))
+
+      (when new-path
+        (setq html-link (s-replace "file://" "" html-link))
+
+        ;; we also need to modify org-html-link to relative path
+        ;; for our post
+        (setq html-link (s-replace raw-path new-path html-link)))
+      )
+    html-link
+    ))
 
 (defun org-blogit-template (contents info)
   "Return complete document string after HTML conversion.
@@ -623,23 +695,35 @@ Return output file name."
 
 (defvar blogit-linked-file-cache nil)
 
+(defun blogit--check-post-file (file)
+  "If file is valid blogit post, return t, else nil."
+  (if (file-directory-p file) nil
+    (with-temp-buffer
+      (insert-file-contents file)
+      ;; all blogit valid post must contains #+DATE option.
+      (if (blogit--parse-option nil :date) t nil))))
+
 (defun blogit--add-linked-file-to-cache ()
   "Copy files (defined by \"file:\" link prefix) to page related directory."
-  (save-match-data
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward "\\(\\[file:\\)\\([^]]+\\)\\(\\]\\)" nil t)
-        (let ((prefix (match-string-no-properties 1))
-              (file  (match-string-no-properties 2))
-              (suffix (match-string-no-properties 3)))
-          (when (file-exists-p file)
-	    (message (format "%s . %s . %s" prefix file suffix))
-	    (add-to-list 'blogit-linked-file-cache file)
-            ))))))
+  (let ((root-dir (blogit--build-export-dir nil))
+        (file-dir (file-name-base (blogit--get-post-filename nil))))
+    (save-match-data
+      (save-excursion
+        (goto-char (point-min))
+        (while (re-search-forward "\\(\\[file:\\)\\([^]]+\\)\\(\\]\\)" nil t)
+          (let ((prefix (match-string-no-properties 1))
+                (file  (match-string-no-properties 2))
+                (suffix (match-string-no-properties 3)))
+            (when (file-exists-p file)
+              ;; check if the file is also a blogit post, if t, not add
+              ;; file to cache.
+              (when (not (blogit--check-post-file file))
+                (add-to-list 'blogit-linked-file-cache (cons file (concat root-dir file-dir))))
+              )))))))
 
-[[file:templates][s]]
-[[file:~/SparkleShare/coldnew.github.io/blog-src/files/2013/USE-isolater.jpg]]
-(blogit--add-linked-file-to-cache)
+;; [[file:templates][s]]
+;; [[file:~/SparkleShare/coldnew.github.io/blog-src/files/2013/USE-isolater.jpg]]
+;; (blogit--add-linked-file-to-cache)
 
 (defun o-blog-publish-linked-files()
   "Copy files (defined by \"file:\" link prefix) to page related directory."
