@@ -74,8 +74,22 @@
   :group 'blogit :type 'string)
 
 (defcustom blogit-template-dir "templates/"
-  "Template directory."
+  "Template directory, this dir must located under
+`blogit-src-dir' and will not be copy to
+blogit-output-dir after publish."
   :group 'blogit :type 'string)
+
+(defcustom blogit-style-dir "style/"
+  "Stylw directory, this dir will must located under
+`blogit-src-dir' and will be cpoied to
+blogit-output-dir after publish."
+  :group 'blogit :type 'string)
+
+(defcustom blogit-always-copy-theme-dir t
+  "If t, always copy blogit-style-dir to blogit-output-dir
+when use `blogit-publish-blog', else only do this when
+use `blogit-republish-blog'."
+  :group 'blogit :type 'boolean)
 
 (setq blogit-project-list
       `("blogit"
@@ -725,18 +739,31 @@ Return output file name."
   (interactive)
   (let* ((org-publish-timestamp-directory
           (convert-standard-filename (concat blogit-cache-dir "/")))
-         (org-publish-cache nil))
-    (org-publish-project blogit-project-list)))
+         (org-publish-cache nil)
+	 (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
+	 (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
+	 (output-style-dir (concat output-dir blogit-style-dir))
+	 (copy-theme-dir blogit-always-copy-theme-dir))
+    (org-publish-project blogit-project-list)
+    ;; Copy theme-dir to blogit-output-dir when publish
+    ;; if theme dir does not exit, re-copy again
+    (unless (file-exists-p output-style-dir) (setq copy-theme-dir t))
+    (when copy-theme-dir
+      (blogit--do-copy source-style-dir output-dir))))
 
 ;;;###autoload
 (defun blogit-republish-blog ()
   (interactive)
   (let* ((org-publish-timestamp-directory
           (convert-standard-filename (concat blogit-cache-dir "/")))
+	 (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
+	 (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
          (org-publish-cache nil))
     (if (file-exists-p org-publish-timestamp-directory)
         (delete-directory org-publish-timestamp-directory t nil))
-    (org-publish-project blogit-project-list)))
+    (org-publish-project blogit-project-list)
+    ;; copy theme to blogit-output-dir
+    (blogit--do-copy source-style-dir output-dir)))
 
 (provide 'blogit)
 ;;; blogit.el ends here.
