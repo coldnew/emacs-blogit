@@ -61,6 +61,10 @@
   "The output directory for blogit."
   :group 'blogit :type 'string)
 
+(defcustom blogit-default-language "en"
+  "Default language for blogit post."
+  :group 'blogit :type 'string)
+
 (defcustom blogit-cache-dir
   (concat blogit-output-dir "/.cache")
   "The cache directory for blogit.")
@@ -135,10 +139,10 @@ Currently blogit only support following format:
     (:page_footer      . "page_footer.html")
     (:plugin_analytics . "plugin_analytics.html")
     (:plugin_disqus    . "plugin_disqus.html")
+    (:newpost          . "newpost.org")
 
     ;; FIXME: still not use
     (:page_navigator   . "page_navigator.html")
-    (:newpost          . "newpost.org")
     (:blog_rss         . "blog_rss.html")
     (:blog_post        . "blog_post.html")
     (:blog_index       . "blog_index.html")
@@ -441,17 +445,17 @@ many useful context is predefined here, but you can overwrite it.
     ("BLOGIT_URL" (format "<a href=\"%s\"> emacs-blogit </a>" blogit-url))
     ("MAIN_TITLE" (or blogit-site-main-title ""))
     ("SUB_TITLE"  (or blogit-site-sub-title ""))
-    ("TITLE"  (or (blogit--parse-option info :title) "Untitled"))
-    ("AUTHOR" (or (blogit--parse-option info :author) user-full-name "Unknown"))
-    ("EMAIL" (or (blogit--parse-option info :email) user-mail-address ""))
-    ("DATE" (or (blogit--parse-option info :date) ""))
-    ("URL" (or (blogit--parse-option info :url) ""))
-    ("LANGUAGE" (or (blogit--parse-option info :language) "en"))
-    ("DESCRIPTION" (or (blogit--parse-option info :description) ""))
-    ("KEYWORDS" (or (blogit--parse-option info :keywords) ""))
-    ("DISQUS" (or (blogit--render-disqus-template info) ""))
-    ("ANALYTICS" (or (blogit--render-analytics-template info) ""))
-    ("ROOT" (blogit--path-to-root (blogit--build-export-dir info)))
+    ("TITLE"  ,(or (blogit--parse-option info :title) "Untitled"))
+    ("AUTHOR" ,(or (blogit--parse-option info :author) user-full-name "Unknown"))
+    ("EMAIL" ,(or (blogit--parse-option info :email) user-mail-address ""))
+    ("DATE" ,(or (blogit--parse-option info :date) ""))
+    ("URL" ,(or (blogit--parse-option info :url) ""))
+    ("LANGUAGE" ,(or (blogit--parse-option info :language) "en"))
+    ("DESCRIPTION" ,(or (blogit--parse-option info :description) ""))
+    ("KEYWORDS" ,(or (blogit--parse-option info :keywords) ""))
+    ("DISQUS" ,(or (blogit--render-disqus-template info) ""))
+    ("ANALYTICS" ,(or (blogit--render-analytics-template info) ""))
+    ("ROOT" ,(blogit--path-to-root (blogit--build-export-dir info)))
     ,@pairs))
 
 
@@ -709,6 +713,33 @@ This function is rewrite from `org-publish-org-to'."
 
 
 ;;; End-user functions
+
+;;;###autoload
+(defun blogit-insert-template (&optional filename)
+  "Insert blogit newpost template."
+  (interactive)
+  (save-excursion
+    (widen)
+    (goto-char (point-min))
+    (insert
+     (blogit--render-template
+      :newpost
+      (blogit--build-context
+       nil
+       ("TITLE" (file-name-base (or filename "")))
+       ("DATE" (format-time-string blogit-date-format))
+       ("URL" (blogit--sanitize-string filename))
+       ("LANGUAGE" (or blogit-default-language "en"))))))
+  (end-of-buffer)
+  (newline-and-indent))
+
+;;;###autoload
+(defun blogit-new-post (filename)
+  "Create a new post in `blogit-source-dir'."
+  (interactive "sTitle for new post: ")
+  (find-file (concat
+              (file-name-as-directory blogit-source-dir) filename ".org"))
+  (blogit-insert-template filename))
 
 ;;;###autoload
 (defun blogit-export-as-html
