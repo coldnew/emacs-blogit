@@ -277,7 +277,7 @@ This function is used to create directory for new blog post.
   (let* ((time-str  (blogit--parse-option info :date))
          (time-list (blogit--parse-date-string time-str))
 	 (dir-format (blogit--get-post-dir-format info))
-         (dir-1 (split-string dir-format))
+         (dir-1 (split-string dir-format "/"))
          (dir ""))
     (dolist (d dir-1)
       (cond
@@ -392,6 +392,7 @@ used.
 
 A copy function COPYF and its arguments ARGS could be specified."
   (let* ((dirp (file-directory-p src))
+	 (dst-dir (file-name-directory dst))
          (copyf (cond
                  (copyf copyf)
                  ((functionp 'dired-do-sync) 'dired-do-sync)
@@ -399,6 +400,9 @@ A copy function COPYF and its arguments ARGS could be specified."
                  (t 'copy-file)))
          (args (or args
                    (when (eq 'copy-file copyf) '(t t t)))))
+
+    (unless (or (not dst-dir) (file-exists-p dst-dir)) (make-directory dst-dir t))
+
     (when (file-exists-p src)
       (apply copyf src dst args))))
 
@@ -570,10 +574,7 @@ holding export options."
   (let ((cache blogit-linked-file-cache)
 	(pub-dir (concat (file-name-directory output-file) (file-name-base output-file))))
 
-    ;; If output dir does not exist, create it
-    (unless (or (not pub-dir) (file-exists-p pub-dir)) (unless blogit-linked-file-cache (make-directory pub-dir t)))
-
-    ;; create dir if not exist
+    ;; copy file to blogit-output-dir if file in cache.
     (dolist (src cache)
       (let ((dst (concat pub-dir "/" (file-name-nondirectory src))))
 	(blogit--do-copy src dst)))
