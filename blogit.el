@@ -316,11 +316,11 @@ ex:
 (defun blogit--calculate-post-relative-path (path)
   "Calculate post path from root."
   (let* ((epath (expand-file-name (blogit--get-post-url path)))
-	 (filename (file-name-nondirectory epath))
-	 (path-dir (file-name-directory epath))
-	 (rpath (s-replace (expand-file-name blogit-output-dir) "" path-dir)))
+         (filename (file-name-nondirectory epath))
+         (path-dir (file-name-directory epath))
+         (rpath (s-replace (expand-file-name blogit-output-dir) "" path-dir)))
     (replace-regexp-in-string "//*" "/"
-			      (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
+                              (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
 
 (defun blogit--render-template (type context)
   "Read the file contents, then render it with a hashtable context."
@@ -503,7 +503,7 @@ In this function, we also add link file"
          (encode-path (expand-file-name (org-link-unescape raw-path)))
          (html-link (org-html-link link desc info))
          (file-dir (file-name-base (blogit--get-post-filename info)))
-	 (link-prefix "<a href=\"")
+         (link-prefix "<a href=\"")
          new-path file-to-cache)
     ;; file
     (when (string= type "file")
@@ -565,6 +565,20 @@ holding export options."
                                                     (blogit--render-footer-template info))))))
 
       (org-html-template contents info))))
+
+(defun blogit-export-linked-file (output-file)
+  (let ((cache blogit-linked-file-cache)
+	(pub-dir (concat (file-name-directory output-file) (file-name-base output-file))))
+
+    ;; If output dir does not exist, create it
+    (unless (or (not pub-dir) (file-exists-p pub-dir)) (unless blogit-linked-file-cache (make-directory pub-dir t)))
+
+    ;; create dir if not exist
+    (dolist (src cache)
+      (let ((dst (concat pub-dir "/" (file-name-nondirectory src))))
+	(blogit--do-copy src dst)))
+    ;; do not forget to clear cache
+    (setq blogit-linked-file-cache nil)))
 
 
 ;;; Rewrite some org function to make blogit work more properly
@@ -664,7 +678,9 @@ This function is rewrite from `org-publish-org-to'."
                   `(:filter-final-output
                     ,(cons 'org-publish-collect-numbering
                            (cons 'org-publish-collect-index
-                                 (plist-get plist :filter-final-output))))))))
+                                 (plist-get plist :filter-final-output))))))
+	       ;; copy all needed file for output-file
+	       (blogit-export-linked-file output-file)))
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 
@@ -701,7 +717,8 @@ Return output file name."
   (blogit-publish-org-to 'blogit filename
                          (concat "." (or (plist-get plist :html-extension)
                                          org-html-extension "html"))
-                         plist pub-dir))
+                         plist pub-dir)
+  )
 
 ;;;###autoload
 (defun blogit-publish-blog ()
