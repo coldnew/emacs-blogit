@@ -95,6 +95,7 @@ use `blogit-republish-blog'."
       `("blogit"
         :base-directory ,blogit-source-dir
         :publishing-directory ,blogit-output-dir
+        :base-extension "org"
         :publishing-function org-blogit-publish-to-html
         :recursive t
         ))
@@ -113,10 +114,10 @@ See `format-time-string' for allowed formatters."
 
 (defvar blogit-output-format-list
   '(:blog-type   blog
-    :blog-dir   "blog/%y/%m/%d"
-    :static-type static
-    :static-dir  ""
-    )
+                 :blog-dir   "blog/%y/%m/%d"
+                 :static-type static
+                 :static-dir  ""
+                 )
   "Output dir formate for blogit, use blogit-output-dir as root when
 this value is empty string.
 
@@ -149,14 +150,18 @@ Currently blogit only support following format:
 (defvar blogit-linked-file-cache nil
   "Cache file to store which file will be copied to output dir.")
 
+(defvar blogit-ignore-dir
+  `(,blogit-template-dir ,blogit-style-dir)
+  "When publish, ignore these dir under `blogit-source-dir'.")
+
 
 ;;; Internal functions
 
 (defun blogit--get-post-type (info)
   "Get current post type, return `blogit-default-type' if not found."
   (let* ((typestr (blogit--parse-option info :type))
-	(key (intern (format ":%s-type" typestr)))
-	(type (plist-get blogit-output-format-list key)))
+         (key (intern (format ":%s-type" typestr)))
+         (type (plist-get blogit-output-format-list key)))
     (cond
      ((eq type 'blog) 'blog)
      ((eq type 'static) 'static)
@@ -165,7 +170,7 @@ Currently blogit only support following format:
 (defun blogit--get-post-dir-format (info)
   "Get post output format according to post type."
   (let* ((type (blogit--get-post-type info))
-	(key (intern (format ":%s-dir" (symbol-name type)))))
+         (key (intern (format ":%s-dir" (symbol-name type)))))
 
     (plist-get blogit-output-format-list key)))
 
@@ -290,7 +295,7 @@ This function is used to create directory for new blog post.
   "Build export dir path according to #+DATE: option."
   (let* ((time-str  (blogit--parse-option info :date))
          (time-list (blogit--parse-date-string time-str))
-	 (dir-format (blogit--get-post-dir-format info))
+         (dir-format (blogit--get-post-dir-format info))
          (dir-1 (split-string dir-format "/"))
          (dir ""))
     (dolist (d dir-1)
@@ -406,7 +411,7 @@ used.
 
 A copy function COPYF and its arguments ARGS could be specified."
   (let* ((dirp (file-directory-p src))
-	 (dst-dir (file-name-directory dst))
+         (dst-dir (file-name-directory dst))
          (copyf (cond
                  (copyf copyf)
                  ((functionp 'dired-do-sync) 'dired-do-sync)
@@ -586,12 +591,12 @@ holding export options."
 (defun blogit-export-linked-file (output-file)
   "Copy all linked file to dst."
   (let ((cache blogit-linked-file-cache)
-	(pub-dir (concat (file-name-directory output-file) (file-name-base output-file))))
+        (pub-dir (concat (file-name-directory output-file) (file-name-base output-file))))
 
     ;; copy file to blogit-output-dir if file in cache.
     (dolist (src cache)
       (let ((dst (concat pub-dir "/" (file-name-nondirectory src))))
-	(blogit--do-copy src dst)))
+        (blogit--do-copy src dst)))
     ;; do not forget to clear cache
     (setq blogit-linked-file-cache nil)))
 
@@ -680,7 +685,7 @@ This function is rewrite from `org-publish-org-to'."
              (let ((output-file
                     (blogit-export-output-file-name extension nil pub-dir))
                    (body-p (plist-get plist :body-only)))
-               (message output-file)
+
                (org-export-to-file backend output-file
                  nil nil nil body-p
                  ;; Add `org-publish-collect-numbering' and
@@ -694,8 +699,8 @@ This function is rewrite from `org-publish-org-to'."
                     ,(cons 'org-publish-collect-numbering
                            (cons 'org-publish-collect-index
                                  (plist-get plist :filter-final-output))))))
-	       ;; copy all needed file for output-file
-	       (blogit-export-linked-file output-file)))
+               ;; copy all needed file for output-file
+               (blogit-export-linked-file output-file)))
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 
@@ -729,10 +734,22 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
-  (blogit-publish-org-to 'blogit filename
-                         (concat "." (or (plist-get plist :html-extension)
-                                         org-html-extension "html"))
-                         plist pub-dir))
+  (let ((do-publish t)
+        (file-dir (file-name-directory (expand-file-name filename))))
+
+    ;; check if file is not under blogit-ignore-dir
+    (dolist (d blogit-ignore-dir)
+      (if do-publish
+          (if (string= file-dir
+                       (file-name-directory (expand-file-name (concat blogit-source-dir "/" d))))
+              (setq do-publish nil))))
+
+    ;; do not publish if file is under blogit template dir
+    (when do-publish
+      (blogit-publish-org-to 'blogit filename
+                             (concat "." (or (plist-get plist :html-extension)
+                                             org-html-extension "html"))
+                             plist pub-dir))))
 
 ;;;###autoload
 (defun blogit-publish-blog ()
@@ -740,10 +757,10 @@ Return output file name."
   (let* ((org-publish-timestamp-directory
           (convert-standard-filename (concat blogit-cache-dir "/")))
          (org-publish-cache nil)
-	 (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
-	 (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
-	 (output-style-dir (concat output-dir blogit-style-dir))
-	 (copy-theme-dir blogit-always-copy-theme-dir))
+         (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
+         (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
+         (output-style-dir (concat output-dir blogit-style-dir))
+         (copy-theme-dir blogit-always-copy-theme-dir))
     (org-publish-project blogit-project-list)
     ;; Copy theme-dir to blogit-output-dir when publish
     ;; if theme dir does not exit, re-copy again
@@ -756,8 +773,8 @@ Return output file name."
   (interactive)
   (let* ((org-publish-timestamp-directory
           (convert-standard-filename (concat blogit-cache-dir "/")))
-	 (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
-	 (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
+         (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
+         (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
          (org-publish-cache nil))
     (if (file-exists-p org-publish-timestamp-directory)
         (delete-directory org-publish-timestamp-directory t nil))
