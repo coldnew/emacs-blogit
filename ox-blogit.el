@@ -138,6 +138,12 @@ Currently blogit only support following format:
   "Template filename define for blogit to parse.")
 
 
+;;; Internal variables
+
+(defvar blogit-linked-file-cache nil
+  "Cache file to store which file will be copied to output dir.")
+
+
 ;;; Internal functions
 
 (defun blogit--get-post-type (info)
@@ -430,7 +436,6 @@ many useful context is predefined here, but you can overwrite it.
     ;; WARNING: DO NOT edit folling since it may break blogit functions
     (:html-head-include-default-style nil "html-style" nil)
     (:html-head-include-scripts nil "html-scripts" nil)
-    (:html-link-use-abs-url nil "html-link-use-abs-url" nil)
     )
 
   :translate-alist
@@ -456,8 +461,6 @@ many useful context is predefined here, but you can overwrite it.
      (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) blogit-google-analytics-id))))))
 
 
-(setq blogit-linked-file-cache nil)
-
 ;; FIXME:
 (defun blogit--check-post-file (file)
   "If file is valid blogit post, return t, else nil."
@@ -469,7 +472,7 @@ many useful context is predefined here, but you can overwrite it.
       (if (blogit--parse-option nil :date) t nil))))
 
 (defun blogit--get-post-url (file)
-  ""
+  "Get the post url from file."
   (if (and (file-directory-p file) (file-exists-p file))
       nil
     (with-temp-buffer
@@ -477,8 +480,6 @@ many useful context is predefined here, but you can overwrite it.
       ;; all blogit valid post must contains #+DATE option.
       (format "%s%s.html" (blogit--build-export-dir nil)
               (blogit--get-post-filename nil file)))))
-
-
 
 (defun org-blogit-html-link (link desc info)
   "Transcode a LINK object from Org to HTML.
@@ -721,84 +722,3 @@ Return output file name."
       (insert-file-contents file)
       ;; all blogit valid post must contains #+DATE option.
       (if (blogit--parse-option nil :date) t nil))))
-
-(defun blogit--add-linked-file-to-cache ()
-  "Copy files (defined by \"file:\" link prefix) to page related directory."
-  (let ((root-dir (blogit--build-export-dir nil))
-        (file-dir (file-name-base (blogit--get-post-filename nil))))
-    (save-match-data
-      (save-excursion
-        (goto-char (point-min))
-        (while (re-search-forward "\\(\\[file:\\)\\([^]]+\\)\\(\\]\\)" nil t)
-          (let ((prefix (match-string-no-properties 1))
-                (file  (match-string-no-properties 2))
-                (suffix (match-string-no-properties 3)))
-            (when (file-exists-p file)
-              ;; check if the file is also a blogit post, if t, not add
-              ;; file to cache.
-              (when (not (blogit--check-post-file file))
-                (add-to-list 'blogit-linked-file-cache (cons file (concat root-dir file-dir))))
-              )))))))
-
-;; [[file:templates][s]]
-;; [[file:~/SparkleShare/coldnew.github.io/blog-src/files/2013/USE-isolater.jpg]]
-;; (blogit--add-linked-file-to-cache)
-
-(defun o-blog-publish-linked-files()
-  "Copy files (defined by \"file:\" link prefix) to page related directory."
-  (save-match-data
-    (save-excursion
-      (goto-char (point-min))
-      (let (ret)
-        (while (re-search-forward "\\(\\[file:\\)\\([^]]+\\)\\(\\]\\)" nil t)
-          (let ((prefix (match-string-no-properties 1))
-                (file  (match-string-no-properties 2))
-                (suffix (match-string-no-properties 3)))
-
-            (when (file-exists-p file)
-              (replace-match
-               (if page
-                   (format "%s%s/%s%s"
-                           prefix
-                           (or (file-name-directory htmlfile) ".")
-                           (file-name-nondirectory file) suffix)
-
-                 (format "%s%s/%s/%s%s"
-                         prefix
-                         (file-relative-name "." filepath)
-                         (file-name-sans-extension htmlfile)
-                         (file-name-nondirectory file) suffix ))
-
-               (add-to-list 'ret file)))))
-
-        (when ret
-          (unless page
-            ;; create a redirection page as index.html into files' directory
-            (with-temp-buffer
-              (insert
-               (mapconcat 'identity
-                          `(,(format "* Redirect from (%s)" title)
-                            ":PROPERTIES:"
-                            ,(format ":PAGE: %s/index.html" (file-name-sans-extension htmlfile))
-                            ":TEMPLATE: page_redirect.html"
-                            ":END:")
-                          "\n"))
-              (org-mode)
-              (goto-char (point-min))
-              (setf STATIC (append STATIC (list (ob-parse-entry))))))
-
-          ;; copy all files into their target directory.
-          (loop for f in ret
-                do (let ((target
-                          (if page
-                              (format "%s/%s"
-                                      (ob:blog-publish-dir BLOG)
-                                      (file-name-nondirectory f))
-                            (format "%s/%s/%s"
-                                    (ob:blog-publish-dir BLOG)
-                                    ;; file path is nil when exporting static page?
-                                    ;;(or filepath ".")
-                                    (file-name-sans-extension htmlfile)
-                                    (file-name-nondirectory f)))))
-                     (mkdir (file-name-directory target) t)
-                     (ob-do-copy f target))))))))
