@@ -567,6 +567,7 @@ holding export options."
       (org-html-template contents info))))
 
 (defun blogit-export-linked-file (output-file)
+  "Copy all linked file to dst."
   (let ((cache blogit-linked-file-cache)
 	(pub-dir (concat (file-name-directory output-file) (file-name-base output-file))))
 
