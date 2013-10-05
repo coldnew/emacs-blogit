@@ -106,11 +106,17 @@ use `blogit-republish-blog'."
         ))
 
 (defcustom blogit-default-type 'blog
-  "Configure default blogit page type. Currently we only support two type."
+  "Configure default blogit page type. Currently we only support three type.
+
+Type:
+      blog  : general blog post
+      statci: static html page
+      draft : When type is `draft', blogit will not export it."
   :group 'blogit
   :type '(choice
           (const :tag "blog" blog)
-          (const :tag "static" static)))
+	  (const :tag "static" static)
+	  (const :tag "draft"  draft)))
 
 (defcustom blogit-date-format "%Y/%02m/%02d %02H:%02M:%02S"
   "Format for printing a date in the sitemap.
@@ -118,11 +124,13 @@ See `format-time-string' for allowed formatters."
   :group 'blogit :type 'string)
 
 (defvar blogit-output-format-list
-  '(:blog-type   blog
-                 :blog-dir   "blog/%y/%m/%d"
-                 :static-type static
-                 :static-dir  ""
-                 )
+  '(:draft-type
+    draft
+    :blog-type   blog
+    :blog-dir   "blog/%y/%m/%d"
+    :static-type static
+    :static-dir  ""
+    )
   "Output dir formate for blogit, use blogit-output-dir as root when
 this value is empty string.
 
@@ -172,6 +180,7 @@ Currently blogit only support following format:
     (cond
      ((eq type 'blog) 'blog)
      ((eq type 'static) 'static)
+     ((eq type 'draft)  'draft)
      (t blogit-default-type))))
 
 (defun blogit--get-post-dir-format (info)
@@ -779,7 +788,10 @@ Return output file name."
                        (file-name-directory (expand-file-name (concat blogit-source-dir "/" d))))
               (setq do-publish nil))))
 
-    ;; do not publish if file is under blogit template dir
+    ;; if file is draft, do not publish it
+    (when (eq 'draft (blogit--get-post-type nil)) (setq do-publish nil))
+
+    ;; only publish when do-publish is t
     (when do-publish
       (blogit-publish-org-to 'blogit filename
                              (concat "." (or (plist-get plist :html-extension)
