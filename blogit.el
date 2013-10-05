@@ -167,14 +167,21 @@ Currently blogit only support following format:
 
 ;;; Internal variables
 
-(defvar blogit-rss-cache nil
-  "Cache to store which file will be add to rss.")
+(defvar blogit-cache-dir (concat blogit-output-dir "/.cache")
+  "The cache directory for blogit.")
+
+;; TODO: use this ?
+(defvar blogit-publish-cache-file (concat blogit-cache-dir "/publish.cache")
+  "Cache file to store publish info, this cache will be used to
+generate rss and tage.")
+
+;; TODO: use this ?
+(defvar blogit-publish-cache nil
+  "Cache to store post info, this cache will be used to
+generate rss and tage.")
 
 (defvar blogit-linked-cache nil
   "Cache to store which file will be copied to output dir.")
-
-(defvar blogit-cache-dir (concat blogit-output-dir "/.cache")
-  "The cache directory for blogit.")
 
 (defvar blogit-ignore-dir
   `(,blogit-template-dir ,blogit-style-dir)
@@ -786,9 +793,9 @@ This function is rewrite from `org-publish-org-to'."
 ;;;###autoload
 (defun blogit-export-as-html
   (&optional async subtreep visible-only body-only ext-plist)
-  "Export current buffer to an HTML buffer.
+  "Export current buffer to an HTML buffer for blogit.
 
-Export is done in a buffer named \"*Org HTML5 Slide Export*\", which
+Export is done in a buffer named \"*Blogit Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
