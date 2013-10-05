@@ -128,7 +128,7 @@ Currently blogit only support following format:
 
     %y : year   eq: 2013
     %m : month  eq: 03
-    %d : month  eq: 23")
+    %d : day  eq: 23")
 
 (defvar blogit-template-list
   '((:page_header      . "page_header.html")
