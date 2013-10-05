@@ -728,7 +728,7 @@ is non-nil."
 
 ;;;###autoload
 (defun org-blogit-publish-to-html (plist filename pub-dir)
-  "Publish an org file to HTML.
+  "Publish an org file to HTML for blogit.
 
 FILENAME is the filename of the Org file to be published.  PLIST
 is the property list for the given project.  PUB-DIR is the
