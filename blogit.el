@@ -461,6 +461,7 @@ many useful context is predefined here, but you can overwrite it.
     (:analytics         "ANALYTICS"         nil   nil   t)
     (:disqus            "DISQUS"            nil   nil   t)
     (:url               "URL"               nil   nil   t)
+    (:type              "TYPE"              nil   nil   t)
 
     ;; disable org-html default style
     ;; WARNING: DO NOT edit folling since it may break blogit functions
