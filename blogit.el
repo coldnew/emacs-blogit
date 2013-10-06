@@ -190,27 +190,24 @@ generate rss and tage.")
 
 ;;; Internal functions
 
-;; FIXME: dirty function, what if I want to get other option from file ?
+(defmacro blogit--file-in-temp-buffer (filename &rest pairs)
+  "Helper macro to open file in temp buffer, and execute blogit function."
+  `(when (file-exists-p ,filename)
+     (with-temp-buffer (insert-file-contents ,filename) ,@pairs)))
+
 (defun blogit--get-post-type (info &optional filename)
   "Get current post type, return `blogit-default-type' if not found.
 When filename is specified, open the file and get it's post type."
-  (flet ((blogit---get-post-type
-          (info)
-          (let* ((typestr (blogit--parse-option info :type))
-                 (key (intern (format ":%s-type" typestr)))
-                 (type (plist-get blogit-output-format-list key)))
-            (cond
-             ((eq type 'blog) 'blog)
-             ((eq type 'static) 'static)
-             ((eq type 'draft)  'draft)
-             (t blogit-default-type)))))
-    (if filename
-        (progn
-          (with-temp-buffer
-            (insert-file-contents filename)
-            (buffer-string)
-            (blogit---get-post-type nil)))
-      (blogit---get-post-type info))))
+  (if filename
+      (blogit--file-in-temp-buffer filename (blogit--get-post-type nil))
+    (let* ((typestr (blogit--parse-option info :type))
+           (key (intern (format ":%s-type" typestr)))
+           (type (plist-get blogit-output-format-list key)))
+      (cond
+       ((eq type 'blog) 'blog)
+       ((eq type 'static) 'static)
+       ((eq type 'draft)  'draft)
+       (t blogit-default-type)))))
 
 (defun blogit--get-post-dir-format (info)
   "Get post output format according to post type.
@@ -227,10 +224,12 @@ Use \"\" as fallback."
       (blogit--sanitize-string (or filename
                                    (file-name-base (buffer-file-name (buffer-base-buffer))))))))
 
+;; FIXME:
 (defun blogit--file-to-string (file)
   "Read the content of FILE and return it as a string."
   (with-temp-buffer (insert-file-contents file) (buffer-string)))
 
+;; FIXME: useless remove ?
 (defun blogit--string-to-file (string file &optional mode)
   "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
 mode, format the string with MODE's format settings."
