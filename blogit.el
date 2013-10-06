@@ -122,13 +122,11 @@ Type:
           (const :tag "static" static)
           (const :tag "draft"  draft)))
 
-(defvar blogit-output-format-list
+(defvar blogit-type-list
   (list
-   :draft-type  'draft
-   :blog-type   'blog
-   :blog-dir    "blog/%y/%m/%d"
-   :static-type 'static
-   :static-dir  "")
+   :draft  '(:type draft)
+   :blog   '(:type blog   :filepath "blog/%y/%m")
+   :static '(:type static :filepath ""))
   "Output dir formate for blogit, use `blogit-output-dir' as root when
 this value is empty string.
 
@@ -139,7 +137,21 @@ Currently blogit only support following format:
 
     %y : year   eq: 2013
     %m : month  eq: 03
-    %d : day    eq: 23")
+    %d : day    eq: 23
+
+Blogit define three basic format: draft, blog, static
+
+1. draft
+
+   draft is the most simplest type, when your blogit post is `draft',
+it means that your post is not complete, and you will not see any
+output html file for `draft' post.
+
+2. blog
+
+3. static
+
+")
 
 (defvar blogit-template-list
   (list
@@ -187,6 +199,14 @@ generate rss and tage.")
 
 ;;; Internal functions
 
+(defun blogit--string-to-key (string)
+  "Conver string to key. eq: \"test\" -> :test"
+  (intern (format ":%s" string)))
+
+(defun blogit--symbol-to-key (symbol)
+  "Conver symbol to key. eq: test -> :test"
+  (blogit--string-to-key (symbol-name symbol)))
+
 (defmacro blogit--file-in-temp-buffer (filename &rest pairs)
   "Helper macro to open file in temp buffer, and execute blogit function."
   `(when (file-exists-p ,filename)
@@ -198,8 +218,9 @@ When filename is specified, open the file and get it's post type."
   (if filename
       (blogit--file-in-temp-buffer filename (blogit--get-post-type nil))
     (let* ((typestr (blogit--parse-option info :type))
-           (key (intern (format ":%s-type" typestr)))
-           (type (plist-get blogit-output-format-list key)))
+           (key (intern (format ":%s" typestr)))
+           (info (plist-get blogit-type-list key))
+           (type (plist-get info :type)))
       (cond
        ((eq type 'blog) 'blog)
        ((eq type 'static) 'static)
@@ -210,9 +231,9 @@ When filename is specified, open the file and get it's post type."
   "Get post output format according to post type.
 Use \"\" as fallback."
   (let* ((type (blogit--get-post-type info))
-         (key (intern (format ":%s-dir" (symbol-name type)))))
+	 (info (plist-get blogit-type-list (blogit--symbol-to-key type))))
 
-    (or (plist-get blogit-output-format-list key) "")))
+    (or (plist-get info :filepath) "")))
 
 (defun blogit--get-post-filename (info &optional filename)
   "Get current post export filename."
