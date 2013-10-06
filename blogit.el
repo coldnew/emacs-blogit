@@ -65,6 +65,12 @@
   "Main url for your site. DO NOT use `nil' here."
   :group 'blogit :type 'string)
 
+(defcustom blogit-sanitize-length 100
+  "If you want the export filename sanitize
+by `blogit--sanitize-string' not so long, you can
+set it to small size, eg: 5."
+  :group 'blogit :type 'integer)
+
 (defcustom blogit-rss-number 20
   "How many post do you want to have in rss."
   :group 'blogit :type 'integer)
@@ -253,7 +259,7 @@ When filename is specified, open the file and get it's post type."
 	(url (or (blogit--parse-option info :url) ""))
 	(filename (file-name-base (or file (buffer-base-buffer) "")))
 	(sanitize (if (not (string= "" url)) url
-		    (blogit--sanitize-string filename))))
+		    (s-left blogit-sanitize-length (blogit--sanitize-string filename)))))
     (list
      (cons "year" year)
      (cons "month" month)
@@ -342,7 +348,7 @@ This function is used to generate blog post url if not specified."
         else if (member gc '(Zs))
         collect "_" into ret
         else if (member gc '(Lo))
-        collect (s-left 2 (sha1 (char-to-string (if cd (car cd) c))))
+        collect (s-left 1 (sha1 (char-to-string (if cd (car cd) c))))
         into ret
         finally return (replace-regexp-in-string
                         "--+" "_"
