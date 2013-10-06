@@ -405,27 +405,29 @@ ex:
   (let ((file (or (blogit--template-fullfile type) type)))
     (mustache-render (blogit--template-to-string file) context)))
 
-(defun blogit--parse-option (info key)
+(defun blogit--parse-option (info key &optional filename)
   "Read option value of org file opened in current buffer.
 
 This function will first use the standard way to parse org-option.
 If parsing failed, use regexp to get the options, else return nil.
 "
-  (flet ((plist-get-str (info key)
-                        (let ((r (plist-get info key)))
-                          (if (stringp r) r (or (car r) "")))))
-    (let* ((keystr1 (symbol-name key))
-           (keystr (upcase (s-right (- (length keystr1) 1) keystr1)))
-           (match-regexp (org-make-options-regexp `(,keystr)))
-           (option (plist-get-str info key)))
+  (if filename
+      (blogit--file-in-temp-buffer filename (blogit--parse-option info key))
+    (flet ((plist-get-str (info key)
+                          (let ((r (plist-get info key)))
+                            (if (stringp r) r (or (car r) "")))))
+      (let* ((keystr1 (symbol-name key))
+             (keystr (upcase (s-right (- (length keystr1) 1) keystr1)))
+             (match-regexp (org-make-options-regexp `(,keystr)))
+             (option (plist-get-str info key)))
 
-      ;; if we can use plist-get to get org-option, use it
-      ;; else use regexp to find options
-      (or (if (not (string= "" option)) option)
-          (save-excursion
-            (goto-char (point-min))
-            (when (re-search-forward match-regexp nil t)
-              (match-string-no-properties 2 nil)))))))
+        ;; if we can use plist-get to get org-option, use it
+        ;; else use regexp to find options
+        (or (if (not (string= "" option)) option)
+            (save-excursion
+              (goto-char (point-min))
+              (when (re-search-forward match-regexp nil t)
+                (match-string-no-properties 2 nil))))))))
 
 (defun blogit--modify-option (option value)
   "Modify option value of org file opened in current buffer.
@@ -565,12 +567,12 @@ many useful context is predefined here, but you can overwrite it.
 
      ;; FIXME: This algorithm may porduce some problem ?
      (if (and (blogit--parse-option nil :date)
-	      (not (eq 'draft (blogit--get-post-type nil)))
-	      (s-starts-with?
-	       (directory-file-name (expand-file-name (concat blogit-source-dir "/")))
-	       (file-name-directory (expand-file-name file))))
+              (not (eq 'draft (blogit--get-post-type nil)))
+              (s-starts-with?
+               (directory-file-name (expand-file-name (concat blogit-source-dir "/")))
+               (file-name-directory (expand-file-name file))))
 
-	 t nil))))
+         t nil))))
 
 (defun blogit--get-post-url (file)
   "Get the post url from file."
@@ -793,14 +795,14 @@ If FREE-CACHE, empty the cache."
       (error "Cannot find cache-file name in `blogit-publish-write-cache-file'"))
     (with-temp-file cache-file
       (let (print-level print-length)
-	(insert "(setq blogit-publish-cache (make-hash-table :test 'equal :weakness nil :size 100))\n")
-	(maphash (lambda (k v)
-		   (insert
-		    (format (concat "(puthash %S "
-				    (if (or (listp v) (symbolp v))
-					"'" "")
-				    "%S blogit-publish-cache)\n") k v)))
-		 blogit-publish-cache)))
+        (insert "(setq blogit-publish-cache (make-hash-table :test 'equal :weakness nil :size 100))\n")
+        (maphash (lambda (k v)
+                   (insert
+                    (format (concat "(puthash %S "
+                                    (if (or (listp v) (symbolp v))
+                                        "'" "")
+                                    "%S blogit-publish-cache)\n") k v)))
+                 blogit-publish-cache)))
     (when free-cache (blogit-publish-reset-cache))))
 
 (defun blogit-publish-initialize-cache ()
@@ -814,17 +816,17 @@ If FREE-CACHE, empty the cache."
   (unless blogit-publish-cache
 
     (let* ((cache-file
-	     (expand-file-name blogit-publish-cache-file))
+            (expand-file-name blogit-publish-cache-file))
 
-	   (cexists (file-exists-p cache-file)))
+           (cexists (file-exists-p cache-file)))
 
       (when blogit-publish-cache (blogit-publish-reset-cache))
 
       (if cexists (load-file cache-file)
-	(setq blogit-publish-cache
-	      (make-hash-table :test 'equal :weakness nil :size 100))
-	(blogit-publish-cache-set ":project:" "publish")
-	(blogit-publish-cache-set ":cache-file:" cache-file))
+        (setq blogit-publish-cache
+              (make-hash-table :test 'equal :weakness nil :size 100))
+        (blogit-publish-cache-set ":project:" "publish")
+        (blogit-publish-cache-set ":cache-file:" cache-file))
       (unless cexists (blogit-publish-write-cache-file nil))))
   blogit-publish-cache)
 
@@ -849,6 +851,28 @@ Returns value on success, else nil."
   (unless blogit-publish-cache
     (error "`blogit-publish-cache-set' called, but no cache present"))
   (puthash key value blogit-publish-cache))
+
+(defun blogit-publish-update-cache (filename)
+  "Update blogit-publish-cache to log post info."
+  (flet ((get-info (key)
+		   (list key (blogit--parse-option nil key)))
+	 (post-url ()
+	  (format "%s%s.html"
+		  (s-replace
+		   (concat (expand-file-name blogit-output-dir) "/") ""
+		   (expand-file-name (blogit--build-export-dir nil)))
+		  (blogit--get-post-filename nil filename))))
+  (let* ((info
+	  (blogit--file-in-temp-buffer
+	   filename
+	   (-flatten
+	   (list
+	    (map 'list 'get-info '(:title :date :url :language :tags))
+	    :type (blogit--get-post-type nil)
+	    :post-url (post-url)
+	    )))))
+
+    (blogit-publish-cache-set filename info))))
 
 
 ;;; Debugging functions
@@ -951,7 +975,9 @@ Return output file name."
       (blogit-publish-org-to 'blogit filename
                              (concat "." (or (plist-get plist :html-extension)
                                              org-html-extension "html"))
-                             plist pub-dir))))
+                             plist pub-dir)
+      ;; Add file info to blogit cache
+      (blogit-publish-update-cache filename))))
 
 ;;;###autoload
 (defun blogit-publish-blog (&optional force)
@@ -973,7 +999,7 @@ When force is t, re-publish all blogit project."
     ;; org-publish-timestamp-directory, which is the same as
     ;; blogit-cache-dir
     (if (and force
-	     (file-exists-p org-publish-timestamp-directory))
+             (file-exists-p org-publish-timestamp-directory))
         (delete-directory org-publish-timestamp-directory t nil))
 
     ;; initialize cache for blogit
@@ -987,8 +1013,8 @@ When force is t, re-publish all blogit project."
     ;; when we republish blogit project, also enable
     ;; copy-style-dir
     (unless (or force
-		(file-exists-p output-style-dir) )
-		(setq copy-style-dir t))
+                (file-exists-p output-style-dir) )
+      (setq copy-style-dir t))
 
     (when copy-style-dir
       (blogit--do-copy source-style-dir output-dir))
