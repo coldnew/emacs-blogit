@@ -930,7 +930,7 @@ Returns value on success, else nil."
              filename
              (-flatten
               (list
-               (map 'list 'get-info '(:title :date :url :language :tags))
+               (map 'list 'get-info '(:title :date :language :tags))
                :type (blogit--get-post-type nil)
                :post-url (post-url)
                )))))
