@@ -157,15 +157,15 @@ output html file for `draft' post.
   (list
    :page_header        "page_header.html"
    :page_footer        "page_footer.html"
-   :plugin_analytics  "plugin_analytics.html"
-   :plugin_disqus     "plugin_disqus.html"
-   :newpost           "newpost.org"
+   :plugin_analytics   "plugin_analytics.html"
+   :plugin_disqus      "plugin_disqus.html"
+   :newpost            "newpost.org"
 
    ;; FIXME: still not use
    :page_navigator    "page_navigator.html"
    :blog_rss          "blog_rss.html"
    :blog_post         "blog_post.html"
-   :blog_index       "blog_index.html"
+   :blog_index        "blog_index.html"
    :index             "index.html"
    )
   "Template filename define for blogit to parse.")
@@ -231,7 +231,7 @@ When filename is specified, open the file and get it's post type."
   "Get post output format according to post type.
 Use \"\" as fallback."
   (let* ((type (blogit--get-post-type info))
-	 (info (plist-get blogit-type-list (blogit--symbol-to-key type))))
+         (info (plist-get blogit-type-list (blogit--symbol-to-key type))))
 
     (or (plist-get info :filepath) "")))
 
