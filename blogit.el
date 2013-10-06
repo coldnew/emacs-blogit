@@ -110,34 +110,7 @@ use `blogit-republish-blog'."
         ))
 
 (defcustom blogit-default-type 'blog
-  "Configure default blogit page type. Currently we only support three type.
-
-Type:
-      blog  : general blog post
-      statci: static html page
-      draft : When type is `draft', blogit will not export it."
-  :group 'blogit
-  :type '(choice
-          (const :tag "blog" blog)
-          (const :tag "static" static)
-          (const :tag "draft"  draft)))
-
-(defvar blogit-type-list
-  (list
-   :draft  '(:type draft)
-   :blog   '(:type blog   :filepath "blog/%y/%m")
-   :static '(:type static :filepath ""))
-  "Output dir formate for blogit, use `blogit-output-dir' as root when
-this value is empty string.
-
-The dir will be format by `format-time-string', but the time is according to
-your #+DATE info.
-
-Currently blogit only support following format:
-
-    %y : year   eq: 2013
-    %m : month  eq: 03
-    %d : day    eq: 23
+  "Configure default blogit page type.
 
 Blogit define three basic format: draft, blog, static
 
@@ -149,8 +122,38 @@ output html file for `draft' post.
 
 2. blog
 
+   general blog post
+
 3. static
 
+   static html page
+
+For more about type, see `blogit-type-list'."
+  :group 'blogit
+  :type '(choice
+          (const :tag "blog" blog)
+          (const :tag "static" static)
+          (const :tag "draft"  draft)))
+
+(defvar blogit-type-list
+  (list
+   :draft  '(:type draft)
+   :blog   '(:type blog   :filepath "blog/%y/%m"  :filename "%d_%s.html")
+   :static '(:type static :filepath ""            :filename "%s.html"))
+  "Output dir formate for blogit, use `blogit-output-dir' as root when
+this value is empty string.
+
+The dir will be format by `format-time-string', but the time is according to
+your #+DATE info.
+
+Currently blogit only support following format:
+
+    %y : year   eq: 2013
+    %m : month  eq: 03
+    %d : day    eq: 23
+    %S : filename without any sanitize. `NOTE: Not suggest use this.'
+    %s : filename sanitize by `blogit--sanitize-string', if `#+URL' is specified, use it.
+         When `#+URL' contains backslash, this fotmat will be ignore.
 ")
 
 (defvar blogit-template-list
@@ -218,7 +221,7 @@ When filename is specified, open the file and get it's post type."
   (if filename
       (blogit--file-in-temp-buffer filename (blogit--get-post-type nil))
     (let* ((typestr (blogit--parse-option info :type))
-           (key (intern (format ":%s" typestr)))
+           (key (blogit--string-to-key typestr))
            (info (plist-get blogit-type-list key))
            (type (plist-get info :type)))
       (cond
@@ -227,20 +230,63 @@ When filename is specified, open the file and get it's post type."
        ((eq type 'draft)  'draft)
        (t blogit-default-type)))))
 
-(defun blogit--get-post-dir-format (info)
-  "Get post output format according to post type.
+;; FIXME: This function looks ogly
+(defun blogit--format-to-s-format (str)
+  "Unelegant way to convert blogit file fotmat to s-format."
+  (replace-regexp-in-string
+   "%y" "${year}"
+   (replace-regexp-in-string
+    "%m" "${month}"
+    (replace-regexp-in-string
+     "%d" "${day}"
+     (replace-regexp-in-string
+      "%S" "${filename}"
+      (replace-regexp-in-string "%s" "${sanitize}" str))))))
+
+(defun blogit--build-format-list (info &optional file)
+  "Cons cells for blogit s-formate."
+  (let* ((date-str  (blogit--parse-option info :date))
+	(date-list (blogit--parse-date-string date-str))
+	(year (or (plist-get date-list :year) ""))
+	(month (or (plist-get date-list :month) ""))
+	(day (or (plist-get date-list :day) ""))
+	(url (or (blogit--parse-option info :url) ""))
+	(filename (file-name-base (or file (buffer-base-buffer) "")))
+	(sanitize (if (not (string= "" url)) url
+		    (blogit--sanitize-string filename))))
+    (list
+     (cons "year" year)
+     (cons "month" month)
+     (cons "day" day)
+     (cons "filename" filename)
+     (cons "sanitize" sanitize))))
+
+(defun blogit--get-filepath-format (info)
+  "Get post output dir format according to post type.
 Use \"\" as fallback."
   (let* ((type (blogit--get-post-type info))
          (info (plist-get blogit-type-list (blogit--symbol-to-key type))))
 
     (or (plist-get info :filepath) "")))
 
+(defun blogit--get-filename-format (info)
+  "Get post output filename format according to post type.
+Use \"%s\" as fallback."
+  (let* ((type (blogit--get-post-type info))
+         (info (plist-get blogit-type-list (blogit--symbol-to-key type))))
+
+    (or (plist-get info :filename) "%s")))
+
 (defun blogit--get-post-filename (info &optional filename)
-  "Get current post export filename."
-  (let ((name (blogit--parse-option info :url)))
-    (if name name
-      (blogit--sanitize-string (or filename
-                                   (file-name-base (buffer-file-name (buffer-base-buffer))))))))
+  "Get current post export filename. When #+URL contains `backslash',
+the default format will be ignored."
+  (let* ((url (blogit--parse-option info :url))
+	 (use-url-p (s-contains? "/" (or url ""))))
+    (if use-url-p url
+      (let* ((blogit-format (blogit--get-filename-format info))
+            ;; rebuild the formate and use s-format to formate it
+            (filename-format (blogit--format-to-s-format blogit-format)))
+	(s-format filename-format 'aget (blogit--build-format-list info filename))))))
 
 ;; FIXME:
 (defun blogit--file-to-string (file)
@@ -353,11 +399,12 @@ This function is used to create directory for new blog post.
             (setq dd (if date (format "%02d" date) ""))
             (blogit--parse-date-string1 (concat yyyy "/" mm "/" dd) 1 2 3)))))))
 
+;; FIXME: use blogit--format-to-s-format to modify this function
 (defun blogit--build-export-dir (info)
   "Build export dir path according to #+DATE: option."
   (let* ((date-str  (blogit--parse-option info :date))
          (date-list (blogit--parse-date-string date-str))
-         (dir-format (blogit--get-post-dir-format info))
+         (dir-format (blogit--get-filepath-format info))
          (dir-1 (split-string dir-format "/"))
          (dir ""))
     ;; Build dir according to export format
@@ -599,7 +646,7 @@ many useful context is predefined here, but you can overwrite it.
     (with-temp-buffer
       (insert-file-contents file)
       ;; all blogit valid post must contains #+DATE option.
-      (format "%s%s.html" (blogit--build-export-dir nil)
+      (format "%s%s" (blogit--build-export-dir nil)
               (blogit--get-post-filename nil file)))))
 
 (defun org-blogit-html-link (link desc info)
@@ -747,8 +794,7 @@ This function is rewrite from `org-export-output-file-name'."
           ;; may have come up with.  PUB-DIR, if defined, always has
           ;; precedence over any provided path.
           (concat (file-name-as-directory (blogit--build-export-dir nil))
-                  (file-name-nondirectory (blogit--get-post-filename nil base-name))
-                  extension)))
+                  (file-name-nondirectory (blogit--get-post-filename nil base-name)))))
 
     ;; If output dir does not exist, create it
     (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
@@ -878,7 +924,7 @@ Returns value on success, else nil."
   (flet ((get-info (key)
                    (list key (blogit--parse-option nil key)))
          (post-url ()
-                   (format "%s%s.html"
+                   (format "%s%s"
                            (s-replace
                             (concat (expand-file-name blogit-output-dir) "/") ""
                             (expand-file-name (blogit--build-export-dir nil)))
