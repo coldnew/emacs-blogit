@@ -799,7 +799,7 @@ If FREE-CACHE, empty the cache."
 		    (format (concat "(puthash %S "
 				    (if (or (listp v) (symbolp v))
 					"'" "")
-				    "%S org-publish-cache)\n") k v)))
+				    "%S blogit-publish-cache)\n") k v)))
 		 blogit-publish-cache)))
     (when free-cache (blogit-publish-reset-cache))))
 
@@ -823,14 +823,14 @@ If FREE-CACHE, empty the cache."
       (if cexists (load-file cache-file)
 	(setq blogit-publish-cache
 	      (make-hash-table :test 'equal :weakness nil :size 100))
-	(blogit-publish-cache-set ":project:" "test")
+	(blogit-publish-cache-set ":project:" "publish")
 	(blogit-publish-cache-set ":cache-file:" cache-file))
       (unless cexists (blogit-publish-write-cache-file nil))))
   blogit-publish-cache)
 
 (defun blogit-publish-reset-cache ()
   "Empty org-publish-cache and reset it nil."
-  (message "%s" "Resetting org-publish-cache")
+  (message "%s" "Resetting blogit-publish-cache")
   (when (hash-table-p blogit-publish-cache)
     (clrhash blogit-publish-cache))
   (setq blogit-publish-cache nil))
@@ -969,16 +969,15 @@ When force is t, re-publish all blogit project."
          (output-style-dir (concat output-dir blogit-style-dir))
          (copy-style-dir blogit-always-copy-theme-dir))
 
-    ;; initialize cache for blogit
-    (blogit-publish-initialize-cache)
-
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
     ;; blogit-cache-dir
-
     (if (and force
 	     (file-exists-p org-publish-timestamp-directory))
         (delete-directory org-publish-timestamp-directory t nil))
+
+    ;; initialize cache for blogit
+    (blogit-publish-initialize-cache)
 
     ;; publish all posts
     (org-publish-project blogit-project-list)
