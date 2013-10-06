@@ -746,18 +746,20 @@ holding export options."
 ;; TODO: finish this function
 (defun blogit-publish-rss ()
   "Publish rss file for blogit."
-  (let (avliable-type)
+  (let (avliable-types)
 
     ;; Find avliable blog type info from blogit-type-list
     ;; NOTE: the type here actually is key, be cereful.
     (dolist (k blogit-type-list)
       (if (and (symbolp k)
 	       (eq 'blog (plist-get (plist-get blogit-type-list k) :type)))
-          (setq avliable-type (-flatten (add-to-list 'avliable-type k)))))
+          (setq avliable-types (-flatten (add-to-list 'avliable-types k)))))
 
     ;; TODO: generate rss
+    (dolist (k avliable-types)
 
-    ))
+
+      )))
 
 
 ;;; Rewrite some org function to make blogit work more properly
