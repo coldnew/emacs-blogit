@@ -550,16 +550,26 @@ many useful context is predefined here, but you can overwrite it.
      :plugin_analytics
      (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) blogit-google-analytics-id))))))
 
-
-;; FIXME:
 (defun blogit--check-post-file (file)
   "If file is valid blogit post, return t, else nil."
   (if (and (file-directory-p file) (file-exists-p file))
       nil
-    (with-temp-buffer
-      (insert-file-contents file)
-      ;; all blogit valid post must contains #+DATE option.
-      (if (blogit--parse-option nil :date) t nil))))
+    (blogit--file-in-temp-buffer
+     file
+     ;; BLogit use following way to check if the post is valid
+     ;;
+     ;; 1. All blogit valid post must contains `DATE' option.
+     ;; 2. If post type is `draft', it's not valid
+     ;; 3. All blogit post must under `blogit-source-dir'.
+
+     ;; FIXME: This algorithm may porduce some problem ?
+     (if (and (blogit--parse-option nil :date)
+	      (not (eq 'draft (blogit--get-post-type nil)))
+	      (s-starts-with?
+	       (directory-file-name (expand-file-name (concat blogit-source-dir "/")))
+	       (file-name-directory (expand-file-name file))))
+
+	 t nil))))
 
 (defun blogit--get-post-url (file)
   "Get the post url from file."
