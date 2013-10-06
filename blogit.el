@@ -122,16 +122,14 @@ Type:
           (const :tag "static" static)
           (const :tag "draft"  draft)))
 
-
 (defvar blogit-output-format-list
-  '(:draft-type
-    draft
-    :blog-type   blog
-    :blog-dir   "blog/%y/%m/%d"
-    :static-type static
-    :static-dir  ""
-    )
-  "Output dir formate for blogit, use blogit-output-dir as root when
+  (list
+   :draft-type  'draft
+   :blog-type   'blog
+   :blog-dir    "blog/%y/%m/%d"
+   :static-type 'static
+   :static-dir  "")
+  "Output dir formate for blogit, use `blogit-output-dir' as root when
 this value is empty string.
 
 The dir will be format by `format-time-string', but the time is according to
@@ -144,19 +142,20 @@ Currently blogit only support following format:
     %d : day    eq: 23")
 
 (defvar blogit-template-list
-  '((:page_header      . "page_header.html")
-    (:page_footer      . "page_footer.html")
-    (:plugin_analytics . "plugin_analytics.html")
-    (:plugin_disqus    . "plugin_disqus.html")
-    (:newpost          . "newpost.org")
+  (list
+   :page_header        "page_header.html"
+   :page_footer        "page_footer.html"
+   :plugin_analytics  "plugin_analytics.html"
+   :plugin_disqus     "plugin_disqus.html"
+   :newpost           "newpost.org"
 
-    ;; FIXME: still not use
-    (:page_navigator   . "page_navigator.html")
-    (:blog_rss         . "blog_rss.html")
-    (:blog_post        . "blog_post.html")
-    (:blog_index       . "blog_index.html")
-    (:index            . "index.html")
-    )
+   ;; FIXME: still not use
+   :page_navigator    "page_navigator.html"
+   :blog_rss          "blog_rss.html"
+   :blog_post         "blog_post.html"
+   :blog_index       "blog_index.html"
+   :index             "index.html"
+   )
   "Template filename define for blogit to parse.")
 
 
@@ -251,7 +250,7 @@ mode, format the string with MODE's format settings."
   "Get match template filename with fullpath according to key."
   (convert-standard-filename
    (concat blogit-source-dir "/" blogit-template-dir
-           (cdr (assoc key blogit-template-list)))))
+           (plist-get blogit-template-list key))))
 
 (defun blogit--sanitize-string (s)
   "Sanitize string S by:
@@ -856,24 +855,24 @@ Returns value on success, else nil."
 (defun blogit-publish-update-cache (filename)
   "Update blogit-publish-cache to log post info."
   (flet ((get-info (key)
-		   (list key (blogit--parse-option nil key)))
-	 (post-url ()
-	  (format "%s%s.html"
-		  (s-replace
-		   (concat (expand-file-name blogit-output-dir) "/") ""
-		   (expand-file-name (blogit--build-export-dir nil)))
-		  (blogit--get-post-filename nil filename))))
-  (let* ((info
-	  (blogit--file-in-temp-buffer
-	   filename
-	   (-flatten
-	   (list
-	    (map 'list 'get-info '(:title :date :url :language :tags))
-	    :type (blogit--get-post-type nil)
-	    :post-url (post-url)
-	    )))))
+                   (list key (blogit--parse-option nil key)))
+         (post-url ()
+                   (format "%s%s.html"
+                           (s-replace
+                            (concat (expand-file-name blogit-output-dir) "/") ""
+                            (expand-file-name (blogit--build-export-dir nil)))
+                           (blogit--get-post-filename nil filename))))
+    (let* ((info
+            (blogit--file-in-temp-buffer
+             filename
+             (-flatten
+              (list
+               (map 'list 'get-info '(:title :date :url :language :tags))
+               :type (blogit--get-post-type nil)
+               :post-url (post-url)
+               )))))
 
-    (blogit-publish-cache-set filename info))))
+      (blogit-publish-cache-set filename info))))
 
 
 ;;; Debugging functions
@@ -1018,6 +1017,7 @@ When force is t, re-publish all blogit project."
       (setq copy-style-dir t))
 
     (when copy-style-dir
+      (message "Copy style dir to blogit-output-dir.")
       (blogit--do-copy source-style-dir output-dir))
 
     ;; write cache file
