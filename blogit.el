@@ -517,8 +517,8 @@ many useful context is predefined here, but you can overwrite it.
 (org-export-define-derived-backend 'blogit 'html
   :options-alist
   '(
-    (:analytics         "ANALYTICS"         nil   nil   t)
-    (:disqus            "DISQUS"            nil   nil   t)
+    (:analytics         "ANALYTICS"         nil   nil   blogit-google-analytics-id)
+    (:disqus            "DISQUS"            nil   nil   blogit-disqus-shortname)
     (:url               "URL"               nil   nil   t)
     (:type              "TYPE"              nil   nil   t)
 
