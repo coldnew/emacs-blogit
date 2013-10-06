@@ -948,7 +948,6 @@ Returns value on success, else nil."
 
 ;;;###autoload
 (defun blogit-verify-configuration ()
-  (interactive)
   "Ensure all required configuration fields are properly configured,
 include:
 
@@ -958,6 +957,7 @@ include:
 
 Blogit will throw error if not properly configure, this will help to debug
 the problem."
+  (interactive)
   (unless (and blogit-source-dir (file-directory-p blogit-source-dir))
     (error "Variable `%s' is not properly configured or directory does not exist."
            (symbol-name 'blogit-source-dir)))
