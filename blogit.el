@@ -392,6 +392,7 @@ ex:
 
 (defun blogit--calculate-post-relative-path (path)
   "Calculate post path from root."
+
   (let* ((epath (expand-file-name (blogit--get-post-url path)))
          (filename (file-name-nondirectory epath))
          (path-dir (file-name-directory epath))
@@ -779,7 +780,10 @@ This function is rewrite from `org-publish-org-to'."
       (unless visitingp (kill-buffer work-buffer)))))
 
 
-;;; Debuffing functions
+;;; Caching functions
+
+
+;;; Debugging functions
 
 ;;;###autoload
 (defun blogit-verify-configuration ()
