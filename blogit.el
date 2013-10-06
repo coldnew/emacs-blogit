@@ -62,7 +62,7 @@
   :group 'blogit :type 'string)
 
 (defcustom blogit-site-url ""
-  "Main url for your site. DO NOT use nil here."
+  "Main url for your site. DO NOT use `nil' here."
   :group 'blogit :type 'string)
 
 (defcustom blogit-rss-number 20
@@ -123,10 +123,6 @@ Type:
           (const :tag "static" static)
           (const :tag "draft"  draft)))
 
-(defcustom blogit-date-format "%Y/%02m/%02d %02H:%02M:%02S"
-  "Format for printing a date in the sitemap.
-See `format-time-string' for allowed formatters."
-  :group 'blogit :type 'string)
 
 (defvar blogit-output-format-list
   '(:draft-type
@@ -167,17 +163,20 @@ Currently blogit only support following format:
 
 ;;; Internal variables
 
+;; FIXME: maybe we shold not let anyone modify this ?
+(defconst blogit-date-format "%Y-%02m-%02d %02H:%02M:%02S"
+  "Format for printing a date in the sitemap.
+See `format-time-string' for allowed formatters.")
+
 (defvar blogit-cache-dir (concat blogit-output-dir "/.cache")
   "The cache directory for blogit.")
 
-;; TODO: use this ?
-(defvar blogit-publish-cache-file (concat blogit-cache-dir "/publish.cache")
-  "Cache file to store publish info, this cache will be used to
-generate rss and tage.")
-
-;; TODO: use this ?
 (defvar blogit-publish-cache nil
   "Cache to store post info, this cache will be used to
+generate rss and tage.")
+
+(defvar blogit-publish-cache-file (concat blogit-cache-dir "/publish.cache")
+  "Cache file to store publish info, this cache will be used to
 generate rss and tage.")
 
 (defvar blogit-linked-cache nil
