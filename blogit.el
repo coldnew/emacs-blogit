@@ -930,5 +930,9 @@ Return output file name."
                      (format-time-string "%s.%3N"
                                          (time-subtract (current-time) start-time))))))
 
+
+;; FIXME:
+;; 1. if post does not conatin #+DATE:, we need to add it automatically
+
 (provide 'blogit)
 ;;; blogit.el ends here.
