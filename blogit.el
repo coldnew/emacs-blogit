@@ -106,7 +106,6 @@ use `blogit-republish-blog'."
         :publishing-directory ,blogit-output-dir
         :base-extension "org"
         :publishing-function org-blogit-publish-to-html
-        :html-link-home ,blogit-site-url
         :recursive t
         ))
 
