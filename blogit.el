@@ -187,6 +187,9 @@ Currently blogit only support following format:
   "Format for printing a date in the sitemap.
 See `format-time-string' for allowed formatters.")
 
+(defvar blogit-tags-dir "tags"
+  "Dir name for storage blogit tags.")
+
 (defvar blogit-cache-dir (concat blogit-output-dir "/.cache")
   "The cache directory for blogit.")
 
@@ -926,7 +929,7 @@ Returns value on success, else nil."
     (error "`blogit-publish-cache-set' called, but no cache present"))
   (puthash key value blogit-publish-cache))
 
-(blogit-publish-cache-get (expand-file-name "~/SparkleShare/blog-src/這只是測試.org"))
+;;(blogit-publish-cache-get (expand-file-name "~/SparkleShare/blog-src/這只是測試.org"))
 
 (defun blogit-publish-update-cache (filename)
   "Update blogit-publish-cache to log post info."
