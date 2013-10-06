@@ -782,6 +782,74 @@ This function is rewrite from `org-publish-org-to'."
 
 ;;; Caching functions
 
+(defun blogit-publish-write-cache-file (&optional free-cache)
+  "Write `blogit-publish-cache' to file.
+If FREE-CACHE, empty the cache."
+  (unless blogit-publish-cache
+    (error "`blogit-publish-write-cache-file' called, but no cache present"))
+
+  (let ((cache-file blogit-publish-cache-file))
+    (unless cache-file
+      (error "Cannot find cache-file name in `blogit-publish-write-cache-file'"))
+    (with-temp-file cache-file
+      (let (print-level print-length)
+	(insert "(setq blogit-publish-cache (make-hash-table :test 'equal :weakness nil :size 100))\n")
+	(maphash (lambda (k v)
+		   (insert
+		    (format (concat "(puthash %S "
+				    (if (or (listp v) (symbolp v))
+					"'" "")
+				    "%S org-publish-cache)\n") k v)))
+		 blogit-publish-cache)))
+    (when free-cache (blogit-publish-reset-cache))))
+
+(defun blogit-publish-initialize-cache ()
+  "Initialize the projects cache if not initialized yet and return it."
+
+  (unless (file-exists-p blogit-cache-dir)
+    (make-directory blogit-cache-dir t))
+  (unless (file-directory-p blogit-cache-dir)
+    (error "Blogit cache: %s is not a directory" blogit-cache-dir))
+
+  (unless blogit-publish-cache
+
+    (let* ((cache-file
+	     (expand-file-name blogit-publish-cache-file))
+
+	   (cexists (file-exists-p cache-file)))
+
+      (when blogit-publish-cache (blogit-publish-reset-cache))
+
+      (if cexists (load-file cache-file)
+	(setq blogit-publish-cache
+	      (make-hash-table :test 'equal :weakness nil :size 100))
+	(blogit-publish-cache-set ":project:" "test")
+	(blogit-publish-cache-set ":cache-file:" cache-file))
+      (unless cexists (blogit-publish-write-cache-file nil))))
+  blogit-publish-cache)
+
+(defun blogit-publish-reset-cache ()
+  "Empty org-publish-cache and reset it nil."
+  (message "%s" "Resetting org-publish-cache")
+  (when (hash-table-p blogit-publish-cache)
+    (clrhash blogit-publish-cache))
+  (setq blogit-publish-cache nil))
+
+(defun blogit-publish-cache-get (key)
+  "Return the value stored in `blogit-publish-cache' for key KEY.
+Returns nil, if no value or nil is found, or the cache does not
+exist."
+  (unless blogit-publish-cache
+    (error "`blogit-publish-cache-get' called, but no cache present"))
+  (gethash key blogit-publish-cache))
+
+(defun blogit-publish-cache-set (key value)
+  "Store KEY VALUE pair in `blogit-publish-cache'.
+Returns value on success, else nil."
+  (unless blogit-publish-cache
+    (error "`blogit-publish-cache-set' called, but no cache present"))
+  (puthash key value blogit-publish-cache))
+
 
 ;;; Debugging functions
 
@@ -901,6 +969,9 @@ When force is t, re-publish all blogit project."
          (output-style-dir (concat output-dir blogit-style-dir))
          (copy-style-dir blogit-always-copy-theme-dir))
 
+    ;; initialize cache for blogit
+    (blogit-publish-initialize-cache)
+
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
     ;; blogit-cache-dir
@@ -922,6 +993,9 @@ When force is t, re-publish all blogit project."
 
     (when copy-style-dir
       (blogit--do-copy source-style-dir output-dir))
+
+    ;; write cache file
+    (blogit-publish-write-cache-file)
 
     ;; calculate publish time
     (message (format "All files published in %ss"
