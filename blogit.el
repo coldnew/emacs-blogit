@@ -882,7 +882,11 @@ Return output file name."
                              plist pub-dir))))
 
 ;;;###autoload
-(defun blogit-publish-blog ()
+(defun blogit-publish-blog (&optional force)
+  "Publush all blogit post, if post already posted and not modified,
+skip it.
+
+When force is t, re-publish all blogit project."
   (interactive)
   (let* ((start-time (current-time)) ;; for statistic purposes only
          (org-publish-timestamp-directory
@@ -891,15 +895,28 @@ Return output file name."
          (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
          (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
          (output-style-dir (concat output-dir blogit-style-dir))
-         (copy-theme-dir blogit-always-copy-theme-dir))
+         (copy-style-dir blogit-always-copy-theme-dir))
+
+    ;; when republish blogit project, we need to remove
+    ;; org-publish-timestamp-directory, which is the same as
+    ;; blogit-cache-dir
+
+    (if (and force
+	     (file-exists-p org-publish-timestamp-directory))
+        (delete-directory org-publish-timestamp-directory t nil))
 
     ;; publish all posts
     (org-publish-project blogit-project-list)
 
     ;; Copy theme-dir to blogit-output-dir when publish
     ;; if theme dir does not exit, re-copy again
-    (unless (file-exists-p output-style-dir) (setq copy-theme-dir t))
-    (when copy-theme-dir
+    ;; when we republish blogit project, also enable
+    ;; copy-style-dir
+    (unless (or force
+		(file-exists-p output-style-dir) )
+		(setq copy-style-dir t))
+
+    (when copy-style-dir
       (blogit--do-copy source-style-dir output-dir))
 
     ;; calculate publish time
@@ -909,27 +926,9 @@ Return output file name."
 
 ;;;###autoload
 (defun blogit-republish-blog ()
+  "Republish all blogit post."
   (interactive)
-  (let* ((start-time (current-time)) ;; for statistic purposes only
-         (org-publish-timestamp-directory
-          (convert-standard-filename (concat blogit-cache-dir "/")))
-         (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
-         (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
-         (org-publish-cache nil))
-    (if (file-exists-p org-publish-timestamp-directory)
-        (delete-directory org-publish-timestamp-directory t nil))
-
-    ;; publish all posts
-    (org-publish-project blogit-project-list)
-
-    ;; copy theme to blogit-output-dir
-    (blogit--do-copy source-style-dir output-dir)
-
-    ;; calculate publish time
-    (message (format "All files published in %ss"
-                     (format-time-string "%s.%3N"
-                                         (time-subtract (current-time) start-time))))))
-
+  (blogit-publish-blog t))
 
 (provide 'blogit)
 ;;; blogit.el ends here.
