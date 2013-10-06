@@ -399,22 +399,18 @@ This function is used to create directory for new blog post.
             (setq dd (if date (format "%02d" date) ""))
             (blogit--parse-date-string1 (concat yyyy "/" mm "/" dd) 1 2 3)))))))
 
-;; FIXME: use blogit--format-to-s-format to modify this function
 (defun blogit--build-export-dir (info)
   "Build export dir path according to #+DATE: option."
-  (let* ((date-str  (blogit--parse-option info :date))
-         (date-list (blogit--parse-date-string date-str))
-         (dir-format (blogit--get-filepath-format info))
-         (dir-1 (split-string dir-format "/"))
-         (dir ""))
+  (let* ((filepath-format-1 (blogit--get-filepath-format info))
+         (filepath-format (blogit--format-to-s-format filepath-format-1))
+         (filepath ""))
+
     ;; Build dir according to export format
-    (dolist (d dir-1)
-      (cond
-       ((string= d "%y") (setq dir (concat dir (plist-get date-list :year))))
-       ((string= d "%m") (setq dir (concat dir (plist-get date-list :month))))
-       ((string= d "%d") (setq dir (concat dir (plist-get date-list :day))))
-       (t (setq dir (concat dir d))))
-      (setq dir (concat dir "/")))
+    (setq filepath
+	  (s-format filepath-format 'aget (blogit--build-format-list info)))
+
+    ;; append a backslash after filepath
+    (setq filepath (concat filepath "/"))
 
     ;; if `#+URL:' has backslah, add it as dir
     (let* ((pdir-str (blogit--get-post-filename info))
@@ -423,13 +419,13 @@ This function is used to create directory for new blog post.
 
       (when pdir
         (dolist (d pdir)
-          (setq dir (concat dir d))))
-      (setq dir (concat dir "/")))
+          (setq filepath (concat filepath d))))
+      (setq filepath (concat filepath "/")))
 
     ;; remove dulpicate /
     (replace-regexp-in-string
      "//*" "/"
-     (format "%s/%s" (directory-file-name blogit-output-dir) dir))))
+     (format "%s/%s" (directory-file-name blogit-output-dir) filepath))))
 
 ;; FIXME: what about ./ ?
 (defun blogit--path-to-root (path)
