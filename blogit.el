@@ -962,8 +962,10 @@ Returns value on success, else nil."
       ;; update tags cache
       (blogit-update-tags-cache info tags))))
 
+;; FIXME: should tatic page need to be ignore by tags?
 (defun blogit-update-tags-cache (info tags)
-  (let ((cache (blogit-cache-get "tags")))
+  (let* ((type (plist-get info :type))
+	 (cache (blogit-cache-get (format "%s-tags" type))))
 
     (dolist (tag tags)
       (let ((key (blogit--string-to-key tag)))
@@ -974,8 +976,8 @@ Returns value on success, else nil."
                   (setq cache (plist-put cache key (+ count 1))))
           (setq cache (plist-put cache key 1)))
 
-	;; add filename to every `tags-%s' cache that files has
-	(let* ((tag-cache (format "tags-%s" tag))
+	;; add filename to every `%s-tags-%s' (type .tagname) cache that files has
+	(let* ((tag-cache (format "%s-tags-%s" type tag))
 	       (tag-cache-val (blogit-cache-get tag-cache))
 
 	       (title (plist-get info :title))
