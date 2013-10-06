@@ -461,8 +461,8 @@ ex:
          (filename (file-name-nondirectory epath))
          (path-dir (file-name-directory epath))
          (rpath (s-replace (expand-file-name blogit-output-dir) "" path-dir)))
-    (replace-regexp-in-string "//*" "/"
-                              (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
+    (blogit--remove-dulpicate-backslash
+     (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
 
 (defun blogit--render-template (type context)
   "Read the file contents, then render it with a hashtable context."
