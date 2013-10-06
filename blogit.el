@@ -144,8 +144,8 @@ For more about type, see `blogit-type-list'."
 (defvar blogit-type-list
   (list
    :draft  '(:type draft)
-   :blog   '(:type blog   :filepath "blog/%y/%m"  :filename "%d_%s.html")
-   :static '(:type static :filepath ""            :filename "%s.html"))
+   :blog   '(:type blog   :root "blog" :filepath "%y/%m"  :filename "%d_%s.html")
+   :static '(:type static :root ""     :filepath ""       :filename "%s.html"))
   "Output dir formate for blogit, use `blogit-output-dir' as root when
 this value is empty string.
 
@@ -216,6 +216,10 @@ generate rss and tage.")
   "Conver symbol to key. eq: test -> :test"
   (blogit--string-to-key (symbol-name symbol)))
 
+(defun blogit--remove-dulpicate-backslash (str)
+  "Remove dulpicate backslash for str."
+  (replace-regexp-in-string "//*" "/"  str))
+
 (defmacro blogit--file-in-temp-buffer (filename &rest pairs)
   "Helper macro to open file in temp buffer, and execute blogit function."
   `(when (file-exists-p ,filename)
@@ -272,8 +276,10 @@ When filename is specified, open the file and get it's post type."
 Use \"\" as fallback."
   (let* ((type (blogit--get-post-type info))
          (info (plist-get blogit-type-list (blogit--symbol-to-key type))))
-
-    (or (plist-get info :filepath) "")))
+    (blogit--remove-dulpicate-backslash
+     (concat
+      (or (plist-get info :root) "") "/"
+      (or (plist-get info :filepath) "")))))
 
 (defun blogit--get-filename-format (info)
   "Get post output filename format according to post type.
@@ -429,8 +435,7 @@ This function is used to create directory for new blog post.
       (setq filepath (concat filepath "/")))
 
     ;; remove dulpicate /
-    (replace-regexp-in-string
-     "//*" "/"
+    (blogit--remove-dulpicate-backslash
      (format "%s/%s" (directory-file-name blogit-output-dir) filepath))))
 
 ;; FIXME: what about ./ ?
@@ -920,6 +925,8 @@ Returns value on success, else nil."
   (unless blogit-publish-cache
     (error "`blogit-publish-cache-set' called, but no cache present"))
   (puthash key value blogit-publish-cache))
+
+(blogit-publish-cache-get (expand-file-name "~/SparkleShare/blog-src/這只是測試.org"))
 
 (defun blogit-publish-update-cache (filename)
   "Update blogit-publish-cache to log post info."
