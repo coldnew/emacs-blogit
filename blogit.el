@@ -908,7 +908,7 @@ If FREE-CACHE, empty the cache."
               (make-hash-table :test 'equal :weakness nil :size 100))
         (blogit-cache-set ":project:" "publish")
         ;;(blogit-cache-set "tags" '())
-        (blogit-cache-set ":cache-file:" cache-file))
+        (blogit-cache-set ":blogit-version:" blogit-version))
       (unless cexists (blogit-write-cache-file nil))))
   blogit-cache)
 
