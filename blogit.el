@@ -61,8 +61,8 @@
   "The output directory for blogit."
   :group 'blogit :type 'string)
 
-(defcustom blogit-site-url nil
-  "Main url for your site."
+(defcustom blogit-site-url ""
+  "Main url for your site. DO NOT use nil here."
   :group 'blogit :type 'string)
 
 (defcustom blogit-rss-number 20
@@ -190,23 +190,35 @@ generate rss and tage.")
 
 ;;; Internal functions
 
-(defun blogit--get-post-type (info)
-  "Get current post type, return `blogit-default-type' if not found."
-  (let* ((typestr (blogit--parse-option info :type))
-         (key (intern (format ":%s-type" typestr)))
-         (type (plist-get blogit-output-format-list key)))
-    (cond
-     ((eq type 'blog) 'blog)
-     ((eq type 'static) 'static)
-     ((eq type 'draft)  'draft)
-     (t blogit-default-type))))
+;; FIXME: dirty function, what if I want to get other option from file ?
+(defun blogit--get-post-type (info &optional filename)
+  "Get current post type, return `blogit-default-type' if not found.
+When filename is specified, open the file and get it's post type."
+  (flet ((blogit---get-post-type
+          (info)
+          (let* ((typestr (blogit--parse-option info :type))
+                 (key (intern (format ":%s-type" typestr)))
+                 (type (plist-get blogit-output-format-list key)))
+            (cond
+             ((eq type 'blog) 'blog)
+             ((eq type 'static) 'static)
+             ((eq type 'draft)  'draft)
+             (t blogit-default-type)))))
+    (if filename
+        (progn
+          (with-temp-buffer
+            (insert-file-contents filename)
+            (buffer-string)
+            (blogit---get-post-type nil)))
+      (blogit---get-post-type info))))
 
 (defun blogit--get-post-dir-format (info)
-  "Get post output format according to post type."
+  "Get post output format according to post type.
+Use \"\" as fallback."
   (let* ((type (blogit--get-post-type info))
          (key (intern (format ":%s-dir" (symbol-name type)))))
 
-    (plist-get blogit-output-format-list key)))
+    (or (plist-get blogit-output-format-list key) "")))
 
 (defun blogit--get-post-filename (info &optional filename)
   "Get current post export filename."
@@ -323,9 +335,6 @@ This function is used to create directory for new blog post.
             (setq mm (if month (format "%02d" month) ""))
             (setq dd (if date (format "%02d" date) ""))
             (blogit--parse-date-string1 (concat yyyy "/" mm "/" dd) 1 2 3)))))))
-
-(butlast '( "b"))
-
 
 (defun blogit--build-export-dir (info)
   "Build export dir path according to #+DATE: option."
@@ -761,6 +770,32 @@ This function is rewrite from `org-publish-org-to'."
       (unless visitingp (kill-buffer work-buffer)))))
 
 
+;;; Debuffing functions
+
+;;;###autoload
+(defun blogit-verify-configuration ()
+  (interactive)
+  "Ensure all required configuration fields are properly configured,
+include:
+
+`blogit-source-dir'
+`blogit-output-dir'
+`blogit-site-url'
+
+Blogit will throw error if not properly configure, this will help to debug
+the problem."
+  (unless (and blogit-source-dir (file-directory-p blogit-source-dir))
+    (error "Variable `%s' is not properly configured or directory does not exist."
+           (symbol-name 'blogit-source-dir)))
+  (unless (and blogit-output-dir (file-directory-p blogit-output-dir))
+    (error "Variable `%s' is not properly configured or directory does not exist."
+           (symbol-name 'blogit-output-dir)))
+  (unless blogit-site-url
+    (error "Variable `%s' is not properly configured."
+           (symbol-name 'blogit-site-url)))
+  (message "Blogit verify configuration SUCCESS!"))
+
+
 ;;; End-user functions
 
 ;;;###autoload
@@ -828,7 +863,7 @@ Return output file name."
               (setq do-publish nil))))
 
     ;; if file is draft, do not publish it
-    (when (eq 'draft (blogit--get-post-type nil)) (setq do-publish nil))
+    (when (eq 'draft (blogit--get-post-type nil filename)) (setq do-publish nil))
 
     ;; only publish when do-publish is t
     (when do-publish
@@ -841,7 +876,7 @@ Return output file name."
 (defun blogit-publish-blog ()
   (interactive)
   (let* ((start-time (current-time)) ;; for statistic purposes only
-	 (org-publish-timestamp-directory
+         (org-publish-timestamp-directory
           (convert-standard-filename (concat blogit-cache-dir "/")))
          (org-publish-cache nil)
          (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
@@ -860,14 +895,14 @@ Return output file name."
 
     ;; calculate publish time
     (message (format "All files published in %ss"
-		     (format-time-string "%s.%3N"
-					 (time-subtract (current-time) start-time))))))
+                     (format-time-string "%s.%3N"
+                                         (time-subtract (current-time) start-time))))))
 
 ;;;###autoload
 (defun blogit-republish-blog ()
   (interactive)
   (let* ((start-time (current-time)) ;; for statistic purposes only
-	 (org-publish-timestamp-directory
+         (org-publish-timestamp-directory
           (convert-standard-filename (concat blogit-cache-dir "/")))
          (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
          (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
@@ -883,8 +918,8 @@ Return output file name."
 
     ;; calculate publish time
     (message (format "All files published in %ss"
-		     (format-time-string "%s.%3N"
-					 (time-subtract (current-time) start-time))))))
+                     (format-time-string "%s.%3N"
+                                         (time-subtract (current-time) start-time))))))
 
 (provide 'blogit)
 ;;; blogit.el ends here.
