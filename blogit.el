@@ -903,7 +903,7 @@ If FREE-CACHE, empty the cache."
         (setq blogit-cache
               (make-hash-table :test 'equal :weakness nil :size 100))
         (blogit-cache-set ":project:" "publish")
-        (blogit-cache-set "tags" '())
+        ;;(blogit-cache-set "tags" '())
         (blogit-cache-set ":cache-file:" cache-file))
       (unless cexists (blogit-write-cache-file nil))))
   blogit-cache)
@@ -960,17 +960,28 @@ Returns value on success, else nil."
       (blogit-cache-set filename info)
 
       ;; update tags cache
-      (blogit-update-tags-cache tags))))
+      (blogit-update-tags-cache info tags))))
 
-(defun blogit-update-tags-cache (tags)
+(defun blogit-update-tags-cache (info tags)
   (let ((cache (blogit-cache-get "tags")))
 
     (dolist (tag tags)
       (let ((key (blogit--string-to-key tag)))
+
+	;; calculate tags count
         (if (member key cache)
             (let ((count (plist-get cache key)))
                   (setq cache (plist-put cache key (+ count 1))))
-          (setq cache (plist-put cache key 1)))))
+          (setq cache (plist-put cache key 1)))
+
+	;; add filename to every `tags-%s' cache that files has
+	(let* ((tag-cache (format "tags-%s" tag))
+	       (tag-cache-val (blogit-cache-get tag-cache))
+
+	       (title (plist-get info :title))
+	       (post-url (plist-get info :post-url)))
+
+	  (blogit-cache-set tag-cache (add-to-list 'tag-cache-val `(,title . ,post-url))))))
 
     (blogit-cache-set "tags" cache)))
 
@@ -1118,12 +1129,12 @@ When force is t, re-publish all blogit project."
                 (file-exists-p output-style-dir) )
       (setq copy-style-dir t))
 
+    ;; write cache file
+    (blogit-write-cache-file)
+
     (when copy-style-dir
       (message "Copy style dir to blogit-output-dir.")
       (blogit--do-copy source-style-dir output-dir))
-
-    ;; write cache file
-    (blogit-write-cache-file)
 
     ;; calculate publish time
     (message (format "All files published in %ss"
