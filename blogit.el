@@ -969,16 +969,17 @@ Returns value on success, else nil."
 tags repeat times."
   (let* ((tags (remove "" (split-string (plist-get info :tags) " ")))
          (type (plist-get info :type))
-         (cache (blogit-cache-get (format "%s-tags" type))))
+         (cache (format "%s-tags" type))
+         (cache-val (blogit-cache-get cache)))
 
     (dolist (tag tags)
       (let ((key (blogit--string-to-key tag)))
 
         ;; calculate tags count
-        (if (member key cache)
-            (let ((count (plist-get cache key)))
-              (setq cache (plist-put cache key (+ count 1))))
-          (setq cache (plist-put cache key 1)))
+        (if (member key cache-val)
+            (let ((count (plist-get cache-val key)))
+              (setq cache-val (plist-put cache-val key (+ count 1))))
+          (setq cache-val (plist-put cache-val key 1)))
 
         ;; add filename to every `%s-tags-%s' (type .tagname) cache that files has
         (let* ((tag-cache (format "%s-tags-%s" type tag))
@@ -989,7 +990,7 @@ tags repeat times."
 
           (blogit-cache-set tag-cache (add-to-list 'tag-cache-val `(,title . ,post-url))))))
 
-    (blogit-cache-set "tags" cache)))
+    (blogit-cache-set cache cache-val)))
 
 (defun blogit-update-recents-cache (info filename)
   "Build recents post cache, post are store in `anti-chronologically' order."
