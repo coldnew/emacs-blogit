@@ -71,8 +71,12 @@ by `blogit--sanitize-string' not so long, you can
 set it to small size, eg: 5."
   :group 'blogit :type 'integer)
 
-(defcustom blogit-rss-number 20
+(defcustom blogit-rss-number 10
   "How many post do you want to have in rss."
+  :group 'blogit :type 'integer)
+
+(defcustom blogit-recents-number 10
+  "How many post do you want to have in recent post list."
   :group 'blogit :type 'integer)
 
 (defcustom blogit-google-analytics-id nil
@@ -959,8 +963,10 @@ Returns value on success, else nil."
       (blogit-update-recents-cache info filename)
       )))
 
-;; FIXME: should tatic page need to be ignore by tags?
+;; FIXME: should static page need to be ignore by tags?
 (defun blogit-update-tags-cache (info)
+  "Build tags info for all files, this function will also count every
+tags repeat times."
   (let* ((tags (remove "" (split-string (plist-get info :tags) " ")))
          (type (plist-get info :type))
          (cache (blogit-cache-get (format "%s-tags" type))))
@@ -986,7 +992,8 @@ Returns value on success, else nil."
     (blogit-cache-set "tags" cache)))
 
 (defun blogit-update-recents-cache (info filename)
-  (flet ((date>
+  "Build recents post cache, post are store in `anti-chronologically' order."
+  (flet ((anti-chronologically
           (a b)
           (let* ((adate (org-time-string-to-time (car a)))
                  (bdate (org-time-string-to-time (car b)))
@@ -999,11 +1006,17 @@ Returns value on success, else nil."
 		(cache (format "%s-recents" type))
                 (cache-val (blogit-cache-get cache)))
 
+	   ;; add current file info to cache and sort by date
+	   ;; in `anti-chronologically' order.
            (setq cache-val (add-to-list 'cache-val `(,date . ,filename)))
-           (setq cache-val (sort cache-val #'date>))
+           (setq cache-val (sort cache-val #'anti-chronologically))
 
-           (blogit-cache-set cache cache-val)
-           )))
+	   ;; we only take what we need in recents cache
+           (setq cache-val (-take
+			    (max blogit-rss-number blogit-recents-number)
+			    cache-val))
+
+           (blogit-cache-set cache cache-val))))
 
 
 ;;; Debugging functions
