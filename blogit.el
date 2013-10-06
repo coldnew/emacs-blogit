@@ -930,12 +930,6 @@ Returns value on success, else nil."
     (error "`blogit-cache-set' called, but no cache present"))
   (puthash key value blogit-cache))
 
-;;(split-string (plist-get (blogit-cache-get (expand-file-name "~/SparkleShare/blog-src/為什麼有些ARM平台需要x-loader.org")) :tags) " ")
-
-;;(remove '("") '("" 3) :test #'equal)
-;;(plist-)
-;;(blogit-cache-get "tags")
-
 (defun blogit-update-cache (filename)
   "Update blogit-cache to log post info."
   (flet ((get-info (key)
@@ -953,39 +947,63 @@ Returns value on success, else nil."
               (list
                (map 'list 'get-info '(:title :date :language :tags))
                :type (blogit--get-post-type nil)
-               :post-url (post-url)))))
-           (tags (remove "" (split-string (plist-get info :tags) " "))))
+               :post-url (post-url))))))
 
       ;; update fileinfo cache
       (blogit-cache-set filename info)
 
       ;; update tags cache
-      (blogit-update-tags-cache info tags))))
+      (blogit-update-tags-cache info)
+
+      ;; update recent post cache, this cache also for rss
+      (blogit-update-recents-cache info filename)
+      )))
 
 ;; FIXME: should tatic page need to be ignore by tags?
-(defun blogit-update-tags-cache (info tags)
-  (let* ((type (plist-get info :type))
-	 (cache (blogit-cache-get (format "%s-tags" type))))
+(defun blogit-update-tags-cache (info)
+  (let* ((tags (remove "" (split-string (plist-get info :tags) " ")))
+         (type (plist-get info :type))
+         (cache (blogit-cache-get (format "%s-tags" type))))
 
     (dolist (tag tags)
       (let ((key (blogit--string-to-key tag)))
 
-	;; calculate tags count
+        ;; calculate tags count
         (if (member key cache)
             (let ((count (plist-get cache key)))
-                  (setq cache (plist-put cache key (+ count 1))))
+              (setq cache (plist-put cache key (+ count 1))))
           (setq cache (plist-put cache key 1)))
 
-	;; add filename to every `%s-tags-%s' (type .tagname) cache that files has
-	(let* ((tag-cache (format "%s-tags-%s" type tag))
-	       (tag-cache-val (blogit-cache-get tag-cache))
+        ;; add filename to every `%s-tags-%s' (type .tagname) cache that files has
+        (let* ((tag-cache (format "%s-tags-%s" type tag))
+               (tag-cache-val (blogit-cache-get tag-cache))
 
-	       (title (plist-get info :title))
-	       (post-url (plist-get info :post-url)))
+               (title (plist-get info :title))
+               (post-url (plist-get info :post-url)))
 
-	  (blogit-cache-set tag-cache (add-to-list 'tag-cache-val `(,title . ,post-url))))))
+          (blogit-cache-set tag-cache (add-to-list 'tag-cache-val `(,title . ,post-url))))))
 
     (blogit-cache-set "tags" cache)))
+
+(defun blogit-update-recents-cache (info filename)
+  (flet ((date>
+          (a b)
+          (let* ((adate (org-time-string-to-time (car a)))
+                 (bdate (org-time-string-to-time (car b)))
+                 (A (+ (lsh (car adate) 16) (cadr adate)))
+                 (B (+ (lsh (car bdate) 16) (cadr bdate))))
+            (>= A B))))
+
+         (let* ((date (plist-get info :date))
+                (type (plist-get info :type))
+		(cache (format "%s-recents" type))
+                (cache-val (blogit-cache-get cache)))
+
+           (setq cache-val (add-to-list 'cache-val `(,date . ,filename)))
+           (setq cache-val (sort cache-val #'date>))
+
+           (blogit-cache-set cache cache-val)
+           )))
 
 
 ;;; Debugging functions
