@@ -39,6 +39,9 @@
 
 (eval-when-compile (require 'cl))
 
+
+;;; Blogit info
+
 (defconst blogit-version "0.1"
   "Blogit version string.")
 
@@ -51,7 +54,7 @@
 
 (defgroup blogit nil
   "Options for generating static pages using blogit."
-  :tag "Org static page generator" :group 'org)
+  :tag "blogit static page generator" :group 'org)
 
 (defcustom blogit-source-dir nil
   "The source directory for blogit."
@@ -172,11 +175,11 @@ Currently blogit only support following format:
    :page_footer        "page_footer.html"
    :plugin_analytics   "plugin_analytics.html"
    :plugin_disqus      "plugin_disqus.html"
+   :rss                "rss.xml"
    :newpost            "newpost.org"
 
    ;; FIXME: still not use
    :page_navigator    "page_navigator.html"
-   :blog_rss          "blog_rss.html"
    :blog_post         "blog_post.html"
    :blog_index        "blog_index.html"
    :index             "index.html"
@@ -201,7 +204,7 @@ See `format-time-string' for allowed formatters.")
   "Cache to store post info, this cache will be used to
 generate rss and tage.")
 
-(defvar blogit-publish-cache-file (concat blogit-cache-dir "/publish.cache")
+(defvar blogit-cache-file (concat blogit-cache-dir "/publish.cache")
   "Cache file to store publish info, this cache will be used to
 generate rss and tage.")
 
@@ -742,7 +745,19 @@ holding export options."
 
 ;; TODO: finish this function
 (defun blogit-publish-rss ()
-  "Publish rss file for blogit.")
+  "Publish rss file for blogit."
+  (let (avliable-type)
+
+    ;; Find avliable blog type info from blogit-type-list
+    ;; NOTE: the type here actually is key, be cereful.
+    (dolist (l blogit-type-list)
+      (if (and (symbolp l)
+	       (eq 'blog (plist-get (plist-get blogit-type-list l) :type)))
+          (setq avliable-type (-flatten (add-to-list 'avliable-type l)))))
+
+    ;; TODO: generate rss
+
+    ))
 
 
 ;;; Rewrite some org function to make blogit work more properly
@@ -856,7 +871,7 @@ If FREE-CACHE, empty the cache."
   (unless blogit-cache
     (error "`blogit-write-cache-file' called, but no cache present"))
 
-  (let ((cache-file blogit-publish-cache-file))
+  (let ((cache-file blogit-cache-file))
     (unless cache-file
       (error "Cannot find cache-file name in `blogit-write-cache-file'"))
     (with-temp-file cache-file
@@ -882,7 +897,7 @@ If FREE-CACHE, empty the cache."
   (unless blogit-cache
 
     (let* ((cache-file
-            (expand-file-name blogit-publish-cache-file))
+            (expand-file-name blogit-cache-file))
 
            (cexists (file-exists-p cache-file)))
 
@@ -987,22 +1002,22 @@ tags repeat times."
                  (B (+ (lsh (car bdate) 16) (cadr bdate))))
             (>= A B))))
 
-         (let* ((date (plist-get info :date))
-                (type (plist-get info :type))
-		(cache (format "%s-recents" type))
-                (cache-val (blogit-cache-get cache)))
+    (let* ((date (plist-get info :date))
+           (type (plist-get info :type))
+           (cache (format "%s-recents" type))
+           (cache-val (blogit-cache-get cache)))
 
-	   ;; add current file info to cache and sort by date
-	   ;; in `anti-chronologically' order.
-           (setq cache-val (add-to-list 'cache-val `(,date . ,filename)))
-           (setq cache-val (sort cache-val #'anti-chronologically))
+      ;; add current file info to cache and sort by date
+      ;; in `anti-chronologically' order.
+      (setq cache-val (add-to-list 'cache-val `(,date . ,filename)))
+      (setq cache-val (sort cache-val #'anti-chronologically))
 
-	   ;; we only take what we need in recents cache
-           (setq cache-val (-take
-			    (max blogit-rss-number blogit-recents-number)
-			    cache-val))
+      ;; we only take what we need in recents cache
+      (setq cache-val (-take
+                       (max blogit-rss-number blogit-recents-number)
+                       cache-val))
 
-           (blogit-cache-set cache cache-val))))
+      (blogit-cache-set cache cache-val))))
 
 
 ;;; Debugging functions
