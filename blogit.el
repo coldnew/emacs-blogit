@@ -931,8 +931,9 @@ Return output file name."
                                          (time-subtract (current-time) start-time))))))
 
 
-;; FIXME:
-;; 1. if post does not conatin #+DATE:, we need to add it automatically
-
 (provide 'blogit)
 ;;; blogit.el ends here.
+
+;; FIXME:
+;; 1. if post does not conatin #+DATE:, we need to add it automatically
+;; 2. make template more useful
