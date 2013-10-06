@@ -193,7 +193,7 @@ See `format-time-string' for allowed formatters.")
 (defvar blogit-cache-dir (concat blogit-output-dir "/.cache")
   "The cache directory for blogit.")
 
-(defvar blogit-publish-cache nil
+(defvar blogit-cache nil
   "Cache to store post info, this cache will be used to
 generate rss and tage.")
 
@@ -259,14 +259,14 @@ When filename is specified, open the file and get it's post type."
 (defun blogit--build-format-list (info &optional file)
   "Cons cells for blogit s-formate."
   (let* ((date-str  (blogit--parse-option info :date))
-	(date-list (blogit--parse-date-string date-str))
-	(year (or (plist-get date-list :year) ""))
-	(month (or (plist-get date-list :month) ""))
-	(day (or (plist-get date-list :day) ""))
-	(url (or (blogit--parse-option info :url) ""))
-	(filename (file-name-base (or file (buffer-base-buffer) "")))
-	(sanitize (if (not (string= "" url)) url
-		    (s-left blogit-sanitize-length (blogit--sanitize-string filename)))))
+         (date-list (blogit--parse-date-string date-str))
+         (year (or (plist-get date-list :year) ""))
+         (month (or (plist-get date-list :month) ""))
+         (day (or (plist-get date-list :day) ""))
+         (url (or (blogit--parse-option info :url) ""))
+         (filename (file-name-base (or file (buffer-base-buffer) "")))
+         (sanitize (if (not (string= "" url)) url
+                     (s-left blogit-sanitize-length (blogit--sanitize-string filename)))))
     (list
      (cons "year" year)
      (cons "month" month)
@@ -296,12 +296,12 @@ Use \"%s\" as fallback."
   "Get current post export filename. When #+URL contains `backslash',
 the default format will be ignored."
   (let* ((url (blogit--parse-option info :url))
-	 (use-url-p (s-contains? "/" (or url ""))))
+         (use-url-p (s-contains? "/" (or url ""))))
     (if use-url-p url
       (let* ((blogit-format (blogit--get-filename-format info))
-            ;; rebuild the formate and use s-format to formate it
-            (filename-format (blogit--format-to-s-format blogit-format)))
-	(s-format filename-format 'aget (blogit--build-format-list info filename))))))
+             ;; rebuild the formate and use s-format to formate it
+             (filename-format (blogit--format-to-s-format blogit-format)))
+        (s-format filename-format 'aget (blogit--build-format-list info filename))))))
 
 ;; FIXME:
 (defun blogit--file-to-string (file)
@@ -422,7 +422,7 @@ This function is used to create directory for new blog post.
 
     ;; Build dir according to export format
     (setq filepath
-	  (s-format filepath-format 'aget (blogit--build-format-list info)))
+          (s-format filepath-format 'aget (blogit--build-format-list info)))
 
     ;; append a backslash after filepath
     (setq filepath (concat filepath "/"))
@@ -861,28 +861,28 @@ This function is rewrite from `org-publish-org-to'."
 
 ;;; Caching functions
 
-(defun blogit-publish-write-cache-file (&optional free-cache)
-  "Write `blogit-publish-cache' to file.
+(defun blogit-write-cache-file (&optional free-cache)
+  "Write `blogit-cache' to file.
 If FREE-CACHE, empty the cache."
-  (unless blogit-publish-cache
-    (error "`blogit-publish-write-cache-file' called, but no cache present"))
+  (unless blogit-cache
+    (error "`blogit-write-cache-file' called, but no cache present"))
 
   (let ((cache-file blogit-publish-cache-file))
     (unless cache-file
-      (error "Cannot find cache-file name in `blogit-publish-write-cache-file'"))
+      (error "Cannot find cache-file name in `blogit-write-cache-file'"))
     (with-temp-file cache-file
       (let (print-level print-length)
-        (insert "(setq blogit-publish-cache (make-hash-table :test 'equal :weakness nil :size 100))\n")
+        (insert "(setq blogit-cache (make-hash-table :test 'equal :weakness nil :size 100))\n")
         (maphash (lambda (k v)
                    (insert
                     (format (concat "(puthash %S "
                                     (if (or (listp v) (symbolp v))
                                         "'" "")
-                                    "%S blogit-publish-cache)\n") k v)))
-                 blogit-publish-cache)))
-    (when free-cache (blogit-publish-reset-cache))))
+                                    "%S blogit-cache)\n") k v)))
+                 blogit-cache)))
+    (when free-cache (blogit-reset-cache))))
 
-(defun blogit-publish-initialize-cache ()
+(defun blogit-initialize-cache ()
   "Initialize the projects cache if not initialized yet and return it."
 
   (unless (file-exists-p blogit-cache-dir)
@@ -890,49 +890,54 @@ If FREE-CACHE, empty the cache."
   (unless (file-directory-p blogit-cache-dir)
     (error "Blogit cache: %s is not a directory" blogit-cache-dir))
 
-  (unless blogit-publish-cache
+  (unless blogit-cache
 
     (let* ((cache-file
             (expand-file-name blogit-publish-cache-file))
 
            (cexists (file-exists-p cache-file)))
 
-      (when blogit-publish-cache (blogit-publish-reset-cache))
+      (when blogit-cache (blogit-reset-cache))
 
       (if cexists (load-file cache-file)
-        (setq blogit-publish-cache
+        (setq blogit-cache
               (make-hash-table :test 'equal :weakness nil :size 100))
-        (blogit-publish-cache-set ":project:" "publish")
-        (blogit-publish-cache-set ":cache-file:" cache-file))
-      (unless cexists (blogit-publish-write-cache-file nil))))
-  blogit-publish-cache)
+        (blogit-cache-set ":project:" "publish")
+        (blogit-cache-set "tags" '())
+        (blogit-cache-set ":cache-file:" cache-file))
+      (unless cexists (blogit-write-cache-file nil))))
+  blogit-cache)
 
-(defun blogit-publish-reset-cache ()
+(defun blogit-reset-cache ()
   "Empty org-publish-cache and reset it nil."
-  (message "%s" "Resetting blogit-publish-cache")
-  (when (hash-table-p blogit-publish-cache)
-    (clrhash blogit-publish-cache))
-  (setq blogit-publish-cache nil))
+  (message "%s" "Resetting blogit-cache")
+  (when (hash-table-p blogit-cache)
+    (clrhash blogit-cache))
+  (setq blogit-cache nil))
 
-(defun blogit-publish-cache-get (key)
-  "Return the value stored in `blogit-publish-cache' for key KEY.
+(defun blogit-cache-get (key)
+  "Return the value stored in `blogit-cache' for key KEY.
 Returns nil, if no value or nil is found, or the cache does not
 exist."
-  (unless blogit-publish-cache
-    (error "`blogit-publish-cache-get' called, but no cache present"))
-  (gethash key blogit-publish-cache))
+  (unless blogit-cache
+    (error "`blogit-cache-get' called, but no cache present"))
+  (gethash key blogit-cache))
 
-(defun blogit-publish-cache-set (key value)
-  "Store KEY VALUE pair in `blogit-publish-cache'.
+(defun blogit-cache-set (key value)
+  "Store KEY VALUE pair in `blogit-cache'.
 Returns value on success, else nil."
-  (unless blogit-publish-cache
-    (error "`blogit-publish-cache-set' called, but no cache present"))
-  (puthash key value blogit-publish-cache))
+  (unless blogit-cache
+    (error "`blogit-cache-set' called, but no cache present"))
+  (puthash key value blogit-cache))
 
-;;(blogit-publish-cache-get (expand-file-name "~/SparkleShare/blog-src/這只是測試.org"))
+;;(split-string (plist-get (blogit-cache-get (expand-file-name "~/SparkleShare/blog-src/為什麼有些ARM平台需要x-loader.org")) :tags) " ")
 
-(defun blogit-publish-update-cache (filename)
-  "Update blogit-publish-cache to log post info."
+;;(remove '("") '("" 3) :test #'equal)
+;;(plist-)
+;;(blogit-cache-get "tags")
+
+(defun blogit-update-cache (filename)
+  "Update blogit-cache to log post info."
   (flet ((get-info (key)
                    (list key (blogit--parse-option nil key)))
          (post-url ()
@@ -948,10 +953,26 @@ Returns value on success, else nil."
               (list
                (map 'list 'get-info '(:title :date :language :tags))
                :type (blogit--get-post-type nil)
-               :post-url (post-url)
-               )))))
+               :post-url (post-url)))))
+           (tags (remove "" (split-string (plist-get info :tags) " "))))
 
-      (blogit-publish-cache-set filename info))))
+      ;; update fileinfo cache
+      (blogit-cache-set filename info)
+
+      ;; update tags cache
+      (blogit-update-tags-cache tags))))
+
+(defun blogit-update-tags-cache (tags)
+  (let ((cache (blogit-cache-get "tags")))
+
+    (dolist (tag tags)
+      (let ((key (blogit--string-to-key tag)))
+        (if (member key cache)
+            (let ((count (plist-get cache key)))
+                  (setq cache (plist-put cache key (+ count 1))))
+          (setq cache (plist-put cache key 1)))))
+
+    (blogit-cache-set "tags" cache)))
 
 
 ;;; Debugging functions
@@ -1056,7 +1077,7 @@ Return output file name."
                                              org-html-extension "html"))
                              plist pub-dir)
       ;; Add file info to blogit cache
-      (blogit-publish-update-cache filename))))
+      (blogit-update-cache filename))))
 
 ;;;###autoload
 (defun blogit-publish-blog (&optional force)
@@ -1077,12 +1098,14 @@ When force is t, re-publish all blogit project."
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
     ;; blogit-cache-dir
-    (if (and force
-             (file-exists-p org-publish-timestamp-directory))
-        (delete-directory org-publish-timestamp-directory t nil))
+    (when (and force
+               (file-exists-p org-publish-timestamp-directory))
+      (delete-directory org-publish-timestamp-directory t nil)
+      ;; reset blogit cache
+      (blogit-reset-cache))
 
     ;; initialize cache for blogit
-    (blogit-publish-initialize-cache)
+    (blogit-initialize-cache)
 
     ;; publish all posts
     (org-publish-project blogit-project-list)
@@ -1100,7 +1123,7 @@ When force is t, re-publish all blogit project."
       (blogit--do-copy source-style-dir output-dir))
 
     ;; write cache file
-    (blogit-publish-write-cache-file)
+    (blogit-write-cache-file)
 
     ;; calculate publish time
     (message (format "All files published in %ss"
