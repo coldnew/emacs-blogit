@@ -750,10 +750,10 @@ holding export options."
 
     ;; Find avliable blog type info from blogit-type-list
     ;; NOTE: the type here actually is key, be cereful.
-    (dolist (l blogit-type-list)
-      (if (and (symbolp l)
-	       (eq 'blog (plist-get (plist-get blogit-type-list l) :type)))
-          (setq avliable-type (-flatten (add-to-list 'avliable-type l)))))
+    (dolist (k blogit-type-list)
+      (if (and (symbolp k)
+	       (eq 'blog (plist-get (plist-get blogit-type-list k) :type)))
+          (setq avliable-type (-flatten (add-to-list 'avliable-type k)))))
 
     ;; TODO: generate rss
 
