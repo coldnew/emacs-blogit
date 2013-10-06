@@ -659,6 +659,9 @@ holding export options."
 
       (org-html-template contents info))))
 
+
+;;; Extra functions for blogit-publish
+
 (defun blogit-export-linked-file (output-file)
   "Copy all linked file to dst."
   (let ((cache blogit-linked-cache)
