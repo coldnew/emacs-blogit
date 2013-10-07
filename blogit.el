@@ -315,6 +315,20 @@ the default format will be ignored."
   "Read the content of FILE and return it as a string."
   (with-temp-buffer (insert-file-contents file) (buffer-string)))
 
+(defun blogit--string-to-file (string file &optional mode)
+  "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
+mode, format the string with MODE's format settings."
+  (with-temp-buffer
+    (insert string)
+    (set-buffer-file-coding-system 'utf-8-unix)
+    (when (and mode (functionp mode))
+      (funcall mode)
+      (flush-lines "^[ \\t]*$" (point-min) (point-max))
+      (delete-trailing-whitespace (point-min) (point-max))
+      (indent-region (point-min) (point-max)))
+    (when (file-writable-p file)
+      (write-region (point-min) (point-max) file))))
+
 ;; FIXME:
 (defun blogit--template-to-string (file)
   "Read the content of FILE in template dir and return it as string."
