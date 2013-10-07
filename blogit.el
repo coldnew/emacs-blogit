@@ -148,6 +148,7 @@ For more about type, see `blogit-type-list'."
           (const :tag "static" static)
           (const :tag "draft"  draft)))
 
+;; FIXME: not let anyone modified this ?
 (defvar blogit-type-list
   (list
    :draft  '(:type draft)
