@@ -226,6 +226,11 @@ generate rss and tage.")
   "Conver symbol to key. eq: test -> :test"
   (blogit--string-to-key (symbol-name symbol)))
 
+(defun blogit--key-to-string (key)
+  "Conver symbol to key. eq: test -> :test"
+  (let ((key-str (symbol-name key)))
+    (s-right (- (length key-str) 1) key-str)))
+
 (defun blogit--remove-dulpicate-backslash (str)
   "Remove dulpicate backslash for str."
   (replace-regexp-in-string "//*" "/"  str))
@@ -757,6 +762,7 @@ holding export options."
     ;; do not forget to clear cache
     (setq blogit-linked-cache nil)))
 
+
 ;; TODO: finish this function
 (defun blogit-publish-rss ()
   "Publish rss file for blogit."
@@ -771,9 +777,28 @@ holding export options."
 
     ;; TODO: generate rss
     (dolist (k avliable-types)
+      (let* ((cache (format "%s-recents" (blogit--key-to-string k)))
+	     (cache-val (blogit-cache-get cache)))
+      (blogit--string-to-file
+       (blogit--render-template
+	:rss
+	(blogit--build-context
+	 nil
+	 ("ITEMS"
+	  (--map
+	     (ht
+	  	  ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
+		  ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
+	  	  ("DESCRIPTION" (plist-get (blogit-cache-get (cdr it)) :description))
+	  	  ("DATE" (plist-get (blogit-cache-get (cdr it)) :date))
+		  ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link))
+		  )
+	     cache-val))))
 
-
-      )))
+       ;; FIXME:
+       (blogit--remove-dulpicate-backslash
+	(concat blogit-output-dir "/" "rss.xml")))
+      ))))
 
 
 ;;; Rewrite some org function to make blogit work more properly
@@ -959,15 +984,20 @@ Returns value on success, else nil."
                            (s-replace
                             (concat (expand-file-name blogit-output-dir) "/") ""
                             (expand-file-name (blogit--build-export-dir nil)))
-                           (blogit--get-post-filename nil filename))))
+                           (blogit--get-post-filename nil filename)))
+	 (post-link ()
+		    (blogit--remove-dulpicate-backslash
+		     (concat blogit-site-url "/" (post-url)))))
     (let* ((info
             (blogit--file-in-temp-buffer
              filename
              (-flatten
               (list
-               (map 'list 'get-info '(:title :date :language :tags))
+               (map 'list 'get-info '(:title :date :language :tags :description))
                :type (blogit--get-post-type nil)
-               :post-url (post-url))))))
+               :post-url (post-url)
+	       :post-link (post-link)
+	       )))))
 
       ;; update fileinfo cache
       (blogit-cache-set filename info)

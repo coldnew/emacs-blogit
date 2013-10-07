@@ -21,11 +21,12 @@
 
   {{#ITEMS}}
   <item>
-    <title>{{ITEM-TITLE}}</title>
-    <link>{{ITEM-LINK}}</link>
-    <description>{{ITEM-DESCRIPTION}}</description>
-    <pubDate>{{ITEM-DATE}}</pubDate>
-    <guid>{{ITEM-LINK}}</guid>
+    <title>{{TITLE}}</title>
+    <link>{{POST_URL}}</link>
+    <description>{{DESCRIPTION}}</description>
+    <pubDate>{{DATE}}</pubDate>
+    <guid>{{POST_LINK}}</guid>
   </item>
   {{/ITEMS}}
+
 </feed>
