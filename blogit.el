@@ -5,7 +5,7 @@
 ;; Author: coldnew <coldnew.tw@gmail.com>
 ;; Keywords: html blog org-mode
 ;; X-URL: http://github.com/coldnew/emacs-blogit
-;; Version: 0.1
+;; Version: 0.2
 
 ;; This file is not part of GNU Emacs.
 
@@ -42,7 +42,7 @@
 
 ;;; Blogit info
 
-(defconst blogit-version "0.1"
+(defconst blogit-version "0.2"
   "Blogit version string.")
 
 (defconst blogit-url
