@@ -320,6 +320,13 @@ the default format will be ignored."
              (filename-format (blogit--format-to-s-format blogit-format)))
         (s-format filename-format 'aget (blogit--build-format-list info filename))))))
 
+(defun blogit--get-tags (info &optional filename)
+  "Get blogit tags in list from info or filename."
+  (let* ((tag-opt (or (blogit--parse-option info :tags filename) ""))
+         (tags (split-string tag-opt " ")))
+    ;; remove empty string and dulpicate tag
+    (remove-duplicates (remove "" tags) :test 'string=)))
+
 ;; FIXME:
 (defun blogit--file-to-string (file)
   "Read the content of FILE and return it as a string."
@@ -1014,14 +1021,8 @@ Returns value on success, else nil."
       (blogit-update-recents-cache info filename)
       )))
 
-(defun blogit--get-tags (info &optional filename)
-  "Get blogit tags in list from info or filename."
-  (let* ((tag-opt (or (blogit--parse-option info :tags filename) ""))
-         (tags (split-string tag-opt " ")))
-    ;; remove empty string and dulpicate tag
-    (remove-duplicates (remove "" tags) :test 'string=)))
-
 ;; FIXME: should static page need to be ignore by tags?
+
 (defun blogit-update-tags-cache (info)
   "Build tags info for all files, this function will also count every
 tags repeat times."
@@ -1055,7 +1056,8 @@ tags repeat times."
 ;; want this feature ?
 
 (defun blogit-update-recents-cache (info filename)
-  "Build recents post cache, post are store in `anti-chronologically' order."
+  "Build recents post cache, post are store in `anti-chronologically' order.
+This cache will be used to build rss and recent post."
   (flet ((anti-chronologically
           (a b)
           (let* ((adate (org-time-string-to-time (car a)))
