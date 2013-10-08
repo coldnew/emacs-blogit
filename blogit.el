@@ -228,9 +228,13 @@ generate rss and tage.")
   (blogit--string-to-key (symbol-name symbol)))
 
 (defun blogit--key-to-string (key)
-  "Conver symbol to key. eq: test -> :test"
+  "Conver key to string. eq: :test -> \"test\""
   (let ((key-str (symbol-name key)))
     (s-right (- (length key-str) 1) key-str)))
+
+(defun blogit--key-to-symbol (key)
+  "Conver key to symbol. eq: test -> :test"
+  (intern (blogit--key-to-string key)))
 
 (defun blogit--remove-dulpicate-backslash (str)
   "Remove dulpicate backslash for str."
