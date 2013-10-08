@@ -762,7 +762,7 @@ holding export options."
 
 ;;; Extra functions for blogit-publish
 
-(defun blogit-export-linked-file (output-file)
+(defun blogit-publish-linked-file (output-file)
   "Copy all linked file to dst."
   (let ((cache blogit-linked-cache)
         (pub-dir (concat (file-name-directory output-file) (file-name-base output-file))))
@@ -773,7 +773,6 @@ holding export options."
         (blogit--do-copy src dst)))
     ;; do not forget to clear cache
     (setq blogit-linked-cache nil)))
-
 
 ;; TODO: finish this function
 ;; TODO: how about add atom support ?
@@ -909,7 +908,7 @@ This function is rewrite from `org-publish-org-to'."
                            (cons 'org-publish-collect-index
                                  (plist-get plist :filter-final-output))))))
                ;; copy all needed file for output-file
-               (blogit-export-linked-file output-file)))
+               (blogit-publish-linked-file output-file)))
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 
