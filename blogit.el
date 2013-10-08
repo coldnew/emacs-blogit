@@ -777,33 +777,33 @@ holding export options."
     ;; NOTE: the type here actually is key, be cereful.
     (dolist (k blogit-type-list)
       (if (and (symbolp k)
-	       (eq 'blog (plist-get (plist-get blogit-type-list k) :type)))
+               (eq 'blog (plist-get (plist-get blogit-type-list k) :type)))
           (setq avliable-types (-flatten (add-to-list 'avliable-types k)))))
 
     ;; TODO: generate rss
     (dolist (k avliable-types)
       (let* ((cache (format "%s-recents" (blogit--key-to-string k)))
-	     (cache-val (blogit-cache-get cache)))
-      (blogit--string-to-file
-       (blogit--render-template
-	:rss
-	(blogit--build-context
-	 nil
-	 ("ITEMS"
-	  (--map
-	     (ht
-	  	  ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
-		  ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
-	  	  ("DESCRIPTION" (plist-get (blogit-cache-get (cdr it)) :description))
-	  	  ("DATE" (plist-get (blogit-cache-get (cdr it)) :date))
-		  ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link))
-		  )
-	     cache-val))))
+             (cache-val (blogit-cache-get cache)))
+        (blogit--string-to-file
+         (blogit--render-template
+          :rss
+          (blogit--build-context
+           nil
+           ("ITEMS"
+            (--map
+             (ht
+              ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
+              ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
+              ("DESCRIPTION" (plist-get (blogit-cache-get (cdr it)) :description))
+              ("DATE" (plist-get (blogit-cache-get (cdr it)) :date))
+              ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link))
+              )
+             cache-val))))
 
-       ;; FIXME:
-       (blogit--remove-dulpicate-backslash
-	(concat blogit-output-dir "/" "rss.xml")))
-      ))))
+         ;; FIXME:
+         (blogit--remove-dulpicate-backslash
+          (concat blogit-output-dir "/" "rss.xml")))
+        ))))
 
 
 ;;; Rewrite some org function to make blogit work more properly
@@ -990,9 +990,9 @@ Returns value on success, else nil."
                             (concat (expand-file-name blogit-output-dir) "/") ""
                             (expand-file-name (blogit--build-export-dir nil)))
                            (blogit--get-post-filename nil filename)))
-	 (post-link ()
-		    (blogit--remove-dulpicate-backslash
-		     (concat blogit-site-url "/" (post-url)))))
+         (post-link ()
+                    (blogit--remove-dulpicate-backslash
+                     (concat blogit-site-url "/" (post-url)))))
     (let* ((info
             (blogit--file-in-temp-buffer
              filename
@@ -1001,8 +1001,8 @@ Returns value on success, else nil."
                (map 'list 'get-info '(:title :date :language :tags :description))
                :type (blogit--get-post-type nil)
                :post-url (post-url)
-	       :post-link (post-link)
-	       )))))
+               :post-link (post-link)
+               )))))
 
       ;; update fileinfo cache
       (blogit-cache-set filename info)
@@ -1017,7 +1017,7 @@ Returns value on success, else nil."
 (defun blogit--get-tags (info &optional filename)
   "Get blogit tags in list from info or filename."
   (let* ((tag-opt (or (blogit--parse-option info :tags filename) ""))
-	 (tags (split-string tag-opt " ")))
+         (tags (split-string tag-opt " ")))
     ;; remove empty string and dulpicate tag
     (remove-duplicates (remove "" tags) :test 'string=)))
 
@@ -1026,8 +1026,7 @@ Returns value on success, else nil."
   "Build tags info for all files, this function will also count every
 tags repeat times."
   (let* ((tags (blogit--get-tags info))
-         (type (plist-get info :type))
-         (cache (format "%s-tags" type))
+         (cache "tags")
          (cache-val (blogit-cache-get cache)))
 
     (dolist (tag tags)
@@ -1039,8 +1038,8 @@ tags repeat times."
               (setq cache-val (plist-put cache-val key (+ count 1))))
           (setq cache-val (plist-put cache-val key 1)))
 
-        ;; add filename to every `%s-tags-%s' (type .tagname) cache that files has
-        (let* ((tag-cache (format "%s-tags-%s" type tag))
+        ;; add filename to every `tags-name' cache that files has
+        (let* ((tag-cache (format "tags-%s" tag))
                (tag-cache-val (blogit-cache-get tag-cache))
 
                (title (plist-get info :title))
@@ -1049,6 +1048,11 @@ tags repeat times."
           (blogit-cache-set tag-cache (add-to-list 'tag-cache-val `(,title . ,post-url))))))
 
     (blogit-cache-set cache cache-val)))
+
+;; TODO:
+;; In traditional way, a `static' page should not be log into rss
+;; feed, we also prevent add static page in our feed, but what if user
+;; want this feature ?
 
 (defun blogit-update-recents-cache (info filename)
   "Build recents post cache, post are store in `anti-chronologically' order."
@@ -1062,20 +1066,22 @@ tags repeat times."
 
     (let* ((date (plist-get info :date))
            (type (plist-get info :type))
-           (cache (format "%s-recents" type))
+           (cache "recents")
            (cache-val (blogit-cache-get cache)))
 
-      ;; add current file info to cache and sort by date
-      ;; in `anti-chronologically' order.
-      (setq cache-val (add-to-list 'cache-val `(,date . ,filename)))
-      (setq cache-val (sort cache-val #'anti-chronologically))
+      (unless (eq type 'static)
 
-      ;; we only take what we need in recents cache
-      (setq cache-val (-take
-                       (max blogit-rss-number blogit-recents-number)
-                       cache-val))
+        ;; add current file info to cache and sort by date
+        ;; in `anti-chronologically' order.
+        (setq cache-val (add-to-list 'cache-val `(,date . ,filename)))
+        (setq cache-val (sort cache-val #'anti-chronologically))
 
-      (blogit-cache-set cache cache-val))))
+        ;; we only take what we need in recents cache
+        (setq cache-val (-take
+                         (max blogit-rss-number blogit-recents-number)
+                         cache-val))
+
+        (blogit-cache-set cache cache-val)))))
 
 
 ;;; Debugging functions
