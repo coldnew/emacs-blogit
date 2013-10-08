@@ -346,7 +346,7 @@ mode, format the string with MODE's format settings."
     (when (file-writable-p file)
       (write-region (point-min) (point-max) file))))
 
-;; FIXME:
+;; FIXME: how about remove this ?
 (defun blogit--template-to-string (file)
   "Read the content of FILE in template dir and return it as string."
   (blogit--file-to-string file))
