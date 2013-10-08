@@ -1014,11 +1014,18 @@ Returns value on success, else nil."
       (blogit-update-recents-cache info filename)
       )))
 
+(defun blogit--get-tags (info &optional filename)
+  "Get blogit tags in list from info or filename."
+  (let* ((tag-opt (or (blogit--parse-option info :tags filename) ""))
+	 (tags (split-string tag-opt " ")))
+    ;; remove empty string and dulpicate tag
+    (remove-duplicates (remove "" tags) :test 'string=)))
+
 ;; FIXME: should static page need to be ignore by tags?
 (defun blogit-update-tags-cache (info)
   "Build tags info for all files, this function will also count every
 tags repeat times."
-  (let* ((tags (remove "" (split-string (plist-get info :tags) " ")))
+  (let* ((tags (blogit--get-tags info))
          (type (plist-get info :type))
          (cache (format "%s-tags" type))
          (cache-val (blogit-cache-get cache)))
