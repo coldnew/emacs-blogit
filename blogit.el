@@ -56,6 +56,29 @@
   "Options for generating static pages using blogit."
   :tag "blogit static page generator" :group 'org)
 
+(defvar blogit-default-project-list
+  '("Blogit"
+
+    ;; same options as org-publist-list
+    :base-directory nil
+    :publishing-directory nil
+    :site-url   ""
+    :recursive t
+    :base-extension "org"
+
+    ;; extra options defined in blogit
+    :default-language "en"
+    :template-directory "templates"
+    :style-directory    "style"
+    :copy-style-method 'always
+    :default-type      'blog
+
+    :type-list blogit-type-list
+    :template-list blogit-template-list
+
+    ))
+
+
 (defcustom blogit-source-dir nil
   "The source directory for blogit."
   :group 'blogit :type 'string)
