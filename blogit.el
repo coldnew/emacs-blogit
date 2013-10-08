@@ -776,41 +776,39 @@ holding export options."
 
 
 ;; TODO: finish this function
+;; TODO: how about add atom support ?
 (defun blogit-publish-rss ()
-  "Publish rss file for blogit."
-  (let (avliable-types)
+  "Publish rss or atom file for blogit."
 
-    ;; Find avliable blog type info from blogit-type-list
-    ;; NOTE: the type here actually is key, be cereful.
-    (dolist (k blogit-type-list)
-      (if (and (symbolp k)
-               (eq 'blog (plist-get (plist-get blogit-type-list k) :type)))
-          (setq avliable-types (-flatten (add-to-list 'avliable-types k)))))
+  ;; TODO: generate rss contenst, how to?
+  (let* ((cache "recents")
+         (cache-val (blogit-cache-get cache)))
 
-    ;; TODO: generate rss
-    (dolist (k avliable-types)
-      (let* ((cache (format "%s-recents" (blogit--key-to-string k)))
-             (cache-val (blogit-cache-get cache)))
-        (blogit--string-to-file
-         (blogit--render-template
-          :rss
-          (blogit--build-context
-           nil
-           ("ITEMS"
-            (--map
-             (ht
-              ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
-              ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
-              ("DESCRIPTION" (plist-get (blogit-cache-get (cdr it)) :description))
-              ("DATE" (plist-get (blogit-cache-get (cdr it)) :date))
-              ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link))
-              )
-             cache-val))))
+    ;; since we only get rss/atom length defined in
+    ;; `blogit-rss-number', reset cache-val length
+    (setq cache-val (-take blogit-rss-number cache-val))
 
-         ;; FIXME:
-         (blogit--remove-dulpicate-backslash
-          (concat blogit-output-dir "/" "rss.xml")))
-        ))))
+    ;; pass cache info to create rss
+    (blogit--string-to-file
+     (blogit--render-template
+      :rss
+      (blogit--build-context
+       nil
+       ("ITEMS"
+        (--map
+         (ht
+          ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
+          ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
+          ("DESCRIPTION" (plist-get (blogit-cache-get (cdr it)) :description))
+          ("DATE" (plist-get (blogit-cache-get (cdr it)) :date))
+          ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link))
+          )
+         cache-val))))
+
+     ;; FIXME:
+     (blogit--remove-dulpicate-backslash
+      (concat blogit-output-dir "/" "rss.xml")))
+    ))
 
 
 ;;; Rewrite some org function to make blogit work more properly
