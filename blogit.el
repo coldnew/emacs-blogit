@@ -56,7 +56,7 @@
   "Options for generating static pages using blogit."
   :tag "blogit static page generator" :group 'org)
 
-(defvar blogit-default-project-list
+(setq blogit-default-project-list
   '("Blogit"
 
     ;; same options as org-publist-list
@@ -75,22 +75,28 @@
     :copy-style-method 'always
     :default-type      'blog
 
-    ;; blog-title
-    ;; blog-description
+    :analytics nil
+    :disqus    nil
+
+    :blog-title ""
+    :blog-description ""
 
     :type-list blogit-type-list
     :template-list blogit-template-list
 
+    :publishing-function org-blogit-publish-to-html
+
     ))
 
+;;(org-combine-plists blogit-default-project-list '(:c 3 :a 2))
 
-(defcustom blogit-source-dir nil
-  "The source directory for blogit."
-  :group 'blogit :type 'string)
+;; (defcustom (blogit-project-info :base-directory) nil
+;;   "The source directory for blogit."
+;;   :group 'blogit :type 'string)
 
-(defcustom blogit-output-dir nil
-  "The output directory for blogit."
-  :group 'blogit :type 'string)
+;; (defcustom (blogit-project-info :publishing-directory) nil
+;;   "The output directory for blogit."
+;;   :group 'blogit :type 'string)
 
 (defcustom blogit-site-url ""
   "Main url for your site. DO NOT use `nil' here."
@@ -125,30 +131,30 @@ set it to small size, eg: 5."
 (defcustom blogit-template-dir "templates/"
   "Template directory, this dir must located under
 `blogit-src-dir' and will not be copy to
-blogit-output-dir after publish."
+(blogit-project-info :publishing-directory) after publish."
   :group 'blogit :type 'string)
 
 (defcustom blogit-style-dir "style/"
   "Stylw directory, this dir will must located under
 `blogit-src-dir' and will be cpoied to
-blogit-output-dir after publish."
+(blogit-project-info :publishing-directory) after publish."
   :group 'blogit :type 'string)
 
 (defcustom blogit-always-copy-theme-dir t
-  "If t, always copy blogit-style-dir to blogit-output-dir
+  "If t, always copy blogit-style-dir to (blogit-project-info :publishing-directory)
 when use `blogit-publish-blog', else only do this when
 use `blogit-republish-blog'."
   :group 'blogit :type 'boolean)
 
-;; FIXME: move this to defvar
-(setq blogit-project-list
-      `("blogit"
-        :base-directory ,blogit-source-dir
-        :publishing-directory ,blogit-output-dir
-        :base-extension "org"
-        :publishing-function org-blogit-publish-to-html
-        :recursive t
-        ))
+;; ;; FIXME: move this to defvar
+;; (setq blogit-project-list
+;;       `("blogit"
+;; ;;        :base-directory ,(blogit-project-info :base-directory)
+;;         :publishing-directory ,(blogit-project-info :publishing-directory)
+;;         :base-extension "org"
+;;         :publishing-function org-blogit-publish-to-html
+;;         :recursive t
+;;         ))
 
 (defcustom blogit-default-type 'blog
   "Configure default blogit page type.
@@ -182,7 +188,7 @@ For more about type, see `blogit-type-list'."
    :draft  '(:type draft)
    :blog   '(:type blog   :root "blog" :filepath "%y/%m"  :filename "%d_%s.html")
    :static '(:type static :root ""     :filepath ""       :filename "%s.html"))
-  "Output dir formate for blogit, use `blogit-output-dir' as root when
+  "Output dir formate for blogit, use `(blogit-project-info :publishing-directory)' as root when
 this value is empty string.
 
 The dir will be format by `format-time-string', but the time is according to
@@ -226,7 +232,7 @@ See `format-time-string' for allowed formatters.")
 (defvar blogit-tags-dir "tags"
   "Dir name for storage blogit tags.")
 
-(defvar blogit-cache-dir (concat blogit-output-dir "/.cache")
+(defvar blogit-cache-dir (concat (blogit-project-info :publishing-directory) "/.cache")
   "The cache directory for blogit.")
 
 (defvar blogit-cache nil
@@ -242,7 +248,10 @@ generate rss and tage.")
 
 (defvar blogit-ignore-dir
   `(,blogit-template-dir ,blogit-style-dir)
-  "When publish, ignore these dir under `blogit-source-dir'.")
+  "When publish, ignore these dir under `(blogit-project-info :base-directory)'.")
+
+(defvar blogit-current-project nil
+  "Cache to store current project plist info.")
 
 
 ;;; Internal functions
@@ -267,6 +276,13 @@ generate rss and tage.")
 (defun blogit--remove-dulpicate-backslash (str)
   "Remove dulpicate backslash for str."
   (replace-regexp-in-string "//*" "/"  str))
+
+
+;;; Internal functions
+
+(defun blogit-project-info (key)
+  "Return project info according to key."
+  (plist-get (cdr blogit-current-project) key))
 
 (defmacro blogit--file-in-temp-buffer (filename &rest pairs)
   "Helper macro to open file in temp buffer, and execute blogit function."
@@ -382,7 +398,7 @@ mode, format the string with MODE's format settings."
 (defun blogit--template-fullfile (key)
   "Get match template filename with fullpath according to key."
   (convert-standard-filename
-   (concat blogit-source-dir "/" blogit-template-dir
+   (concat (blogit-project-info :base-directory) "/" blogit-template-dir
            (plist-get blogit-template-list key))))
 
 (defun blogit--sanitize-string (s)
@@ -490,7 +506,7 @@ This function is used to create directory for new blog post.
 
     ;; remove dulpicate /
     (blogit--remove-dulpicate-backslash
-     (format "%s/%s" (directory-file-name blogit-output-dir) filepath))))
+     (format "%s/%s" (directory-file-name (blogit-project-info :publishing-directory)) filepath))))
 
 ;; FIXME: what about ./ ?
 (defun blogit--path-to-root (path)
@@ -499,7 +515,7 @@ ex:
     (root)/2013/12/23/test.html -> ../../..
     (root)/theme                -> ..
 "
-  (let* ((root (expand-file-name blogit-output-dir))
+  (let* ((root (expand-file-name (blogit-project-info :publishing-directory)))
          (rpath (file-relative-name
                  (expand-file-name path) root))
          (dpath (directory-file-name
@@ -522,7 +538,7 @@ ex:
   (let* ((epath (expand-file-name (blogit--get-post-url path)))
          (filename (file-name-nondirectory epath))
          (path-dir (file-name-directory epath))
-         (rpath (s-replace (expand-file-name blogit-output-dir) "" path-dir)))
+         (rpath (s-replace (expand-file-name (blogit-project-info :publishing-directory)) "" path-dir)))
     (blogit--remove-dulpicate-backslash
      (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
 
@@ -617,8 +633,8 @@ many useful context is predefined here, but you can overwrite it.
   `(ht
     ("BLOGIT" (concat "emacs-blogit ver." blogit-version))
     ("BLOGIT_URL" (format "<a href=\"%s\"> emacs-blogit </a>" blogit-url))
-    ("BLOG_TITLE" (or blogit-blog-title ""))
-    ("BLOG_DESCRIPTION"  (or blogit-blog-description ""))
+    ("BLOG_TITLE" (or (blogit-project-info :blog-title) ""))
+    ("BLOG_DESCRIPTION"  (or (blogit-project-info :blog-description) ""))
     ("TITLE"  ,(or (blogit--parse-option info :title) "Untitled"))
     ("AUTHOR" ,(or (blogit--parse-option info :author) user-full-name "Unknown"))
     ("EMAIL" ,(or (blogit--parse-option info :email) user-mail-address ""))
@@ -681,13 +697,13 @@ many useful context is predefined here, but you can overwrite it.
      ;;
      ;; 1. All blogit valid post must contains `DATE' option.
      ;; 2. If post type is `draft', it's not valid
-     ;; 3. All blogit post must under `blogit-source-dir'.
+     ;; 3. All blogit post must under `(blogit-project-info :base-directory)'.
 
      ;; FIXME: This algorithm may porduce some problem ?
      (if (and (blogit--parse-option nil :date)
               (not (eq 'draft (blogit--get-post-type nil)))
               (s-starts-with?
-               (directory-file-name (expand-file-name (concat blogit-source-dir "/")))
+               (directory-file-name (expand-file-name (concat (blogit-project-info :base-directory) "/")))
                (file-name-directory (expand-file-name file))))
 
          t nil))))
@@ -787,7 +803,7 @@ holding export options."
   (let ((cache blogit-linked-cache)
         (pub-dir (concat (file-name-directory output-file) (file-name-base output-file))))
 
-    ;; copy file to blogit-output-dir if file in cache.
+    ;; copy file to (blogit-project-info :publishing-directory) if file in cache.
     (dolist (src cache)
       (let ((dst (concat pub-dir "/" (file-name-nondirectory src))))
         (blogit--do-copy src dst)))
@@ -826,7 +842,7 @@ holding export options."
 
      ;; FIXME:
      (blogit--remove-dulpicate-backslash
-      (concat blogit-output-dir "/" "rss.xml")))
+      (concat (blogit-project-info :publishing-directory) "/" "rss.xml")))
     ))
 
 
@@ -1011,7 +1027,7 @@ Returns value on success, else nil."
          (post-url ()
                    (format "%s%s"
                            (s-replace
-                            (concat (expand-file-name blogit-output-dir) "/") ""
+                            (concat (expand-file-name (blogit-project-info :publishing-directory)) "/") ""
                             (expand-file-name (blogit--build-export-dir nil)))
                            (blogit--get-post-filename nil filename)))
          (post-link ()
@@ -1110,19 +1126,19 @@ This cache will be used to build rss and recent post."
   "Ensure all required configuration fields are properly configured,
 include:
 
-`blogit-source-dir'
-`blogit-output-dir'
+`(blogit-project-info :base-directory)'
+`(blogit-project-info :publishing-directory)'
 `blogit-site-url'
 
 Blogit will throw error if not properly configure, this will help to debug
 the problem."
   (interactive)
-  (unless (and blogit-source-dir (file-directory-p blogit-source-dir))
+  (unless (and (blogit-project-info :base-directory) (file-directory-p (blogit-project-info :base-directory)))
     (error "Variable `%s' is not properly configured or directory does not exist."
-           (symbol-name 'blogit-source-dir)))
-  (unless (and blogit-output-dir (file-directory-p blogit-output-dir))
+           (symbol-name '(blogit-project-info :base-directory))))
+  (unless (and (blogit-project-info :publishing-directory) (file-directory-p (blogit-project-info :publishing-directory)))
     (error "Variable `%s' is not properly configured or directory does not exist."
-           (symbol-name 'blogit-output-dir)))
+           (symbol-name '(blogit-project-info :publishing-directory))))
   (unless blogit-site-url
     (error "Variable `%s' is not properly configured."
            (symbol-name 'blogit-site-url)))
@@ -1152,10 +1168,10 @@ the problem."
 
 ;;;###autoload
 (defun blogit-new-post (filename)
-  "Create a new post in `blogit-source-dir'."
+  "Create a new post in `(blogit-project-info :base-directory)'."
   (interactive "sTitle for new post: ")
   (find-file (concat
-              (file-name-as-directory blogit-source-dir) filename ".org"))
+              (file-name-as-directory (blogit-project-info :base-directory)) filename ".org"))
   (blogit-insert-template filename))
 
 ;;;###autoload
@@ -1192,7 +1208,7 @@ Return output file name."
     (dolist (d blogit-ignore-dir)
       (if do-publish
           (if (string= file-dir
-                       (file-name-directory (expand-file-name (concat blogit-source-dir "/" d))))
+                       (file-name-directory (expand-file-name (concat (blogit-project-info :base-directory) "/" d))))
               (setq do-publish nil))))
 
     ;; if file is draft, do not publish it
@@ -1218,8 +1234,8 @@ When force is t, re-publish all blogit project."
          (org-publish-timestamp-directory
           (convert-standard-filename (concat blogit-cache-dir "/")))
          (org-publish-cache nil)
-         (source-style-dir (convert-standard-filename (concat blogit-source-dir "/" blogit-style-dir)))
-         (output-dir (convert-standard-filename (concat blogit-output-dir "/")))
+         (source-style-dir (convert-standard-filename (concat (blogit-project-info :base-directory) "/" blogit-style-dir)))
+         (output-dir (convert-standard-filename (concat (blogit-project-info :publishing-directory) "/")))
          (output-style-dir (concat output-dir blogit-style-dir))
          (copy-style-dir blogit-always-copy-theme-dir))
 
@@ -1236,9 +1252,16 @@ When force is t, re-publish all blogit project."
     (blogit-initialize-cache)
 
     ;; publish all posts
-    (org-publish-project blogit-project-list)
+    ;; TODO: how about create multiple blogit project like org-publish
+    ;; do ?
 
-    ;; Copy theme-dir to blogit-output-dir when publish
+    (setq blogit-current-project
+	  (org-combine-plists blogit-project-list
+			      blogit-default-project-list))
+
+    (org-publish-project blogit-current-project)
+
+    ;; Copy theme-dir to (blogit-project-info :publishing-directory) when publish
     ;; if theme dir does not exit, re-copy again
     ;; when we republish blogit project, also enable
     ;; copy-style-dir
