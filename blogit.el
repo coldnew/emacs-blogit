@@ -282,7 +282,9 @@ generate rss and tage.")
 
 (defun blogit-project-info (key)
   "Return project info according to key."
-  (plist-get (cdr blogit-current-project) key))
+  (if (eq key :project)
+      (car blogit-current-project)
+    (plist-get (cdr blogit-current-project) key)))
 
 (defmacro blogit--file-in-temp-buffer (filename &rest pairs)
   "Helper macro to open file in temp buffer, and execute blogit function."
