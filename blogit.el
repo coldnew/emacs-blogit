@@ -62,9 +62,11 @@
     ;; same options as org-publist-list
     :base-directory nil
     :publishing-directory nil
-    :site-url   ""
+    :site-url   ""  ;; blog-base-url
     :recursive t
     :base-extension "org"
+
+    ;; blog-export-rss t
 
     ;; extra options defined in blogit
     :default-language "en"
@@ -72,6 +74,9 @@
     :style-directory    "style"
     :copy-style-method 'always
     :default-type      'blog
+
+    ;; blog-title
+    ;; blog-description
 
     :type-list blogit-type-list
     :template-list blogit-template-list
@@ -612,8 +617,8 @@ many useful context is predefined here, but you can overwrite it.
   `(ht
     ("BLOGIT" (concat "emacs-blogit ver." blogit-version))
     ("BLOGIT_URL" (format "<a href=\"%s\"> emacs-blogit </a>" blogit-url))
-    ("MAIN_TITLE" (or blogit-site-main-title ""))
-    ("SUB_TITLE"  (or blogit-site-sub-title ""))
+    ("BLOG_TITLE" (or blogit-blog-title ""))
+    ("BLOG_DESCRIPTION"  (or blogit-blog-description ""))
     ("TITLE"  ,(or (blogit--parse-option info :title) "Untitled"))
     ("AUTHOR" ,(or (blogit--parse-option info :author) user-full-name "Unknown"))
     ("EMAIL" ,(or (blogit--parse-option info :email) user-mail-address ""))
