@@ -65,7 +65,7 @@
         :recursive t
         :base-extension "org"
 
-        ;; ;; extra options defined in blogit
+	;; extra options defined in blogit
         :default-language "en"
         :template-directory-name "templates"
         :style-directory-name    "style"
@@ -83,6 +83,8 @@
         :template-list blogit-template-list
         :publishing-function org-blogit-publish-to-html
 
+	:always-copy-style-dir t
+
         :export-rss t
         :export-rss-number 10
 
@@ -99,6 +101,7 @@
 	:blogit-cache-file ""
 	:blogit-style-directory ""
 	:blogit-template-directory ""
+	:blogit-default-type blog
         ))
 
 (defvar blogit-project-list nil
@@ -142,37 +145,6 @@ Most properties are optional, but some should always be set:
 "
   )
 
-(defcustom blogit-always-copy-theme-dir t
-  "If t, always copy (blogit-project-info :style-directory-name) to (blogit-project-info :publishing-directory)
-when use `blogit-publish-blog', else only do this when
-use `blogit-republish-blog'."
-  :group 'blogit :type 'boolean)
-
-(defcustom blogit-default-type 'blog
-  "Configure default blogit page type.
-
-Blogit define three basic format: draft, blog, static
-
-1. draft
-
-   draft is the most simplest type, when your blogit post is `draft',
-it means that your post is not complete, and you will not see any
-output html file for `draft' post.
-
-2. blog
-
-   general blog post
-
-3. static
-
-   static html page
-
-For more about type, see `blogit-type-list'."
-  :group 'blogit
-  :type '(choice
-          (const :tag "blog" blog)
-          (const :tag "static" static)
-          (const :tag "draft"  draft)))
 
 ;; FIXME: not let anyone modified this ?
 (defvar blogit-type-list
@@ -352,7 +324,7 @@ generate rss and tage.")
      (with-temp-buffer (insert-file-contents ,filename) ,@pairs)))
 
 (defun blogit--get-post-type (info &optional filename)
-  "Get current post type, return `blogit-default-type' if not found.
+  "Get current post type, return `(blogit-project-info :blogit-default-type)' if not found.
 When filename is specified, open the file and get it's post type."
   (if filename
       (blogit--file-in-temp-buffer filename (blogit--get-post-type nil))
@@ -364,7 +336,7 @@ When filename is specified, open the file and get it's post type."
        ((eq type 'blog) 'blog)
        ((eq type 'static) 'static)
        ((eq type 'draft)  'draft)
-       (t blogit-default-type)))))
+       (t (blogit-project-info :blogit-default-type))))))
 
 ;; FIXME: This function looks ogly
 (defun blogit--format-to-s-format (str)
@@ -1305,7 +1277,7 @@ When force is t, re-publish all blogit project."
          (source-style-dir (blogit-project-info :blogit-style-directory))
          (output-dir (blogit-project-info :publishing-directory))
          (output-style-dir (concat output-dir (blogit-project-info :style-directory-name) "/"))
-         (copy-style-dir blogit-always-copy-theme-dir))
+         (copy-style-dir (blogit-project-info :always-copy-style-dir)))
 
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
