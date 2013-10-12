@@ -296,6 +296,36 @@ generate rss and tage.")
     (push key new-list)
     (setq blogit-current-project (cons project-name new-list))))
 
+(defun blogit-initialize-project (project-list)
+  "Initial some project value for current project."
+
+  ;; Add porject-list to current-project
+  (setq blogit-current-project
+        (blogit-combine-project blogit-project-list))
+
+  ;; Initial ignore dir
+  ;; FIXME: How to let anyone add more ignore dir?
+  (blogit-project-set
+   :blogit-ignore-directory-list
+   (list
+    (blogit-project-info :template-directory)
+    (blogit-project-info :style-directory)))
+
+  ;; Initial cache dir
+  (blogit-project-set
+   :blogit-cache-directory
+   (concat (blogit-project-info :publishing-directory)
+	   "/"
+	   (blogit-project-info :blogit-cache-directory-name)))
+
+  ;; Initial cache file
+  (blogit-project-set
+   :blogit-cache-file
+   (concat (blogit-project-info :blogit-cache-directory)
+	   "/"
+	   (format "%s-publish.cache" (car blogit-current-project))))
+  )
+
 
 ;;; Internal functions
 
@@ -1248,26 +1278,9 @@ skip it.
 When force is t, re-publish all blogit project."
   (interactive)
 
-  (setq blogit-current-project
-        (blogit-combine-project blogit-project-list))
-
-  (blogit-project-set
-   :blogit-ignore-directory-list
-   (list
-    (blogit-project-info :template-directory)
-    (blogit-project-info :style-directory)))
-
-  (blogit-project-set
-   :blogit-cache-directory
-   (concat (blogit-project-info :publishing-directory)
-	   "/"
-	   (blogit-project-info :blogit-cache-directory-name)))
-
-  (blogit-project-set
-   :blogit-cache-file
-   (concat (blogit-project-info :blogit-cache-directory)
-	   "/"
-	   (format "%s-publish.cache" (car blogit-current-project))))
+  ;; Initial project info to current project
+  ;; TODO: Add multi project support
+  (blogit-initialize-project blogit-project-list)
 
   (let* ((start-time (current-time)) ;; for statistic purposes only
          (org-publish-timestamp-directory
