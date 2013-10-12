@@ -1239,13 +1239,6 @@ Return output file name."
       ;; Add file info to blogit cache
       (blogit-update-cache filename))))
 
-(defun blogit-publish-expand-projects (projects-alist)
-  "Expand projects in PROJECTS-ALIST.
-This splices all the components into the list."
-  (let ((rest projects-alist) rtn p components)
-    (while (setq p (pop rest)) (push p rtn))
-    (nreverse (delete-dups (delq nil rtn)))))
-
 ;;;###autoload
 (defun blogit-publish-blog (&optional force)
   "Publush all blogit post, if post already posted and not modified,
