@@ -67,8 +67,8 @@
 
         ;; ;; extra options defined in blogit
         :default-language "en"
-        :template-directory "templates"
-        :style-directory    "style"
+        :template-directory-name "templates"
+        :style-directory-name    "style"
         :copy-style-method 'always
         :default-type      'blog
 
@@ -90,13 +90,15 @@
         :export-recents-number 10
 
         ;; Advanced options for customize blogit
-
+	;; some will be set by `blogit-initialize-project'
         :blogit-sanitize-length 5
         :blogit-date-format "%Y-%02m-%02d %02H:%02M:%02S"
         :blogit-ignore-directory-list nil
         :blogit-cache-directory ""
         :blogit-cache-directory-name ".cache"
 	:blogit-cache-file ""
+	:blogit-style-directory ""
+	:blogit-template-directory ""
         ))
 
 (defvar blogit-project-list nil
@@ -141,20 +143,10 @@ Most properties are optional, but some should always be set:
   )
 
 (defcustom blogit-always-copy-theme-dir t
-  "If t, always copy (blogit-project-info :style-directory) to (blogit-project-info :publishing-directory)
+  "If t, always copy (blogit-project-info :style-directory-name) to (blogit-project-info :publishing-directory)
 when use `blogit-publish-blog', else only do this when
 use `blogit-republish-blog'."
   :group 'blogit :type 'boolean)
-
-;; ;; FIXME: move this to defvar
-;; (setq blogit-project-list
-;;       `("blogit"
-;; ;;        :base-directory ,(blogit-project-info :base-directory)
-;;         :publishing-directory ,(blogit-project-info :publishing-directory)
-;;         :base-extension "org"
-;;         :publishing-function org-blogit-publish-to-html
-;;         :recursive t
-;;         ))
 
 (defcustom blogit-default-type 'blog
   "Configure default blogit page type.
@@ -296,6 +288,15 @@ generate rss and tage.")
     (push key new-list)
     (setq blogit-current-project (cons project-name new-list))))
 
+(defun blogit-project-convert-standard-filename (key)
+  "Convert directory path to standard."
+  (let ((dir (blogit-project-info key)))
+    (blogit-project-set
+     key
+     (convert-standard-filename
+      (blogit--remove-dulpicate-backslash
+       (concat dir "/"))))))
+
 (defun blogit-initialize-project (project-list)
   "Initial some project value for current project."
 
@@ -308,15 +309,14 @@ generate rss and tage.")
   (blogit-project-set
    :blogit-ignore-directory-list
    (list
-    (blogit-project-info :template-directory)
-    (blogit-project-info :style-directory)))
+    (blogit-project-info :template-directory-name)
+    (blogit-project-info :style-directory-name)))
 
   ;; Initial cache dir
   (blogit-project-set
    :blogit-cache-directory
-   (concat (blogit-project-info :publishing-directory)
-	   "/"
-	   (blogit-project-info :blogit-cache-directory-name)))
+   (concat (blogit-project-info :publishing-directory) "/"
+	   (blogit-project-info :blogit-cache-directory-name) "/"))
 
   ;; Initial cache file
   (blogit-project-set
@@ -324,6 +324,23 @@ generate rss and tage.")
    (concat (blogit-project-info :blogit-cache-directory)
 	   "/"
 	   (format "%s-publish.cache" (car blogit-current-project))))
+
+  (blogit-project-set
+   :blogit-style-directory
+   (concat (blogit-project-info :base-directory) "/"
+	   (blogit-project-info :style-directory-name) "/"))
+
+  (blogit-project-set
+   :blogit-template-directory
+   (concat (blogit-project-info :base-directory) "/"
+	   (blogit-project-info :template-directory-name) "/"))
+
+  ;; Convert standard name for project directory path
+  (blogit-project-convert-standard-filename :base-directory)
+  (blogit-project-convert-standard-filename :publishing-directory)
+  (blogit-project-convert-standard-filename :blogit-cache-directory)
+  (blogit-project-convert-standard-filename :blogit-style-directory)
+  (blogit-project-convert-standard-filename :blogit-template-directory)
   )
 
 
@@ -444,7 +461,7 @@ mode, format the string with MODE's format settings."
   "Get match template filename with fullpath according to key."
   (convert-standard-filename
    (concat (blogit-project-info :base-directory) "/"
-           (blogit-project-info :template-directory) "/"
+           (blogit-project-info :template-directory-name) "/"
            (plist-get blogit-template-list key))))
 
 (defun blogit--sanitize-string (s)
@@ -1283,13 +1300,11 @@ When force is t, re-publish all blogit project."
   (blogit-initialize-project blogit-project-list)
 
   (let* ((start-time (current-time)) ;; for statistic purposes only
-         (org-publish-timestamp-directory
-          (convert-standard-filename (concat (blogit-project-info :blogit-cache-directory) "/")))
+         (org-publish-timestamp-directory (blogit-project-info :blogit-cache-directory))
          (org-publish-cache nil)
-         (source-style-dir (convert-standard-filename
-                            (concat (blogit-project-info :base-directory) "/" (blogit-project-info :style-directory))))
-         (output-dir (convert-standard-filename (concat (blogit-project-info :publishing-directory) "/")))
-         (output-style-dir (concat output-dir (blogit-project-info :style-directory) "/"))
+         (source-style-dir (blogit-project-info :blogit-style-directory))
+         (output-dir (blogit-project-info :publishing-directory))
+         (output-style-dir (concat output-dir (blogit-project-info :style-directory-name) "/"))
          (copy-style-dir blogit-always-copy-theme-dir))
 
     ;; when republish blogit project, we need to remove
