@@ -57,91 +57,91 @@
   :tag "blogit static page generator" :group 'org)
 
 (setq blogit-default-project-list
-  '("Blogit"
+      '("Blogit"
 
-    ;; same options as org-publist-list
-    :base-directory nil
-    :publishing-directory nil
-    :site-url   ""  ;; blog-base-url
-    :recursive t
-    :base-extension "org"
+        ;; same options as `org-publist-project-alist'
+        :base-directory ""
+        :publishing-directory ""
+        :recursive t
+        :base-extension "org"
 
-    ;; blog-export-rss t
+        ;; ;; extra options defined in blogit
+        :default-language "en"
+        :template-directory "templates"
+        :style-directory    "style"
+        :copy-style-method 'always
+        :default-type      'blog
 
-    ;; extra options defined in blogit
-    :default-language "en"
-    :template-directory "templates"
-    :style-directory    "style"
-    :copy-style-method 'always
-    :default-type      'blog
+        :google-analytics ""
+        :disqus    ""
 
-    :analytics nil
-    :disqus    nil
+        :blog-url   ""
+        :blog-title ""
+        :blog-description ""
 
-    :blog-title ""
-    :blog-description ""
+        :type-list blogit-type-list
+        :template-list blogit-template-list
+        :publishing-function org-blogit-publish-to-html
 
-    :type-list blogit-type-list
-    :template-list blogit-template-list
+        :export-rss t
+        :export-rss-number 10
 
-    :publishing-function org-blogit-publish-to-html
+        :export-recents-post t
+        :export-recents-number 10
 
-    ))
+        ;; Advanced options for customize blogit
 
-;;(org-combine-plists blogit-default-project-list '(:c 3 :a 2))
+        :blogit-sanitize-length 5
+        :blogit-date-format "%Y-%02m-%02d %02H:%02M:%02S"
+        :blogit-ignore-directory-list nil
+        :blogit-cache-directory ""
+        :blogit-cache-directory-name ".cache"
+	:blogit-cache-file ""
+        ))
 
-;; (defcustom (blogit-project-info :base-directory) nil
-;;   "The source directory for blogit."
-;;   :group 'blogit :type 'string)
+(defvar blogit-project-list nil
+  "Association list to control publishing behavior.
+Each element of the alist is a publishing 'project.'  The CAR of
+each element is a string, uniquely identifying the project.  The
+CDR of each element is in one of the following forms:
 
-;; (defcustom (blogit-project-info :publishing-directory) nil
-;;   "The output directory for blogit."
-;;   :group 'blogit :type 'string)
+1. A well-formed property list with an even number of elements,
+   alternating keys and values, specifying parameters for the
+   publishing process.
 
-(defcustom blogit-site-url ""
-  "Main url for your site. DO NOT use `nil' here."
-  :group 'blogit :type 'string)
+     \(:property value :property value ... )
 
-(defcustom blogit-sanitize-length 100
-  "If you want the export filename sanitize
-by `blogit--sanitize-string' not so long, you can
-set it to small size, eg: 5."
-  :group 'blogit :type 'integer)
+2. A meta-project definition, specifying of a list of
+   sub-projects:
 
-(defcustom blogit-rss-number 10
-  "How many post do you want to have in rss."
-  :group 'blogit :type 'integer)
+     \(:components (\"project-1\" \"project-2\" ...))
 
-(defcustom blogit-recents-number 10
-  "How many post do you want to have in recent post list."
-  :group 'blogit :type 'integer)
+When the CDR of an element of org-publish-project-alist is in
+this second form, the elements of the list after `:components'
+are taken to be components of the project, which group together
+files requiring different publishing options.  When you publish
+such a project with \\[org-publish], the components all publish.
 
-(defcustom blogit-google-analytics-id nil
-  "Personal google analytics id."
-  :group 'blogit :type 'string)
+When a property is given a value in `org-publish-project-alist',
+its setting overrides the value of the corresponding user
+variable (if any) during publishing.  However, options set within
+a file override everything.
 
-(defcustom blogit-disqus-shortname nil
-  "Personal disqus shortname."
-  :group 'blogit :type 'string)
+Most properties are optional, but some should always be set:
 
-(defcustom blogit-default-language "en"
-  "Default language for blogit post."
-  :group 'blogit :type 'string)
+  `:base-directory'
 
-(defcustom blogit-template-dir "templates/"
-  "Template directory, this dir must located under
-`blogit-src-dir' and will not be copy to
-(blogit-project-info :publishing-directory) after publish."
-  :group 'blogit :type 'string)
+    Directory containing publishing source files.
 
-(defcustom blogit-style-dir "style/"
-  "Stylw directory, this dir will must located under
-`blogit-src-dir' and will be cpoied to
-(blogit-project-info :publishing-directory) after publish."
-  :group 'blogit :type 'string)
+  `:publishing-directory'
+
+    Directory (possibly remote) where output files will be
+    published.
+"
+  )
 
 (defcustom blogit-always-copy-theme-dir t
-  "If t, always copy blogit-style-dir to (blogit-project-info :publishing-directory)
+  "If t, always copy (blogit-project-info :style-directory) to (blogit-project-info :publishing-directory)
 when use `blogit-publish-blog', else only do this when
 use `blogit-republish-blog'."
   :group 'blogit :type 'boolean)
@@ -225,30 +225,16 @@ Currently blogit only support following format:
 ;;; Internal variables
 
 ;; FIXME: maybe we shold not let anyone modify this ?
-(defconst blogit-date-format "%Y-%02m-%02d %02H:%02M:%02S"
-  "Format for printing a date in the sitemap.
-See `format-time-string' for allowed formatters.")
 
 (defvar blogit-tags-dir "tags"
   "Dir name for storage blogit tags.")
-
-(defvar blogit-cache-dir (concat (blogit-project-info :publishing-directory) "/.cache")
-  "The cache directory for blogit.")
 
 (defvar blogit-cache nil
   "Cache to store post info, this cache will be used to
 generate rss and tage.")
 
-(defvar blogit-cache-file (concat blogit-cache-dir "/publish.cache")
-  "Cache file to store publish info, this cache will be used to
-generate rss and tage.")
-
 (defvar blogit-linked-cache nil
   "Cache to store which file will be copied to output dir.")
-
-(defvar blogit-ignore-dir
-  `(,blogit-template-dir ,blogit-style-dir)
-  "When publish, ignore these dir under `(blogit-project-info :base-directory)'.")
 
 (defvar blogit-current-project nil
   "Cache to store current project plist info.")
@@ -278,13 +264,40 @@ generate rss and tage.")
   (replace-regexp-in-string "//*" "/"  str))
 
 
-;;; Internal functions
+;;; Internal Project Control functions
+
+(defun blogit-combine-project (project)
+  (let ((project-name (car project))
+        (project-plist (cdr project)))
+     (cons project-name
+           (org-combine-plists
+            (cdr blogit-default-project-list) project-plist))))
 
 (defun blogit-project-info (key)
   "Return project info according to key."
   (if (eq key :project)
       (car blogit-current-project)
     (plist-get (cdr blogit-current-project) key)))
+
+(defun blogit--plist-remove (plist &rest keys)
+  (let ((proper-plist plist))
+    ;; FIXME: possible optimization: (plist-remove '(:x 0 :a 1 :b 2) :a)
+    ;; could return the tail without consing up a new list.
+    (loop for (key . rest) on plist by #'cddr
+	  unless (memq key keys)
+	  collect key and collect (first rest))))
+
+(defun blogit-project-set (key val)
+  "Setting blogit-current-project value according to key."
+  (let* ((project-name (car blogit-current-project))
+	(project-list (cdr blogit-current-project))
+	(new-list (blogit--plist-remove project-list key)))
+    (push val new-list)
+    (push key new-list)
+    (setq blogit-current-project (cons project-name new-list))))
+
+
+;;; Internal functions
 
 (defmacro blogit--file-in-temp-buffer (filename &rest pairs)
   "Helper macro to open file in temp buffer, and execute blogit function."
@@ -329,7 +342,7 @@ When filename is specified, open the file and get it's post type."
          (url (or (blogit--parse-option info :url) ""))
          (filename (file-name-base (or file (buffer-base-buffer) "")))
          (sanitize (if (not (string= "" url)) url
-                     (s-left blogit-sanitize-length (blogit--sanitize-string filename)))))
+                     (s-left (blogit-project-info :blogit-sanitize-length) (blogit--sanitize-string filename)))))
     (list
      (cons "year" year)
      (cons "month" month)
@@ -400,7 +413,8 @@ mode, format the string with MODE's format settings."
 (defun blogit--template-fullfile (key)
   "Get match template filename with fullpath according to key."
   (convert-standard-filename
-   (concat (blogit-project-info :base-directory) "/" blogit-template-dir
+   (concat (blogit-project-info :base-directory) "/"
+           (blogit-project-info :template-directory) "/"
            (plist-get blogit-template-list key))))
 
 (defun blogit--sanitize-string (s)
@@ -656,8 +670,8 @@ many useful context is predefined here, but you can overwrite it.
 (org-export-define-derived-backend 'blogit 'html
   :options-alist
   '(
-    (:analytics         "ANALYTICS"         nil   nil   blogit-google-analytics-id)
-    (:disqus            "DISQUS"            nil   nil   blogit-disqus-shortname)
+    (:analytics         "ANALYTICS"         nil   nil   (blogit-project-info :google-analytics))
+    (:disqus            "DISQUS"            nil   nil   (blogit-project-info :disqus))
     (:url               "URL"               nil   nil   t)
     (:type              "TYPE"              nil   nil   t)
 
@@ -678,16 +692,16 @@ many useful context is predefined here, but you can overwrite it.
   (blogit--render-template :page_footer (blogit--build-context info)))
 
 (defun blogit--render-disqus-template (info)
-  (when (or (blogit--parse-option info :disqus) blogit-disqus-shortname)
+  (when (or (blogit--parse-option info :disqus) (blogit-project-info :disqus))
     (blogit--render-template
      :plugin_disqus
-     (ht ("DISQUS" (or (blogit--parse-option info :disqus) blogit-disqus-shortname))))))
+     (ht ("DISQUS" (or (blogit--parse-option info :disqus) (blogit-project-info :disqus)))))))
 
 (defun blogit--render-analytics-template (info)
-  (when (or (blogit--parse-option info :analytics) blogit-google-analytics-id)
+  (when (or (blogit--parse-option info :analytics) (blogit-project-info :google-analytics))
     (blogit--render-template
      :plugin_analytics
-     (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) blogit-google-analytics-id))))))
+     (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) (blogit-project-info :google-analytics)))))))
 
 (defun blogit--check-post-file (file)
   "If file is valid blogit post, return t, else nil."
@@ -822,8 +836,8 @@ holding export options."
          (cache-val (blogit-cache-get cache)))
 
     ;; since we only get rss/atom length defined in
-    ;; `blogit-rss-number', reset cache-val length
-    (setq cache-val (-take blogit-rss-number cache-val))
+    ;; `(blogit-project-info :export-rss-number)', reset cache-val length
+    (setq cache-val (-take (blogit-project-info :export-rss-number) cache-val))
 
     ;; pass cache info to create rss
     (blogit--string-to-file
@@ -959,7 +973,7 @@ If FREE-CACHE, empty the cache."
   (unless blogit-cache
     (error "`blogit-write-cache-file' called, but no cache present"))
 
-  (let ((cache-file blogit-cache-file))
+  (let ((cache-file (blogit-project-info :blogit-cache-file)))
     (unless cache-file
       (error "Cannot find cache-file name in `blogit-write-cache-file'"))
     (with-temp-file cache-file
@@ -977,15 +991,15 @@ If FREE-CACHE, empty the cache."
 (defun blogit-initialize-cache ()
   "Initialize the projects cache if not initialized yet and return it."
 
-  (unless (file-exists-p blogit-cache-dir)
-    (make-directory blogit-cache-dir t))
-  (unless (file-directory-p blogit-cache-dir)
-    (error "Blogit cache: %s is not a directory" blogit-cache-dir))
+  (unless (file-exists-p (blogit-project-info :blogit-cache-directory))
+    (make-directory (blogit-project-info :blogit-cache-directory) t))
+  (unless (file-directory-p (blogit-project-info :blogit-cache-directory))
+    (error "Blogit cache: %s is not a directory" (blogit-project-info :blogit-cache-directory)))
 
   (unless blogit-cache
 
     (let* ((cache-file
-            (expand-file-name blogit-cache-file))
+            (expand-file-name (blogit-project-info :blogit-cache-file)))
 
            (cexists (file-exists-p cache-file)))
 
@@ -1034,7 +1048,7 @@ Returns value on success, else nil."
                            (blogit--get-post-filename nil filename)))
          (post-link ()
                     (blogit--remove-dulpicate-backslash
-                     (concat blogit-site-url "/" (post-url)))))
+                     (concat (blogit-project-info :blog-url) "/" (post-url)))))
     (let* ((info
             (blogit--file-in-temp-buffer
              filename
@@ -1115,7 +1129,7 @@ This cache will be used to build rss and recent post."
 
         ;; we only take what we need in recents cache
         (setq cache-val (-take
-                         (max blogit-rss-number blogit-recents-number)
+                         (max (blogit-project-info :export-rss-number) (blogit-project-info :export-recents-number))
                          cache-val))
 
         (blogit-cache-set cache cache-val)))))
@@ -1130,7 +1144,7 @@ include:
 
 `(blogit-project-info :base-directory)'
 `(blogit-project-info :publishing-directory)'
-`blogit-site-url'
+`(blogit-project-info :blog-url)'
 
 Blogit will throw error if not properly configure, this will help to debug
 the problem."
@@ -1141,9 +1155,9 @@ the problem."
   (unless (and (blogit-project-info :publishing-directory) (file-directory-p (blogit-project-info :publishing-directory)))
     (error "Variable `%s' is not properly configured or directory does not exist."
            (symbol-name '(blogit-project-info :publishing-directory))))
-  (unless blogit-site-url
+  (unless (blogit-project-info :blog-url)
     (error "Variable `%s' is not properly configured."
-           (symbol-name 'blogit-site-url)))
+           (symbol-name '(blogit-project-info :blog-url))))
   (message "Blogit verify configuration SUCCESS!"))
 
 
@@ -1162,9 +1176,9 @@ the problem."
       (blogit--build-context
        nil
        ("TITLE" (file-name-base (or filename "")))
-       ("DATE" (format-time-string blogit-date-format))
+       ("DATE" (format-time-string (blogit-project-info :blogit-date-format)))
        ("URL" (blogit--sanitize-string filename))
-       ("LANGUAGE" (or blogit-default-language "en"))))))
+       ("LANGUAGE" (or (blogit-project-info :default-language) "en"))))))
   (end-of-buffer)
   (newline-and-indent))
 
@@ -1206,8 +1220,8 @@ Return output file name."
   (let ((do-publish t)
         (file-dir (file-name-directory (expand-file-name filename))))
 
-    ;; check if file is not under blogit-ignore-dir
-    (dolist (d blogit-ignore-dir)
+    ;; check if file is not under blogit ignore directory
+    (dolist (d (blogit-project-info :blogit-ignore-directory-list))
       (if do-publish
           (if (string= file-dir
                        (file-name-directory (expand-file-name (concat (blogit-project-info :base-directory) "/" d))))
@@ -1225,6 +1239,13 @@ Return output file name."
       ;; Add file info to blogit cache
       (blogit-update-cache filename))))
 
+(defun blogit-publish-expand-projects (projects-alist)
+  "Expand projects in PROJECTS-ALIST.
+This splices all the components into the list."
+  (let ((rest projects-alist) rtn p components)
+    (while (setq p (pop rest)) (push p rtn))
+    (nreverse (delete-dups (delq nil rtn)))))
+
 ;;;###autoload
 (defun blogit-publish-blog (&optional force)
   "Publush all blogit post, if post already posted and not modified,
@@ -1232,18 +1253,41 @@ skip it.
 
 When force is t, re-publish all blogit project."
   (interactive)
+
+  (setq blogit-current-project
+        (blogit-combine-project blogit-project-list))
+
+  (blogit-project-set
+   :blogit-ignore-directory-list
+   (list
+    (blogit-project-info :template-directory)
+    (blogit-project-info :style-directory)))
+
+  (blogit-project-set
+   :blogit-cache-directory
+   (concat (blogit-project-info :publishing-directory)
+	   "/"
+	   (blogit-project-info :blogit-cache-directory-name)))
+
+  (blogit-project-set
+   :blogit-cache-file
+   (concat (blogit-project-info :blogit-cache-directory)
+	   "/"
+	   (format "%s-publish.cache" (car blogit-current-project))))
+
   (let* ((start-time (current-time)) ;; for statistic purposes only
          (org-publish-timestamp-directory
-          (convert-standard-filename (concat blogit-cache-dir "/")))
+          (convert-standard-filename (concat (blogit-project-info :blogit-cache-directory) "/")))
          (org-publish-cache nil)
-         (source-style-dir (convert-standard-filename (concat (blogit-project-info :base-directory) "/" blogit-style-dir)))
+         (source-style-dir (convert-standard-filename
+                            (concat (blogit-project-info :base-directory) "/" (blogit-project-info :style-directory))))
          (output-dir (convert-standard-filename (concat (blogit-project-info :publishing-directory) "/")))
-         (output-style-dir (concat output-dir blogit-style-dir))
+         (output-style-dir (concat output-dir (blogit-project-info :style-directory) "/"))
          (copy-style-dir blogit-always-copy-theme-dir))
 
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
-    ;; blogit-cache-dir
+    ;; (blogit-project-info :blogit-cache-directory)
     (when (and force
                (file-exists-p org-publish-timestamp-directory))
       (delete-directory org-publish-timestamp-directory t nil)
@@ -1256,10 +1300,6 @@ When force is t, re-publish all blogit project."
     ;; publish all posts
     ;; TODO: how about create multiple blogit project like org-publish
     ;; do ?
-
-    (setq blogit-current-project
-	  (org-combine-plists blogit-project-list
-			      blogit-default-project-list))
 
     (org-publish-project blogit-current-project)
 
