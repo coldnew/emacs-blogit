@@ -1223,12 +1223,13 @@ Return output file name."
     ;; check if file is not under blogit ignore directory
     (dolist (d (blogit-project-info :blogit-ignore-directory-list))
       (if do-publish
-          (if (string= file-dir
-                       (file-name-directory (expand-file-name (concat (blogit-project-info :base-directory) "/" d))))
-              (setq do-publish nil))))
+          (when (string= file-dir
+                       (file-name-directory (expand-file-name (concat (blogit-project-info :base-directory) "/" d "/"))))
+	    (setq do-publish nil))))
 
     ;; if file is draft, do not publish it
-    (when (eq 'draft (blogit--get-post-type nil filename)) (setq do-publish nil))
+    (if do-publish
+      (when (eq 'draft (blogit--get-post-type nil filename)) (setq do-publish nil)))
 
     ;; only publish when do-publish is t
     (when do-publish
