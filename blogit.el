@@ -61,12 +61,12 @@
         :recursive t
         :base-extension "org"
 
-	;; extra options defined in blogit
+        ;; extra options defined in blogit
         :default-language "en"
         :template-directory-name "templates"
         :style-directory-name    "style"
 
-        :copy-style-directory-method 'always
+        :always-copy-style-directory t
 
         :google-analytics ""
         :disqus    ""
@@ -79,26 +79,26 @@
         :template-list blogit-template-list
         :publishing-function org-blogit-publish-to-html
 
-        :export-rss t 			; TODO:
+        :export-rss t                   ; TODO:
         :export-rss-number 10
 
-        :export-recents-post t		; TODO:
+        :export-recents-post t          ; TODO:
         :export-recents-number 10
 
         ;; Advanced options for customize blogit
-	;; some will be set by `blogit-initialize-project'
+        ;; some will be set by `blogit-initialize-project'
         :blogit-sanitize-length 5
         :blogit-date-format "%Y-%02m-%02d %02H:%02M:%02S"
         :blogit-ignore-directory-list nil
 
         :blogit-cache-directory ""
         :blogit-cache-directory-name ".cache"
-	:blogit-cache-file ""
+        :blogit-cache-file ""
 
-	:blogit-style-directory ""
-	:blogit-template-directory ""
-	:blogit-default-type blog
-	:blogit-tags-directory-name "tags"
+        :blogit-style-directory ""
+        :blogit-template-directory ""
+        :blogit-default-type blog
+        :blogit-tags-directory-name "tags"
         ))
 
 (defvar blogit-project-list nil
@@ -193,7 +193,7 @@ generate rss and tage.")
   "Cache to store current project plist info.")
 
 
-;;; Internal functions
+;;; Internal general purpose functions
 
 (defun blogit--string-to-key (string)
   "Conver string to key. eq: \"test\" -> :test"
@@ -216,15 +216,33 @@ generate rss and tage.")
   "Remove dulpicate backslash for str."
   (replace-regexp-in-string "//*" "/"  str))
 
+(defun blogit--file-to-string (file)
+  "Read the content of FILE and return it as a string."
+  (with-temp-buffer (insert-file-contents file) (buffer-string)))
+
+(defun blogit--string-to-file (string file &optional mode)
+  "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
+mode, format the string with MODE's format settings."
+  (with-temp-buffer
+    (insert string)
+    (set-buffer-file-coding-system 'utf-8-unix)
+    (when (and mode (functionp mode))
+      (funcall mode)
+      (flush-lines "^[ \\t]*$" (point-min) (point-max))
+      (delete-trailing-whitespace (point-min) (point-max))
+      (indent-region (point-min) (point-max)))
+    (when (file-writable-p file)
+      (write-region (point-min) (point-max) file))))
+
 
 ;;; Internal Project Control functions
 
 (defun blogit-combine-project (project)
   (let ((project-name (car project))
         (project-plist (cdr project)))
-     (cons project-name
-           (org-combine-plists
-            (cdr blogit-default-project-list) project-plist))))
+    (cons project-name
+          (org-combine-plists
+           (cdr blogit-default-project-list) project-plist))))
 
 (defun blogit-project-info (key)
   "Return project info according to key."
@@ -237,14 +255,14 @@ generate rss and tage.")
     ;; FIXME: possible optimization: (blogit--plist-remove '(:x 0 :a 1 :b 2) :a)
     ;; could return the tail without consing up a new list.
     (loop for (key . rest) on plist by #'cddr
-	  unless (memq key keys)
-	  collect key and collect (first rest))))
+          unless (memq key keys)
+          collect key and collect (first rest))))
 
 (defun blogit-project-set (key val)
   "Setting blogit-current-project value according to key."
   (let* ((project-name (car blogit-current-project))
-	(project-list (cdr blogit-current-project))
-	(new-list (blogit--plist-remove project-list key)))
+         (project-list (cdr blogit-current-project))
+         (new-list (blogit--plist-remove project-list key)))
     (push val new-list)
     (push key new-list)
     (setq blogit-current-project (cons project-name new-list))))
@@ -277,24 +295,24 @@ generate rss and tage.")
   (blogit-project-set
    :blogit-cache-directory
    (concat (blogit-project-info :publishing-directory) "/"
-	   (blogit-project-info :blogit-cache-directory-name) "/"))
+           (blogit-project-info :blogit-cache-directory-name) "/"))
 
   ;; Initial cache file
   (blogit-project-set
    :blogit-cache-file
    (concat (blogit-project-info :blogit-cache-directory)
-	   "/"
-	   (format "%s-publish.cache" (car blogit-current-project))))
+           "/"
+           (format "%s-publish.cache" (car blogit-current-project))))
 
   (blogit-project-set
    :blogit-style-directory
    (concat (blogit-project-info :base-directory) "/"
-	   (blogit-project-info :style-directory-name) "/"))
+           (blogit-project-info :style-directory-name) "/"))
 
   (blogit-project-set
    :blogit-template-directory
    (concat (blogit-project-info :base-directory) "/"
-	   (blogit-project-info :template-directory-name) "/"))
+           (blogit-project-info :template-directory-name) "/"))
 
   ;; Convert standard name for project directory path
   (blogit-project-convert-standard-filename :base-directory)
@@ -350,7 +368,9 @@ When filename is specified, open the file and get it's post type."
          (url (or (blogit--parse-option info :url) ""))
          (filename (file-name-base (or file (buffer-base-buffer) "")))
          (sanitize (if (not (string= "" url)) url
-                     (s-left (blogit-project-info :blogit-sanitize-length) (blogit--sanitize-string filename)))))
+                     (blogit--sanitize-string
+		      filename
+		      (blogit-project-info :blogit-sanitize-length)))))
     (list
      (cons "year" year)
      (cons "month" month)
@@ -394,25 +414,6 @@ the default format will be ignored."
     ;; remove empty string and dulpicate tag
     (remove-duplicates (remove "" tags) :test 'string=)))
 
-;; FIXME:
-(defun blogit--file-to-string (file)
-  "Read the content of FILE and return it as a string."
-  (with-temp-buffer (insert-file-contents file) (buffer-string)))
-
-(defun blogit--string-to-file (string file &optional mode)
-  "Write STRING into FILE, only when FILE is writable. If MODE is a valid major
-mode, format the string with MODE's format settings."
-  (with-temp-buffer
-    (insert string)
-    (set-buffer-file-coding-system 'utf-8-unix)
-    (when (and mode (functionp mode))
-      (funcall mode)
-      (flush-lines "^[ \\t]*$" (point-min) (point-max))
-      (delete-trailing-whitespace (point-min) (point-max))
-      (indent-region (point-min) (point-max)))
-    (when (file-writable-p file)
-      (write-region (point-min) (point-max) file))))
-
 ;; FIXME: how about remove this ?
 (defun blogit--template-to-string (file)
   "Read the content of FILE in template dir and return it as string."
@@ -421,11 +422,11 @@ mode, format the string with MODE's format settings."
 (defun blogit--template-fullfile (key)
   "Get match template filename with fullpath according to key."
   (convert-standard-filename
-   (concat (blogit-project-info :base-directory) "/"
-           (blogit-project-info :template-directory-name) "/"
-           (plist-get blogit-template-list key))))
+   (blogit--remove-dulpicate-backslash
+    (concat (blogit-project-info :blogit-template-directory) "/"
+            (plist-get blogit-template-list key)))))
 
-(defun blogit--sanitize-string (s)
+(defun blogit--sanitize-string (s &optional length)
   "Sanitize string S by:
 
 - converting all charcters to pure ASCII
@@ -434,27 +435,28 @@ mode, format the string with MODE's format settings."
 - trimming leading and tailing \"_\"
 
 This function is used to generate blog post url if not specified."
-  (loop for c across s
-        with cd
-        with gc
-        with ret
-        do (progn
-             (setf gc (get-char-code-property c 'general-category))
-             (setf cd (get-char-code-property c 'decomposition)))
-        if (or (member gc '(Lu Ll Nd)) (= ?_ c) (= ?- c))
-        collect (downcase
-                 (char-to-string (if cd (car cd)  c)))
-        into ret
-        else if (member gc '(Zs))
-        collect "_" into ret
-        else if (member gc '(Lo))
-        collect (s-left 1 (sha1 (char-to-string (if cd (car cd) c))))
-        into ret
-        finally return (replace-regexp-in-string
-                        "--+" "_"
-                        (replace-regexp-in-string
-                         "^_+\\|_+$" ""
-                         (mapconcat 'identity ret "")))))
+  (if length (s-left length (blogit--sanitize-string s))
+    (loop for c across s
+          with cd
+          with gc
+          with ret
+          do (progn
+               (setf gc (get-char-code-property c 'general-category))
+               (setf cd (get-char-code-property c 'decomposition)))
+          if (or (member gc '(Lu Ll Nd)) (= ?_ c) (= ?- c))
+          collect (downcase
+                   (char-to-string (if cd (car cd)  c)))
+          into ret
+          else if (member gc '(Zs))
+          collect "_" into ret
+          else if (member gc '(Lo))
+          collect (s-left 1 (sha1 (char-to-string (if cd (car cd) c))))
+          into ret
+          finally return (replace-regexp-in-string
+                          "--+" "_"
+                          (replace-regexp-in-string
+                           "^_+\\|_+$" ""
+                           (mapconcat 'identity ret ""))))))
 
 (defun blogit--parse-date-string1 (date-str yn mn dn)
   "Helper function to return date list for `blogit--parse-date-string'."
@@ -558,7 +560,6 @@ ex:
 
 (defun blogit--calculate-post-relative-path (path)
   "Calculate post path from root."
-
   (let* ((epath (expand-file-name (blogit--get-post-url path)))
          (filename (file-name-nondirectory epath))
          (path-dir (file-name-directory epath))
@@ -566,10 +567,6 @@ ex:
     (blogit--remove-dulpicate-backslash
      (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
 
-(defun blogit--render-template (type context)
-  "Read the file contents, then render it with a hashtable context."
-  (let ((file (or (blogit--template-fullfile type) type)))
-    (mustache-render (blogit--template-to-string file) context)))
 
 (defun blogit--parse-option (info key &optional filename)
   "Read option value of org file opened in current buffer.
@@ -675,6 +672,13 @@ many useful context is predefined here, but you can overwrite it.
     ("ROOT" (blogit--path-to-root (blogit--build-export-dir ,info)))
     ,@pairs))
 
+;; TODO: seems like we can reduce some function here.
+
+(defun blogit--render-template (type context)
+  "Read the file contents, then render it with a hashtable context."
+  (let ((file (or (blogit--template-fullfile type) type)))
+    (mustache-render (blogit--template-to-string file) context)))
+
 (defun blogit--render-header-template (info)
   (blogit--render-template :page_header (blogit--build-context info)))
 
@@ -704,9 +708,10 @@ many useful context is predefined here, but you can overwrite it.
   '(
     (:analytics         "ANALYTICS"         nil   nil   nil)
     (:disqus            "DISQUS"            nil   nil   nil)
-    (:url               "URL"               nil   nil   t)
-    (:type              "TYPE"              nil   nil   t)
+    (:url               "URL"               nil   nil   nil)
+    (:type              "TYPE"              nil   nil   nil)
 
+    ;; FIXME: maybe this can remove ?
     ;; disable org-html default style
     ;; WARNING: DO NOT edit folling since it may break blogit functions
     (:html-head-include-default-style nil "html-style" nil)
@@ -1234,12 +1239,12 @@ Return output file name."
     (dolist (d (blogit-project-info :blogit-ignore-directory-list))
       (if do-publish
           (when (string= file-dir
-                       (file-name-directory (expand-file-name (concat (blogit-project-info :base-directory) "/" d "/"))))
-	    (setq do-publish nil))))
+                         (file-name-directory (expand-file-name (concat (blogit-project-info :base-directory) "/" d "/"))))
+            (setq do-publish nil))))
 
     ;; if file is draft, do not publish it
     (if do-publish
-      (when (eq 'draft (blogit--get-post-type nil filename)) (setq do-publish nil)))
+        (when (eq 'draft (blogit--get-post-type nil filename)) (setq do-publish nil)))
 
     ;; only publish when do-publish is t
     (when do-publish
@@ -1267,7 +1272,7 @@ When force is t, re-publish all blogit project."
          (source-style-dir (blogit-project-info :blogit-style-directory))
          (output-dir (blogit-project-info :publishing-directory))
          (output-style-dir (concat output-dir (blogit-project-info :style-directory-name) "/"))
-	 org-publish-cache)
+         org-publish-cache)
 
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
@@ -1293,11 +1298,11 @@ When force is t, re-publish all blogit project."
     ;; publish rss
     (blogit-publish-rss)
 
-    ;; Copy style dir according to `:copy-style-directory-method',
+    ;; Copy style dir according to `:always-copy-style-directory',
     ;; when republish blogit posts, always re-copy style dir event it exist.
     (when (or force
-	      (eq 'always (blogit-project-info :copy-style-directory-method))
-	      (not (file-exists-p output-style-dir)))
+              (blogit-project-info :always-copy-style-directory)
+              (not (file-exists-p output-style-dir)))
       (message "Copy style dir to blogit-output-dir.")
       (blogit--do-copy source-style-dir output-dir))
 
