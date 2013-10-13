@@ -1057,7 +1057,7 @@ Returns value on success, else nil."
          (post-url ()
                    (format "%s%s"
                            (s-replace
-                            (concat (expand-file-name (blogit-project-info :publishing-directory)) "/") ""
+                            (expand-file-name (blogit-project-info :publishing-directory)) ""
                             (expand-file-name (blogit--build-export-dir nil)))
                            (blogit--get-post-filename nil filename)))
          (post-link ()
@@ -1293,6 +1293,9 @@ When force is t, re-publish all blogit project."
 
     ;; write cache file
     (blogit-write-cache-file)
+
+    ;; publish rss
+    (blogit-publish-rss)
 
     ;; Copy style dir according to `:copy-style-directory-method',
     ;; when republish blogit posts, always re-copy style dir event it exist.
