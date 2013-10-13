@@ -1070,7 +1070,7 @@ Returns value on success, else nil."
 (defun blogit-update-cache (filename)
   "Update blogit-cache to log post info."
   (flet ((get-info (key)
-                   (list key (blogit--parse-option nil key)))
+                   (list key (or (blogit--parse-option nil key) "")))
          (post-url ()
                    (format "%s%s"
                            (s-replace
