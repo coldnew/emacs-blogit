@@ -236,7 +236,7 @@ generate rss and tage.")
 
 (defun blogit--plist-remove (plist &rest keys)
   (let ((proper-plist plist))
-    ;; FIXME: possible optimization: (plist-remove '(:x 0 :a 1 :b 2) :a)
+    ;; FIXME: possible optimization: (blogit--plist-remove '(:x 0 :a 1 :b 2) :a)
     ;; could return the tail without consing up a new list.
     (loop for (key . rest) on plist by #'cddr
 	  unless (memq key keys)
