@@ -680,6 +680,7 @@ many useful context is predefined here, but you can overwrite it.
     ("EMAIL" (or (blogit--parse-option ,info :email) user-mail-address ""))
     ("DATE" (or (blogit--parse-option ,info :date) ""))
     ("YEAR" (format-time-string "%Y"))
+    ("BLOG_URL" (or (blogit-project-info :blog-url) ""))
     ("URL" (or (blogit--parse-option ,info :url) ""))
     ("LANGUAGE" (or (blogit--parse-option ,info :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option ,info :description) ""))
