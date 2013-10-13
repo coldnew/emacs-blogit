@@ -176,10 +176,6 @@ Currently blogit only support following format:
 
    ;; combine other templates
    :blog_post          "blog_post.html"
-
-   ;; FIXME: still not use
-   :blog_index        "blog_index.html"
-   :index             "index.html"
    )
   "Template filename define for blogit to parse.")
 
