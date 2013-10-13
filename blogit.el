@@ -541,7 +541,7 @@ ex:
     (root)/2013/12/23/test.html -> ../../..
     (root)/theme                -> ..
 "
-  (let* ((root (expand-file-name (blogit-project-info :publishing-directory)))
+  (let* ((root (blogit-project-info :publishing-directory))
          (rpath (file-relative-name
                  (expand-file-name path) root))
          (dpath (directory-file-name
@@ -661,18 +661,42 @@ many useful context is predefined here, but you can overwrite it.
     ("BLOGIT_URL" (format "<a href=\"%s\"> emacs-blogit </a>" blogit-url))
     ("BLOG_TITLE" (or (blogit-project-info :blog-title) ""))
     ("BLOG_DESCRIPTION"  (or (blogit-project-info :blog-description) ""))
-    ("TITLE"  ,(or (blogit--parse-option info :title) "Untitled"))
-    ("AUTHOR" ,(or (blogit--parse-option info :author) user-full-name "Unknown"))
-    ("EMAIL" ,(or (blogit--parse-option info :email) user-mail-address ""))
-    ("DATE" ,(or (blogit--parse-option info :date) ""))
-    ("URL" ,(or (blogit--parse-option info :url) ""))
-    ("LANGUAGE" ,(or (blogit--parse-option info :language) "en"))
-    ("DESCRIPTION" ,(or (blogit--parse-option info :description) ""))
-    ("KEYWORDS" ,(or (blogit--parse-option info :keywords) ""))
-    ("DISQUS" ,(or (blogit--render-disqus-template info) ""))
-    ("ANALYTICS" ,(or (blogit--render-analytics-template info) ""))
-    ("ROOT" ,(blogit--path-to-root (blogit--build-export-dir info)))
+    ("TITLE"  (or (blogit--parse-option ,info :title) "Untitled"))
+    ("AUTHOR" (or (blogit--parse-option ,info :author) user-full-name "Unknown"))
+    ("EMAIL" (or (blogit--parse-option ,info :email) user-mail-address ""))
+    ("DATE" (or (blogit--parse-option ,info :date) ""))
+    ("URL" (or (blogit--parse-option ,info :url) ""))
+    ("LANGUAGE" (or (blogit--parse-option ,info :language) "en"))
+    ("DESCRIPTION" (or (blogit--parse-option ,info :description) ""))
+    ("KEYWORDS" (or (blogit--parse-option ,info :keywords) ""))
+    ("DISQUS" (or (blogit--render-disqus-template ,info) ""))
+    ("ANALYTICS" (or (blogit--render-analytics-template ,info) ""))
+    ("ROOT" (blogit--path-to-root (blogit--build-export-dir ,info)))
+    ;; context derived from ox-html
+    ;;("HTML_META" ,(or (org-html--build-meta-info info) ""))
+    ("HTML_HEAD" (org-html--build-head ,info))
+    ("HTML_MATHJAX" (org-html--build-mathjax-config ,info))
+    ("HTML_PREAMBLE" (org-html--build-pre/postamble 'preamble ,info))
+    ("HTML_POSTAMBLE" (org-html--build-pre/postamble 'postamble ,info))
+    ;; basic blogit contents
+    ("CONTENT" (org-export-as 'blogit nil nil t nil))
     ,@pairs))
+
+(defun blogit--build-context-from-template (info)
+  "Create a hash table with the key-value pairs given.
+Keys are compared with `equal'.
+
+\(fn (KEY-1 VALUE-1) (KEY-2 VALUE-2) ...)
+
+This function is used to create context for blogit-render function,
+many useful context is predefined here, but you can overwrite it.
+"
+ (blogit--build-context
+  info
+  ("HEADER" (blogit--render-header-template info))
+  ("FOOTER" (blogit--render-footer-template info))
+  ))
+
 
 
 ;;; Define Back-End for org-export
@@ -797,29 +821,41 @@ In this function, we also add link file"
     ;; done and done, now return our new-link
     html-link))
 
+;; (defun org-blogit-template (contents info)
+;;   "Return complete document string after HTML conversion.
+;; CONTENTS is the transcoded contents string.  INFO is a plist
+;; holding export options."
+;;   (let* ((meta-info (org-html--build-meta-info info))
+;;          (preamble-info (org-html--build-pre/postamble 'preamble info))
+;;          ;;(postamble-info (org-html--build-pre/postamble 'postamble info))
+;;          ;; FIXME: discard postamble info, this method is not elegant
+;;          (postamble-info ""))
+;;     ;; we override some of function in org-html-template to make it
+;;     ;; more easy to build our template
+;;     (flet ((org-html--build-meta-info (info)
+;;                                       (concat
+;;                                        meta-info
+;;                                        (blogit--render-header-template info)))
+;;            (org-html--build-pre/postamble (type info)
+;;                                           (cond
+;;                                            ((eq type 'preamble) preamble-info)
+;;                                            ((eq type 'postamble)
+;;                                             (concat postamble-info
+;;                                                     (blogit--render-footer-template info))))))
+
+;;       ;;(org-html-template contents info)
+;;       (blogit--render-template :blog_post (blogit--build-context info))
+;;       )))
+
+
 (defun org-blogit-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let* ((meta-info (org-html--build-meta-info info))
-         (preamble-info (org-html--build-pre/postamble 'preamble info))
-         ;;(postamble-info (org-html--build-pre/postamble 'postamble info))
-         ;; FIXME: discard postamble info, this method is not elegant
-         (postamble-info ""))
-    ;; we override some of function in org-html-template to make it
-    ;; more easy to build our template
-    (flet ((org-html--build-meta-info (info)
-                                      (concat
-                                       meta-info
-                                       (blogit--render-header-template info)))
-           (org-html--build-pre/postamble (type info)
-                                          (cond
-                                           ((eq type 'preamble) preamble-info)
-                                           ((eq type 'postamble)
-                                            (concat postamble-info
-                                                    (blogit--render-footer-template info))))))
+      ;;(org-html-template contents info)
+  (blogit--render-template :blog_post (blogit--build-context-from-template info))
+      )
 
-      (org-html-template contents info))))
 
 
 ;;; Extra functions for blogit-publish
@@ -1295,9 +1331,9 @@ When force is t, re-publish all blogit project."
     ;; Copy style dir according to `:copy-style-directory-method',
     ;; when republish blogit posts, always re-copy style dir event it exist.
 
-    (unless (or force
-		(eq 'always (blogit-project-info :copy-style-directory-method))
-                (not (file-exists-p output-style-dir)))
+    (when (or force
+	      (eq 'always (blogit-project-info :copy-style-directory-method))
+	      (not (file-exists-p output-style-dir)))
       (setq copy-style-dir t))
 
     ;; write cache file
