@@ -1303,7 +1303,7 @@ When force is t, re-publish all blogit project."
          (source-style-dir (blogit-project-info :blogit-style-directory))
          (output-dir (blogit-project-info :publishing-directory))
          (output-style-dir (concat output-dir (blogit-project-info :style-directory-name) "/"))
-	 copy-style-dir org-publish-cache)
+	 org-publish-cache)
 
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
@@ -1323,23 +1323,14 @@ When force is t, re-publish all blogit project."
 
     (org-publish-project blogit-current-project)
 
-    ;; Copy theme-dir to (blogit-project-info :publishing-directory) when publish
-    ;; if theme dir does not exit, re-copy again
-    ;; when we republish blogit project, also enable
-    ;; copy-style-dir
-
-    ;; Copy style dir according to `:copy-style-directory-method',
-    ;; when republish blogit posts, always re-copy style dir event it exist.
-
-    (when (or force
-	      (eq 'always (blogit-project-info :copy-style-directory-method))
-	      (not (file-exists-p output-style-dir)))
-      (setq copy-style-dir t))
-
     ;; write cache file
     (blogit-write-cache-file)
 
-    (when copy-style-dir
+    ;; Copy style dir according to `:copy-style-directory-method',
+    ;; when republish blogit posts, always re-copy style dir event it exist.
+    (when (or force
+	      (eq 'always (blogit-project-info :copy-style-directory-method))
+	      (not (file-exists-p output-style-dir)))
       (message "Copy style dir to blogit-output-dir.")
       (blogit--do-copy source-style-dir output-dir))
 
