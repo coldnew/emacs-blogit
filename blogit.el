@@ -871,7 +871,7 @@ holding export options."
           )
          cache-val))))
 
-     ;; FIXME:
+     ;; FIXME: add option to optimize this
      (blogit--remove-dulpicate-backslash
       (concat (blogit-project-info :publishing-directory) "/" "rss.xml")))
     ))
@@ -1024,7 +1024,6 @@ If FREE-CACHE, empty the cache."
         (setq blogit-cache
               (make-hash-table :test 'equal :weakness nil :size 100))
         (blogit-cache-set ":project:" "publish")
-        ;;(blogit-cache-set "tags" '())
         (blogit-cache-set ":blogit-version:" blogit-version))
       (unless cexists (blogit-write-cache-file nil))))
   blogit-cache)
