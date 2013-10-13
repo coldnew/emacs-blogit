@@ -139,6 +139,22 @@ Most properties are optional, but some should always be set:
 
     Directory (possibly remote) where output files will be
     published.
+
+  `:blog-url'
+
+    Url for link to the static site you publish. You should set
+    this option if enable rss/atom feed export.
+
+Some option you may set to make blog more complete:
+
+   `:blog-title'
+
+    The main title for your blog.
+
+   `:blog-description'
+
+    Description for your blog.
+
 "
   )
 
