@@ -52,10 +52,6 @@
 
 ;;; User Configuration Variables
 
-(defgroup blogit nil
-  "Options for generating static pages using blogit."
-  :tag "blogit static page generator" :group 'org)
-
 (setq blogit-default-project-list
       '("Blogit"
 
