@@ -7,3 +7,4 @@
 #+DESCRIPTION:
 #+KEYWORDS:
 #+TAGS:
+#+OPTIONS: num:nil

@@ -679,6 +679,7 @@ many useful context is predefined here, but you can overwrite it.
     ("AUTHOR" (or (blogit--parse-option ,info :author) user-full-name "Unknown"))
     ("EMAIL" (or (blogit--parse-option ,info :email) user-mail-address ""))
     ("DATE" (or (blogit--parse-option ,info :date) ""))
+    ("YEAR" (format-time-string "%Y"))
     ("URL" (or (blogit--parse-option ,info :url) ""))
     ("LANGUAGE" (or (blogit--parse-option ,info :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option ,info :description) ""))
@@ -1230,6 +1231,10 @@ Export is done in a buffer named \"*Blogit Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
+
+  ;; Initial some blogit project info
+  (blogit-initialize-project blogit-project-list)
+
   (let ((outbuf (org-export-to-buffer
                     'blogit "*Blogit Export*"
                   subtreep visible-only body-only ext-plist))
