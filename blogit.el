@@ -70,6 +70,7 @@
 
         :google-analytics ""
         :disqus    ""
+	:lloogg    ""
 
         :blog-url   ""
         :blog-title ""
@@ -187,6 +188,7 @@ Currently blogit only support following format:
    :page_footer        "page_footer.html"
    :plugin_analytics   "plugin_analytics.html"
    :plugin_disqus      "plugin_disqus.html"
+   :plugin_lloogg      "plugin_lloogg.html"
    :rss                "rss.xml"
    :newpost            "newpost.org"
 
@@ -687,6 +689,7 @@ many useful context is predefined here, but you can overwrite it.
     ("KEYWORDS" (or (blogit--parse-option ,info :keywords) ""))
     ("DISQUS" (or (blogit--render-disqus-template ,info) ""))
     ("ANALYTICS" (or (blogit--render-analytics-template ,info) ""))
+    ("LLOOGG" (or (blogit--render-lloogg-template ,info) ""))
     ("ROOT" (blogit--path-to-root (blogit--build-export-dir ,info)))
     ,@pairs))
 
@@ -717,6 +720,12 @@ many useful context is predefined here, but you can overwrite it.
     (blogit--render-template
      :plugin_analytics
      (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) (blogit-project-info :google-analytics)))))))
+
+(defun blogit--render-lloogg-template (info)
+  (when (or (blogit--parse-option info :lloogg) (blogit-project-info :lloogg))
+    (blogit--render-template
+     :plugin_lloogg
+     (ht ("LLOOGG" (or (blogit--parse-option info :lloogg) (blogit-project-info :lloogg)))))))
 
 
 ;;; Define Back-End for org-export
