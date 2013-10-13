@@ -69,8 +69,8 @@
         :default-language "en"
         :template-directory-name "templates"
         :style-directory-name    "style"
-        :copy-style-method 'always
-        :default-type      'blog
+
+        :copy-style-directory-method 'always
 
         :google-analytics ""
         :disqus    ""
@@ -83,8 +83,6 @@
         :template-list blogit-template-list
         :publishing-function org-blogit-publish-to-html
 
-	:always-copy-style-dir t
-
         :export-rss t
         :export-rss-number 10
 
@@ -96,9 +94,11 @@
         :blogit-sanitize-length 5
         :blogit-date-format "%Y-%02m-%02d %02H:%02M:%02S"
         :blogit-ignore-directory-list nil
+
         :blogit-cache-directory ""
         :blogit-cache-directory-name ".cache"
 	:blogit-cache-file ""
+
 	:blogit-style-directory ""
 	:blogit-template-directory ""
 	:blogit-default-type blog
@@ -1277,7 +1277,7 @@ When force is t, re-publish all blogit project."
          (source-style-dir (blogit-project-info :blogit-style-directory))
          (output-dir (blogit-project-info :publishing-directory))
          (output-style-dir (concat output-dir (blogit-project-info :style-directory-name) "/"))
-         (copy-style-dir (blogit-project-info :always-copy-style-dir)))
+	 copy-style-dir)
 
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
@@ -1301,8 +1301,13 @@ When force is t, re-publish all blogit project."
     ;; if theme dir does not exit, re-copy again
     ;; when we republish blogit project, also enable
     ;; copy-style-dir
+
+    ;; Copy style dir according to `:copy-style-directory-method',
+    ;; when republish blogit posts, always re-copy style dir event it exist.
+
     (unless (or force
-                (file-exists-p output-style-dir) )
+		(eq 'always (blogit-project-info :copy-style-directory-method))
+                (not (file-exists-p output-style-dir)))
       (setq copy-style-dir t))
 
     ;; write cache file
