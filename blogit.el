@@ -83,10 +83,10 @@
         :template-list blogit-template-list
         :publishing-function org-blogit-publish-to-html
 
-        :export-rss t
+        :export-rss t 			; TODO:
         :export-rss-number 10
 
-        :export-recents-post t
+        :export-recents-post t		; TODO:
         :export-recents-number 10
 
         ;; Advanced options for customize blogit
@@ -102,6 +102,7 @@
 	:blogit-style-directory ""
 	:blogit-template-directory ""
 	:blogit-default-type blog
+	:blogit-tags-directory-name "tags"
         ))
 
 (defvar blogit-project-list nil
@@ -145,7 +146,6 @@ Most properties are optional, but some should always be set:
 "
   )
 
-
 ;; FIXME: not let anyone modified this ?
 (defvar blogit-type-list
   (list
@@ -187,11 +187,6 @@ Currently blogit only support following format:
 
 
 ;;; Internal variables
-
-;; FIXME: maybe we shold not let anyone modify this ?
-
-(defvar blogit-tags-dir "tags"
-  "Dir name for storage blogit tags.")
 
 (defvar blogit-cache nil
   "Cache to store post info, this cache will be used to
@@ -1273,11 +1268,10 @@ When force is t, re-publish all blogit project."
 
   (let* ((start-time (current-time)) ;; for statistic purposes only
          (org-publish-timestamp-directory (blogit-project-info :blogit-cache-directory))
-         (org-publish-cache nil)
          (source-style-dir (blogit-project-info :blogit-style-directory))
          (output-dir (blogit-project-info :publishing-directory))
          (output-style-dir (concat output-dir (blogit-project-info :style-directory-name) "/"))
-	 copy-style-dir)
+	 copy-style-dir org-publish-cache)
 
     ;; when republish blogit project, we need to remove
     ;; org-publish-timestamp-directory, which is the same as
