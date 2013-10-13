@@ -8,25 +8,27 @@
      xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
      xmlns:georss="http://www.georss.org/georss"
      xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
-     xmlns:media="http://search.yahoo.com/mrss/"><channel>
-  <title>{{MAIN_TITLE}}</title>
-  <link>{{SITE_URL}}</link>
-  <description><![CDATA[]]></description>
-  <pubDate>{{DATE}}</pubDate>
-  <lastBuildDate>{{DATE}}</lastBuildDate>
-  <generator>Blogit static site generator (https://github.com/coldnew/blogit)</generator>
-  <webMaster>{{EMAIL}} ({{AUTHOR}})</webMaster>
-
-  {{IMAGE}}
-
-  {{#ITEMS}}
-  <item>
-    <title>{{TITLE}}</title>
-    <link>{{POST_URL}}</link>
-    <description>{{DESCRIPTION}}</description>
+     xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>{{MAIN_TITLE}}</title>
+    <link>{{SITE_URL}}</link>
+    <description><![CDATA[]]></description>
     <pubDate>{{DATE}}</pubDate>
-    <guid>{{POST_LINK}}</guid>
-  </item>
-  {{/ITEMS}}
+    <lastBuildDate>{{DATE}}</lastBuildDate>
+    <generator>Blogit static site generator (https://github.com/coldnew/blogit)</generator>
+    <webMaster>{{EMAIL}} ({{AUTHOR}})</webMaster>
 
-</feed>
+    {{IMAGE}}
+
+    {{#ITEMS}}
+    <item>
+      <title>{{TITLE}}</title>
+      <link>{{POST_URL}}</link>
+      <description>{{DESCRIPTION}}</description>
+      <pubDate>{{DATE}}</pubDate>
+      <guid>{{POST_LINK}}</guid>
+    </item>
+    {{/ITEMS}}
+
+  </channel>
+</rss>
