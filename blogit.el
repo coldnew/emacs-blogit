@@ -167,15 +167,17 @@ Currently blogit only support following format:
 (defvar blogit-template-list
   (list
    :page_header        "page_header.html"
+   :page_navigator     "page_navigator.html"
    :page_footer        "page_footer.html"
    :plugin_analytics   "plugin_analytics.html"
    :plugin_disqus      "plugin_disqus.html"
    :rss                "rss.xml"
    :newpost            "newpost.org"
 
+   ;; combine other templates
+   :blog_post          "blog_post.html"
+
    ;; FIXME: still not use
-   :page_navigator    "page_navigator.html"
-   :blog_post         "blog_post.html"
    :blog_index        "blog_index.html"
    :index             "index.html"
    )
@@ -647,6 +649,9 @@ A copy function COPYF and its arguments ARGS could be specified."
     (when (file-exists-p src)
       (apply copyf src dst args))))
 
+
+;;; Blogit context builder and template render
+
 (defmacro blogit--build-context (info &rest pairs)
   "Create a hash table with the key-value pairs given.
 Keys are compared with `equal'.
@@ -672,55 +677,13 @@ many useful context is predefined here, but you can overwrite it.
     ("DISQUS" (or (blogit--render-disqus-template ,info) ""))
     ("ANALYTICS" (or (blogit--render-analytics-template ,info) ""))
     ("ROOT" (blogit--path-to-root (blogit--build-export-dir ,info)))
-    ;; context derived from ox-html
-    ;;("HTML_META" ,(or (org-html--build-meta-info info) ""))
-    ("HTML_HEAD" (org-html--build-head ,info))
-    ("HTML_MATHJAX" (org-html--build-mathjax-config ,info))
-    ("HTML_PREAMBLE" (org-html--build-pre/postamble 'preamble ,info))
-    ("HTML_POSTAMBLE" (org-html--build-pre/postamble 'postamble ,info))
-    ;; basic blogit contents
-    ("CONTENT" (org-export-as 'blogit nil nil t nil))
     ,@pairs))
-
-(defun blogit--build-context-from-template (info)
-  "Create a hash table with the key-value pairs given.
-Keys are compared with `equal'.
-
-\(fn (KEY-1 VALUE-1) (KEY-2 VALUE-2) ...)
-
-This function is used to create context for blogit-render function,
-many useful context is predefined here, but you can overwrite it.
-"
- (blogit--build-context
-  info
-  ("HEADER" (blogit--render-header-template info))
-  ("FOOTER" (blogit--render-footer-template info))
-  ))
-
-
-
-;;; Define Back-End for org-export
-
-(org-export-define-derived-backend 'blogit 'html
-  :options-alist
-  '(
-    (:analytics         "ANALYTICS"         nil   nil   (blogit-project-info :google-analytics))
-    (:disqus            "DISQUS"            nil   nil   (blogit-project-info :disqus))
-    (:url               "URL"               nil   nil   t)
-    (:type              "TYPE"              nil   nil   t)
-
-    ;; disable org-html default style
-    ;; WARNING: DO NOT edit folling since it may break blogit functions
-    (:html-head-include-default-style nil "html-style" nil)
-    (:html-head-include-scripts nil "html-scripts" nil)
-    )
-
-  :translate-alist
-  '((link . org-blogit-html-link)
-    (template     . org-blogit-template)))
 
 (defun blogit--render-header-template (info)
   (blogit--render-template :page_header (blogit--build-context info)))
+
+(defun blogit--render-navigator-template (info)
+  (blogit--render-template :page_navigator (blogit--build-context info)))
 
 (defun blogit--render-footer-template (info)
   (blogit--render-template :page_footer (blogit--build-context info)))
@@ -736,6 +699,27 @@ many useful context is predefined here, but you can overwrite it.
     (blogit--render-template
      :plugin_analytics
      (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) (blogit-project-info :google-analytics)))))))
+
+
+;;; Define Back-End for org-export
+
+(org-export-define-derived-backend 'blogit 'html
+  :options-alist
+  '(
+    (:analytics         "ANALYTICS"         nil   nil   nil)
+    (:disqus            "DISQUS"            nil   nil   nil)
+    (:url               "URL"               nil   nil   t)
+    (:type              "TYPE"              nil   nil   t)
+
+    ;; disable org-html default style
+    ;; WARNING: DO NOT edit folling since it may break blogit functions
+    (:html-head-include-default-style nil "html-style" nil)
+    (:html-head-include-scripts nil "html-scripts" nil)
+    )
+
+  :translate-alist
+  '((link . org-blogit-html-link)
+    (template     . org-blogit-template)))
 
 (defun blogit--check-post-file (file)
   "If file is valid blogit post, return t, else nil."
@@ -821,41 +805,26 @@ In this function, we also add link file"
     ;; done and done, now return our new-link
     html-link))
 
-;; (defun org-blogit-template (contents info)
-;;   "Return complete document string after HTML conversion.
-;; CONTENTS is the transcoded contents string.  INFO is a plist
-;; holding export options."
-;;   (let* ((meta-info (org-html--build-meta-info info))
-;;          (preamble-info (org-html--build-pre/postamble 'preamble info))
-;;          ;;(postamble-info (org-html--build-pre/postamble 'postamble info))
-;;          ;; FIXME: discard postamble info, this method is not elegant
-;;          (postamble-info ""))
-;;     ;; we override some of function in org-html-template to make it
-;;     ;; more easy to build our template
-;;     (flet ((org-html--build-meta-info (info)
-;;                                       (concat
-;;                                        meta-info
-;;                                        (blogit--render-header-template info)))
-;;            (org-html--build-pre/postamble (type info)
-;;                                           (cond
-;;                                            ((eq type 'preamble) preamble-info)
-;;                                            ((eq type 'postamble)
-;;                                             (concat postamble-info
-;;                                                     (blogit--render-footer-template info))))))
-
-;;       ;;(org-html-template contents info)
-;;       (blogit--render-template :blog_post (blogit--build-context info))
-;;       )))
-
-
 (defun org-blogit-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-      ;;(org-html-template contents info)
-  (blogit--render-template :blog_post (blogit--build-context-from-template info))
-      )
-
+  ;;(org-html-template contents info)
+  (blogit--render-template
+   :blog_post
+   (blogit--build-context
+    info
+    ;; context derived from ox-html
+    ("HTML_META" (org-html--build-meta-info info))
+    ("HTML_HEAD" (org-html--build-head info))
+    ("HTML_MATHJAX" (org-html--build-mathjax-config info))
+    ("HTML_PREAMBLE" (org-html--build-pre/postamble 'preamble info))
+    ("HTML_POSTAMBLE" (org-html--build-pre/postamble 'postamble info))
+    ;; context from blogit template
+    ("HEADER" (blogit--render-header-template info))
+    ("CONTENT" (org-export-as 'blogit nil nil t nil))
+    ("NAVIGATOR" (blogit--render-navigator-template info))
+    ("FOOTER" (blogit--render-footer-template info)))))
 
 
 ;;; Extra functions for blogit-publish
