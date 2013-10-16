@@ -70,7 +70,7 @@
 
         :google-analytics ""
         :disqus    ""
-	:lloogg    ""
+        :lloogg    ""
 
         :blog-url   ""
         :blog-title ""
@@ -387,8 +387,8 @@ When filename is specified, open the file and get it's post type."
          (filename (file-name-base (or file (buffer-base-buffer) "")))
          (sanitize (if (not (string= "" url)) url
                      (blogit--sanitize-string
-		      filename
-		      (blogit-project-info :blogit-sanitize-length)))))
+                      filename
+                      (blogit-project-info :blogit-sanitize-length)))))
     (list
      (cons "year" year)
      (cons "month" month)
@@ -1355,27 +1355,31 @@ When force is t, re-publish all blogit project."
 skip it.
 
 When force is t, re-publish all blogit project."
-(mapc
- (lambda (project)
-   ;; Initial project info to current project
-   (blogit--publish-blog project))
- (org-publish-expand-projects projects)))
+  (mapc
+   (lambda (project)
+     ;; Initial project info to current project
+     (blogit--publish-blog project))
+   (org-publish-expand-projects projects)))
+
+
+(defun blogit--select-project (&optional msg)
+  (let ((project
+         (list
+          (assoc (org-icompleting-read
+                  (or msg "Publish blogit project: ")
+                  blogit-project-alist nil t)
+                 blogit-project-alist)
+          current-prefix-arg)))
+    (if (not (stringp project)) (list project)
+      ;; If this function is called in batch mode,
+      ;; project is still a string here.
+      (list (assoc project org-publish-project-alist)))))
 
 ;;;###autoload
-(defun blogit-publish (project &optional force)
-  (interactive
-   (list
-    (assoc (org-icompleting-read
-	    "Publish blogit project: "
-	    blogit-project-alist nil t)
-	   blogit-project-alist)
-    current-prefix-arg))
-  (let ((project-alist (if (not (stringp project)) (list project)
-			 ;; If this function is called in batch mode,
-			 ;; project is still a string here.
-			 (list (assoc project org-publish-project-alist)))))
+(defun blogit-publish (&optional force)
+  (interactive)
+  (blogit--publish-projects (car (blogit--select-project))))
 
-    (blogit--publish-projects project-alist)))
 
 
 (provide 'blogit)
