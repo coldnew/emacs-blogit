@@ -1225,6 +1225,7 @@ the problem."
   (newline-and-indent))
 
 ;;;###autoload
+;;; FIXME: deprecate
 (defun blogit-new-post (filename)
   "Create a new post in `(blogit-project-info :base-directory)'."
   (interactive "sTitle for new post: ")
@@ -1233,6 +1234,7 @@ the problem."
   (blogit-insert-template filename))
 
 ;;;###autoload
+;;; FIXME: deprecate
 (defun blogit-export-as-html
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to an HTML buffer for blogit.
