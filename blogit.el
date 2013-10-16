@@ -299,7 +299,7 @@ mode, format the string with MODE's format settings."
 
   ;; Add porject-list to current-project
   (setq blogit-current-project
-        (blogit-combine-project blogit-project-list))
+        (blogit-combine-project project-list))
 
   ;; Initial ignore dir
   ;; FIXME: How to let anyone add more ignore dir?
@@ -1286,17 +1286,23 @@ Return output file name."
       ;; Add file info to blogit cache
       (blogit-update-cache filename))))
 
-;;;###autoload
-(defun blogit-publish-blog (&optional force)
+
+;; ;;;###autoload
+;; (defun blogit-republish-blog ()
+;;   "Republish all blogit post."
+;;   (interactive)
+;;   (blogit-publish-blog t))
+
+
+(defun blogit--publish-blog (project-list &optional force)
   "Publush all blogit post, if post already posted and not modified,
 skip it.
 
 When force is t, re-publish all blogit project."
-  (interactive)
 
   ;; Initial project info to current project
   ;; TODO: Add multi project support
-  (blogit-initialize-project blogit-project-list)
+  (blogit-initialize-project project-list)
 
   (let* ((start-time (current-time)) ;; for statistic purposes only
          (org-publish-timestamp-directory (blogit-project-info :blogit-cache-directory))
@@ -1342,11 +1348,33 @@ When force is t, re-publish all blogit project."
                      (format-time-string "%s.%3N"
                                          (time-subtract (current-time) start-time))))))
 
+(defun blogit--publish-projects (projects &optional force)
+  "Publush all blogit post, if post already posted and not modified,
+skip it.
+
+When force is t, re-publish all blogit project."
+(mapc
+ (lambda (project)
+   ;; Initial project info to current project
+   (blogit--publish-blog project))
+ (org-publish-expand-projects projects)))
+
 ;;;###autoload
-(defun blogit-republish-blog ()
-  "Republish all blogit post."
-  (interactive)
-  (blogit-publish-blog t))
+(defun blogit-publish (project &optional force)
+  (interactive
+   (list
+    (assoc (org-icompleting-read
+	    "Publish blogit project: "
+	    blogit-project-list nil t)
+	   blogit-project-list)
+    current-prefix-arg))
+  (let ((project-alist (if (not (stringp project)) (list project)
+			 ;; If this function is called in batch mode,
+			 ;; project is still a string here.
+			 (list (assoc project org-publish-project-alist)))))
+
+    (blogit--publish-projects project-alist)))
+
 
 (provide 'blogit)
 ;;; blogit.el ends here.
