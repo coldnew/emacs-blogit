@@ -1205,33 +1205,16 @@ the problem."
 
 ;;; End-user functions
 
-;;;###autoload
-(defun blogit-insert-template (&optional filename)
-  "Insert blogit newpost template."
-  (interactive)
-  (save-excursion
-    (widen)
-    (goto-char (point-min))
-    (insert
-     (blogit--render-template
-      :newpost
-      (blogit--build-context
-       nil
-       ("TITLE" (file-name-base (or filename "")))
-       ("DATE" (format-time-string (blogit-project-info :blogit-date-format)))
-       ("URL" (blogit--sanitize-string filename))
-       ("LANGUAGE" (or (blogit-project-info :default-language) "en"))))))
-  (end-of-buffer)
-  (newline-and-indent))
 
-;;;###autoload
-;;; FIXME: deprecate
-(defun blogit-new-post (filename)
-  "Create a new post in `(blogit-project-info :base-directory)'."
-  (interactive "sTitle for new post: ")
-  (find-file (concat
-              (file-name-as-directory (blogit-project-info :base-directory)) filename ".org"))
-  (blogit-insert-template filename))
+
+;; ;;;###autoload
+;; ;;; FIXME: deprecate
+;; (defun blogit-new-post (filename)
+;;   "Create a new post in `(blogit-project-info :base-directory)'."
+;;   (interactive "sTitle for new post: ")
+;;   (find-file (concat
+;;               (file-name-as-directory (blogit-project-info :base-directory)) filename ".org"))
+;;   (blogit-insert-template filename))
 
 ;;;###autoload
 ;;; FIXME: deprecate
@@ -1296,15 +1279,67 @@ Return output file name."
 ;;   (blogit-publish-blog t))
 
 
+
+
+;; (defun blogit--publish-projects (projects &optional force)
+;;   "Publush all blogit post, if post already posted and not modified,
+;; skip it.
+
+;; When force is t, re-publish all blogit project."
+;;   (mapc
+;;    (lambda (project)
+;;      ;; Initial project info to current project
+;;      ;;(blogit--publish-blog project)
+;;      (setq a project)
+;;      )
+;;    (org-publish-expand-projects projects)))
+
+
+
+;;; Extra functions for End-user functions
+
+(defun blogit--select-project (func &optional msg)
+  (let ((project
+         (list
+          (assoc (org-icompleting-read
+                  (or msg "Publish blogit project: ")
+                  blogit-project-alist nil t)
+                 blogit-project-alist)
+          current-prefix-arg)))
+    (let ((project-list
+           (if (not (stringp project)) (list project)
+             ;; If this function is called in batch mode,
+             ;; project is still a string here.
+             (list (assoc project org-publish-project-alist)))))
+      (mapc
+       (lambda (current-project)
+         ;; Initial project info to current project
+         (blogit-initialize-project current-project)
+         (funcall func current-project))
+       (org-publish-expand-projects (car project-list))))))
+
+(defun blogit--insert-newpost-template (&optional filename)
+  "Insert blogit newpost template."
+  (save-excursion
+    (widen)
+    (goto-char (point-min))
+    (insert
+     (blogit--render-template
+      :newpost
+      (blogit--build-context
+       nil
+       ("TITLE" (file-name-base (or filename (buffer-file-name) "")))
+       ("DATE" (format-time-string (blogit-project-info :blogit-date-format)))
+       ("URL" (blogit--sanitize-string filename))
+       ("LANGUAGE" (or (blogit-project-info :default-language) "en"))))))
+  (end-of-buffer)
+  (newline-and-indent))
+
 (defun blogit--publish-blog (project-list &optional force)
   "Publush all blogit post, if post already posted and not modified,
 skip it.
 
 When force is t, re-publish all blogit project."
-
-  ;; Initial project info to current project
-  ;; TODO: Add multi project support
-  (blogit-initialize-project project-list)
 
   (let* ((start-time (current-time)) ;; for statistic purposes only
          (org-publish-timestamp-directory (blogit-project-info :blogit-cache-directory))
@@ -1350,36 +1385,35 @@ When force is t, re-publish all blogit project."
                      (format-time-string "%s.%3N"
                                          (time-subtract (current-time) start-time))))))
 
-(defun blogit--publish-projects (projects &optional force)
-  "Publush all blogit post, if post already posted and not modified,
-skip it.
+
+;;; End-user functions
 
-When force is t, re-publish all blogit project."
-  (mapc
-   (lambda (project)
-     ;; Initial project info to current project
-     (blogit--publish-blog project))
-   (org-publish-expand-projects projects)))
+;; FIXME: since we re-ask user the project want to use, this is abit
+;; annoying
 
+;;;###autoload
+(defun blogit-insert-template (&optional filename)
+  "Insert blogit newpost template."
+  (interactive)
+  (blogit--select-project 'blogit--insert-newpost-template))
 
-(defun blogit--select-project (&optional msg)
-  (let ((project
-         (list
-          (assoc (org-icompleting-read
-                  (or msg "Publish blogit project: ")
-                  blogit-project-alist nil t)
-                 blogit-project-alist)
-          current-prefix-arg)))
-    (if (not (stringp project)) (list project)
-      ;; If this function is called in batch mode,
-      ;; project is still a string here.
-      (list (assoc project org-publish-project-alist)))))
+;;;###autoload
+(defun blogit-new-post ()
+  "Create a new post according to project."
+  (interactive)
+  (flet ((create-new-post-file
+          (project)
+          (let ((filename (read-input "sTitle for new post: ")))
+            (find-file (concat
+                        (file-name-as-directory (blogit-project-info :base-directory)) filename ".org"))
+            (blogit--insert-newpost-template filename))))
+
+    (blogit--select-project 'create-new-post-file)))
 
 ;;;###autoload
 (defun blogit-publish (&optional force)
   (interactive)
-  (blogit--publish-projects (car (blogit--select-project))))
-
+  (blogit--select-project 'blogit--publish-blog))
 
 
 (provide 'blogit)
