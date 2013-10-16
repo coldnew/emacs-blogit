@@ -52,7 +52,7 @@
 
 ;;; User Configuration Variables
 
-(setq blogit-default-project-list
+(setq blogit-default-project-alist
       '("Blogit"
 
         ;; same options as `org-publist-project-alist'
@@ -102,7 +102,7 @@
         :blogit-tags-directory-name "tags"
         ))
 
-(defvar blogit-project-list nil
+(defvar blogit-project-alist nil
   "Association list to control publishing behavior.
 Each element of the alist is a publishing 'project.'  The CAR of
 each element is a string, uniquely identifying the project.  The
@@ -260,7 +260,7 @@ mode, format the string with MODE's format settings."
         (project-plist (cdr project)))
     (cons project-name
           (org-combine-plists
-           (cdr blogit-default-project-list) project-plist))))
+           (cdr blogit-default-project-alist) project-plist))))
 
 (defun blogit-project-info (key)
   "Return project info according to key."
@@ -1243,7 +1243,7 @@ is non-nil."
   (interactive)
 
   ;; Initial some blogit project info
-  (blogit-initialize-project blogit-project-list)
+  (blogit-initialize-project blogit-project-alist)
 
   (let ((outbuf (org-export-to-buffer
                     'blogit "*Blogit Export*"
@@ -1365,8 +1365,8 @@ When force is t, re-publish all blogit project."
    (list
     (assoc (org-icompleting-read
 	    "Publish blogit project: "
-	    blogit-project-list nil t)
-	   blogit-project-list)
+	    blogit-project-alist nil t)
+	   blogit-project-alist)
     current-prefix-arg))
   (let ((project-alist (if (not (stringp project)) (list project)
 			 ;; If this function is called in batch mode,
