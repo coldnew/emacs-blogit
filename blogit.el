@@ -1416,6 +1416,13 @@ When force is t, re-publish all blogit project."
   (blogit--select-project 'blogit--publish-blog))
 
 
+;;;###autoload
+(defun blogit-republish (&optional force)
+  (interactive)
+  (flet ((blogit--republish-blog (project-list)
+				 (blogit--publish-blog project-list t)))
+  (blogit--select-project 'blogit--republish-blog)))
+
 (provide 'blogit)
 ;;; blogit.el ends here.
 
