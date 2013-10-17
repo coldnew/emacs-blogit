@@ -1,0 +1,25 @@
+#+TITLE: test post for blogit
+#+AUTHOR: coldnew
+#+EMAIL:  coldnew.tw@gmail.com
+#+DATE:   2013-10-17 22:31:44
+#+LANGUAGE: en
+#+URL:    test_post_for_blogit
+#+DESCRIPTION:
+#+KEYWORDS:
+#+TAGS:
+#+OPTIONS: num:nil
+
+* About
+
+This is my first post for =emacs blogit= .
+
+* What is blogit ?
+
+blogit is a static site generater fully based on emacs and org-mode.
+There are many flavor way to write static site under org-mode, like
+org-jekyll, org-octopress, o-blog.
+
+
+* Whate next
+
+Current blogit is under develop
