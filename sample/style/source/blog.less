@@ -2,8 +2,23 @@
 @import "header.less";
 @import "toc.less";
 
+nav a:hover {
+    zoom: 1.1;
+}
+
+.navbar {
+    font-size: @baseFontSize / (18/13);
+    line-height: 0.76 * @baseLineHeight  / (18/13);
+}
+
+.navbar-fixed-top {
+    li {
+        line-height: @baseLineHeight;
+    }
+}
+
 body {
-    width:70%;
+    width:100%;
     margin: 0 auto;
     font-size: 18px;
     line-height: 150%;
@@ -48,7 +63,7 @@ pre.src, .modal-body > pre {
     .resizable(both);
     .box-shadow(0 3px 7px rgba(0,0,0,0.3));
     border: 1px solid @grayLighter;
-//    border: 1px solid #dddddd;
+    //    border: 1px solid #dddddd;
     background: @blog-background;
     color: @blog-foreground;
 }

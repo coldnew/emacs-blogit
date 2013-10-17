@@ -348,6 +348,12 @@ mode, format the string with MODE's format settings."
   `(when (file-exists-p ,filename)
      (with-temp-buffer (insert-file-contents ,filename) ,@pairs)))
 
+(defun blogit--file-in-dir-p (file dir)
+  "Check if file is under directory."
+  (let ((file-dir (file-name-directory (expand-file-name filename))))
+    (string= file-dir
+	     (file-name-directory (expand-file-name dir)))))
+
 (defun blogit--get-post-type (info &optional filename)
   "Get current post type, return `(blogit-project-info :blogit-default-type)' if not found.
 When filename is specified, open the file and get it's post type."
@@ -1237,14 +1243,14 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
-  (let ((do-publish t)
-        (file-dir (file-name-directory (expand-file-name filename))))
+  (let ((do-publish t))
 
     ;; check if file is not under blogit ignore directory
     (dolist (d (blogit-project-info :blogit-ignore-directory-list))
       (if do-publish
-          (when (string= file-dir
-                         (file-name-directory (expand-file-name (concat (blogit-project-info :base-directory) "/" d "/"))))
+          (when
+	      (blogit--file-in-dir-p filename
+				     (concat (blogit-project-info :base-directory) "/" d "/"))
             (setq do-publish nil))))
 
     ;; if file is draft, do not publish it
