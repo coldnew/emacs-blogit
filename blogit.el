@@ -1368,7 +1368,7 @@ When force is t, re-publish all blogit project."
   (interactive)
   (flet ((create-new-post-file
           (project)
-          (let ((filename (read-input "sTitle for new post: ")))
+          (let ((filename (read-input "Title for new post: ")))
             (find-file (concat
                         (file-name-as-directory (blogit-project-info :base-directory)) filename ".org"))
             (blogit--insert-newpost-template filename))))
