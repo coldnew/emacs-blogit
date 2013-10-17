@@ -1205,17 +1205,6 @@ the problem."
 
 ;;; End-user functions
 
-
-
-;; ;;;###autoload
-;; ;;; FIXME: deprecate
-;; (defun blogit-new-post (filename)
-;;   "Create a new post in `(blogit-project-info :base-directory)'."
-;;   (interactive "sTitle for new post: ")
-;;   (find-file (concat
-;;               (file-name-as-directory (blogit-project-info :base-directory)) filename ".org"))
-;;   (blogit-insert-template filename))
-
 ;;;###autoload
 ;;; FIXME: deprecate
 (defun blogit-export-as-html
@@ -1270,30 +1259,6 @@ Return output file name."
                              plist pub-dir)
       ;; Add file info to blogit cache
       (blogit-update-cache filename))))
-
-
-;; ;;;###autoload
-;; (defun blogit-republish-blog ()
-;;   "Republish all blogit post."
-;;   (interactive)
-;;   (blogit-publish-blog t))
-
-
-
-
-;; (defun blogit--publish-projects (projects &optional force)
-;;   "Publush all blogit post, if post already posted and not modified,
-;; skip it.
-
-;; When force is t, re-publish all blogit project."
-;;   (mapc
-;;    (lambda (project)
-;;      ;; Initial project info to current project
-;;      ;;(blogit--publish-blog project)
-;;      (setq a project)
-;;      )
-;;    (org-publish-expand-projects projects)))
-
 
 
 ;;; Extra functions for End-user functions
