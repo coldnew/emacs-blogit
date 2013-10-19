@@ -882,7 +882,7 @@ holding export options."
   "Publish rss or atom file for blogit."
 
   ;; TODO: generate rss contenst, how to?
-  (let* ((cache "recents")
+  (let* ((cache ":recents:")
          (cache-val (blogit-cache-get cache)))
 
     ;; since we only get rss/atom length defined in
