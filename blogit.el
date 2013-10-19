@@ -854,11 +854,12 @@ holding export options."
     ("HTML_MATHJAX" (org-html--build-mathjax-config info))
     ("HTML_PREAMBLE" (org-html--build-pre/postamble 'preamble info))
     ("HTML_POSTAMBLE" (org-html--build-pre/postamble 'postamble info))
+
     ;; context from blogit template
-    ("HEADER" (blogit--render-header-template info))
-    ("CONTENT" (org-export-as 'blogit nil nil t nil))
-    ("NAVIGATOR" (blogit--render-navigator-template info))
-    ("FOOTER" (blogit--render-footer-template info)))))
+    ("PAGE_HEADER" (blogit--render-header-template info))
+    ("HTML_CONTENT" (org-export-as 'blogit nil nil t nil))
+    ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
+    ("PAGE_FOOTER" (blogit--render-footer-template info)))))
 
 
 ;;; Extra functions for blogit-publish
