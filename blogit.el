@@ -1084,6 +1084,9 @@ Returns value on success, else nil."
     (error "`blogit-cache-set' called, but no cache present"))
   (puthash key value blogit-cache))
 
+;; FIXME:
+;; When use blogit-publish, some cache may vanish
+
 (defun blogit-update-cache (filename)
   "Update blogit-cache to log post info."
   (flet ((get-info (key)
