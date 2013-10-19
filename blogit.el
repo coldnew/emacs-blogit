@@ -352,7 +352,7 @@ mode, format the string with MODE's format settings."
   "Check if file is under directory."
   (let ((file-dir (file-name-directory (expand-file-name filename))))
     (string= file-dir
-	     (file-name-directory (expand-file-name dir)))))
+             (file-name-directory (expand-file-name dir)))))
 
 (defun blogit--get-post-type (info &optional filename)
   "Get current post type, return `(blogit-project-info :blogit-default-type)' if not found.
@@ -1128,26 +1128,27 @@ Returns value on success, else nil."
   "Build tags info for all files, this function will also count every
 tags repeat times."
   (let* ((tags (blogit--get-tags info))
-         (cache "tags")
+         (cache ":tags:")
          (cache-val (blogit-cache-get cache)))
 
     (dolist (tag tags)
       (let ((key (blogit--string-to-key tag)))
 
-        ;; calculate tags count
-        (if (member key cache-val)
-            (let ((count (plist-get cache-val key)))
-              (setq cache-val (plist-put cache-val key (+ count 1))))
-          (setq cache-val (plist-put cache-val key 1)))
-
         ;; add filename to every `tags-name' cache that files has
-        (let* ((tag-cache (format "tags-%s" tag))
+        (let* ((tag-cache (format ":tags-%s:" tag))
                (tag-cache-val (blogit-cache-get tag-cache))
 
                (title (plist-get info :title))
                (post-url (plist-get info :post-url)))
 
-          (blogit-cache-set tag-cache (add-to-list 'tag-cache-val `(,title . ,post-url))))))
+          (add-to-list 'tag-cache-val `(,title . ,post-url))
+          (blogit-cache-set tag-cache tag-cache-val)
+
+          ;; calculate tags count
+          (if (member key cache-val)
+              (let ((count (length (blogit-cache-get tag-cache))))
+                (setq cache-val (plist-put cache-val key count)))
+            (setq cache-val (plist-put cache-val key 1))))))
 
     (blogit-cache-set cache cache-val)))
 
@@ -1169,14 +1170,14 @@ This cache will be used to build rss and recent post."
 
     (let* ((date (plist-get info :date))
            (type (plist-get info :type))
-           (cache "recents")
+           (cache ":recents:")
            (cache-val (blogit-cache-get cache)))
 
       (unless (eq type 'static)
 
         ;; add current file info to cache and sort by date
         ;; in `anti-chronologically' order.
-        (setq cache-val (add-to-list 'cache-val `(,date . ,filename)))
+        (add-to-list 'cache-val `(,date . ,filename))
         (setq cache-val (sort cache-val #'anti-chronologically))
 
         ;; we only take what we need in recents cache
@@ -1253,13 +1254,14 @@ Return output file name."
     (dolist (d (blogit-project-info :blogit-ignore-directory-list))
       (if do-publish
           (when
-	      (blogit--file-in-dir-p filename
-				     (concat (blogit-project-info :base-directory) "/" d "/"))
+              (blogit--file-in-dir-p filename
+                                     (concat (blogit-project-info :base-directory) "/" d "/"))
             (setq do-publish nil))))
 
     ;; if file is draft, do not publish it
     (if do-publish
-        (when (eq 'draft (blogit--get-post-type nil filename)) (setq do-publish nil)))
+        (when (eq 'draft (blogit--get-post-type nil filename))
+          (setq do-publish nil)))
 
     ;; only publish when do-publish is t
     (when do-publish
@@ -1395,8 +1397,8 @@ When force is t, re-publish all blogit project."
 (defun blogit-republish (&optional force)
   (interactive)
   (flet ((blogit--republish-blog (project-list)
-				 (blogit--publish-blog project-list t)))
-  (blogit--select-project 'blogit--republish-blog)))
+                                 (blogit--publish-blog project-list t)))
+    (blogit--select-project 'blogit--republish-blog)))
 
 (provide 'blogit)
 ;;; blogit.el ends here.
