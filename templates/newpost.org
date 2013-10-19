@@ -4,7 +4,5 @@
 #+DATE:   {{DATE}}
 #+LANGUAGE: {{LANGUAGE}}
 #+URL:    {{URL}}
-#+DESCRIPTION:
-#+KEYWORDS:
-#+TAGS:
 #+OPTIONS: num:nil
+#+TAGS:
