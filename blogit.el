@@ -857,9 +857,9 @@ holding export options."
 
     ;; context from blogit template
     ("PAGE_HEADER" (blogit--render-header-template info))
-    ("HTML_CONTENT" (org-export-as 'blogit nil nil t nil))
     ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
-    ("PAGE_FOOTER" (blogit--render-footer-template info)))))
+    ("PAGE_FOOTER" (blogit--render-footer-template info))
+    ("CONTENT" (org-export-as 'blogit nil nil t nil)))))
 
 
 ;;; Extra functions for blogit-publish
