@@ -736,7 +736,7 @@ many useful context is predefined here, but you can overwrite it.
 
 ;;; Define Back-End for org-export
 
-(org-export-define-derived-backend 'blogit 'html
+(org-export-define-derived-backend 'blogit-html 'html
   :options-alist
   '(
     (:analytics         "ANALYTICS"         nil   nil   nil)
@@ -859,7 +859,7 @@ holding export options."
     ("PAGE_HEADER" (blogit--render-header-template info))
     ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
     ("PAGE_FOOTER" (blogit--render-footer-template info))
-    ("CONTENT" (org-export-as 'blogit nil nil t nil)))))
+    ("CONTENT" (org-export-as 'blogit-html nil nil t nil)))))
 
 
 ;;; Extra functions for blogit-publish
@@ -1231,7 +1231,7 @@ is non-nil."
   (blogit-initialize-project blogit-project-alist)
 
   (let ((outbuf (org-export-to-buffer
-                    'blogit "*Blogit Export*"
+                    'blogit-html "*Blogit HTML Export*"
                   subtreep visible-only body-only ext-plist))
         (org-export-coding-system org-html-coding-system))
     ;; Set major mode.
@@ -1265,7 +1265,7 @@ Return output file name."
 
     ;; only publish when do-publish is t
     (when do-publish
-      (blogit-publish-org-to 'blogit filename
+      (blogit-publish-org-to 'blogit-html filename
                              (concat "." (or (plist-get plist :html-extension)
                                              org-html-extension "html"))
                              plist pub-dir)
