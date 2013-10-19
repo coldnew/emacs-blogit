@@ -1,32 +1,7 @@
 @import "base.less";
 @import "header.less";
 @import "toc.less";
-
-nav a:hover {
-    zoom: 1.1;
-}
-
-.navbar {
-    font-size: @baseFontSize / (18/13);
-    line-height: 0.76 * @baseLineHeight  / (18/13);
-}
-
-.navbar-fixed-top {
-    li {
-        line-height: @baseLineHeight;
-    }
-}
-
-body {
-    width:100%;
-    margin: 0 auto;
-    font-size: 18px;
-    line-height: 150%;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    font-family: "Yanone Kaffeesatz", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
+@import "navigator.less";
 
 h2, h3, h4, h5, h6 {
     border-bottom: 2px LightGrey solid;
@@ -57,12 +32,10 @@ h4 {
     color: DarkBlue;
 }
 
-// TODO: why bootstrap failed?
-@grayLighter: #eee;
 pre.src, .modal-body > pre {
     .resizable(both);
     .box-shadow(0 3px 7px rgba(0,0,0,0.3));
-    border: 1px solid @grayLighter;
+    border: 1px solid @gray-lighter;
     //    border: 1px solid #dddddd;
     background: @blog-background;
     color: @blog-foreground;
@@ -71,7 +44,7 @@ pre.src, .modal-body > pre {
 a {
     text-decoration: none;
     padding: 1px;
-    color: @linkColor;
+    color: @link-color;
 }
 
 #footer {

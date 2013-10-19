@@ -3,10 +3,10 @@
 
 @import "font.less";
 
-@linkColor: #933;
+@link-color: #933;
 
-@baseFontSize: 18px;
-@baseLineHeight: @baseFontSize * (18/13);
+@base-font-size: 18px;
+@base-line-height: @base-font-size * (18/13);
 
 @blog-background: #2e3436;
 @blog-foreground: #eeeeec;
@@ -14,3 +14,14 @@
 @gridColumns:             12;
 @gridColumnWidth:         70px;
 @gridGutterWidth:         20px;
+
+body {
+    width:100%;
+    margin: 0 auto;
+    font-size: @base-font-size;
+    line-height: 150%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Yanone Kaffeesatz", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
