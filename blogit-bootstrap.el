@@ -63,20 +63,16 @@ and is converted according to bootstrap-source templatate.
 
 (defun blogit--file-to-source-html (file &optional mode)
   (let ((src-block
-         (with-temp-buffer
+         (blogit--file-in-temp-buffer
+	  file
            (goto-char (point-min))
-
            (insert  (if mode (format "#+BEGIN_SRC %s\n" mode)
                       (format "#+BEGIN_EXAMPLE\n")))
-           (insert-file-contents file)
 
            (goto-char (point-max))
-
            (insert  (if mode (format "#+END_SRC\n")
                       (format "#+END_EXAMPLE\n")))
-           (org-export-as 'html nil nil t nil)))
-
-        )
+           (org-export-as 'html nil nil t nil))))
     src-block))
 
 (provide 'blogit-bootstrap)
