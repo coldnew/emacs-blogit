@@ -218,7 +218,7 @@ project list. Return nil when failed."
           ;; Initialize project info
           (blogit-initialize-project p)
           (blogit-initialize-cache)
-	  (setq ret t))))
+          (setq ret t))))
     ret))
 
 
@@ -372,10 +372,14 @@ This function is used to generate blog post url if not specified."
 
 (defun blogit--parse-date-string1 (date-str yn mn dn)
   "Helper function to return date list for `blogit--parse-date-string'."
-  (list
-   :year (format "%04d" (string-to-int (match-string yn date-str)))
-   :month (format "%02d" (string-to-int (match-string mn date-str)))
-   :day (format "%02d" (string-to-int (match-string dn date-str)))))
+  (let ((year (string-to-int (match-string yn date-str)))
+        (month (string-to-int (match-string mn date-str)))
+        (day (string-to-int (match-string dn date-str))))
+    (list
+     :year (format "%04d" year)
+     :month (format "%02d" month)
+     :month_abbrev (calendar-month-name month t)
+     :day (format "%02d" day))))
 
 ;; FIXME: this function may be has some error when date-string is nil
 (defun blogit--parse-date-string (date-string)
@@ -465,11 +469,11 @@ This function is used to create directory for new blog post.
   (replace-regexp-in-string
    (concat "<img src=\"" (blogit--build-post-file-directory info filename))
    (concat "<img src=\"" (file-name-directory (blogit--build-post-url info filename))
-	   (blogit--build-post-file-directory info filename))
+           (blogit--build-post-file-directory info filename))
    (blogit--file-in-temp-buffer
     filename
     (blogit--modify-option "OPTIONS"
-			   (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
+                           (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
     (org-export-as 'blogit-html nil nil t nil))))
 
 ;; FIXME: what about ./ ?
@@ -603,6 +607,7 @@ many useful context is predefined here, but you can overwrite it.
     ("DATE" (or (blogit--parse-option ,info :date) ""))
     ("POST_DAY" (or (plist-get (blogit--get-post-date-list ,info) :day) ""))
     ("POST_MONTH" (or (plist-get (blogit--get-post-date-list ,info) :month) ""))
+    ("POST_MONTH_ABBREV" (or (plist-get (blogit--get-post-date-list ,info) :month_abbrev) ""))
     ("POST_YEAR" (or (plist-get (blogit--get-post-date-list ,info) :year) ""))
     ("CURRENT_DATE" (format-time-string (blogit-project-info :blogit-date-format)))
     ("CURRENT_YEAR" (format-time-string "%Y"))
@@ -655,7 +660,7 @@ many useful context is predefined here, but you can overwrite it.
      (ht ("LLOOGG" (or (blogit--parse-option info :lloogg) (blogit-project-info :lloogg)))))))
 
 (defun blogit--render-qrcode-template (info)
-    (blogit--render-template :plugin_qrcode (blogit--build-context info)))
+  (blogit--render-template :plugin_qrcode (blogit--build-context info)))
 
 (provide 'blogit-core)
 ;;; blogit-core.el ends here.
