@@ -13,7 +13,7 @@
     <title>{{MAIN_TITLE}}</title>
     <link>{{BLOG_URL}}</link>
     <description><![CDATA[]]></description>
-    <pubDate>{{DATE}}</pubDate>
+    <pubDate>{{CURRENT_DATE}}</pubDate>
     <lastBuildDate>{{DATE}}</lastBuildDate>
     <generator>Emace Blogit (https://github.com/coldnew/blogit)</generator>
     <webMaster>{{EMAIL}} ({{AUTHOR}})</webMaster>

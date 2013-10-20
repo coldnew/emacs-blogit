@@ -206,6 +206,9 @@ Currently blogit only support following format:
 (defvar blogit-current-project nil
   "Cache to store current project plist info.")
 
+(defvar blogit-current-file nil
+  "Cache to store current processing file info.")
+
 (defvar blogit-cache nil
   "Cache to store post info, this cache will be used to
 generate rss and tage.")

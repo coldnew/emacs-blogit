@@ -32,9 +32,6 @@
 (require 'blogit-vars)
 (require 'blogit-core)
 
-
-
-
 (defun blogit-bootstrap-publish-source (info val)
   "Publish an sourced file in HTML mode.
 
@@ -46,8 +43,8 @@ and is converted according to bootstrap-source templatate.
 "
   (let* ((val-list (split-string val " "))
 	 (element (blogit--string-list-to-plist val))
-	 (file-1 (plist-get element :file))
-	 (file (if (file-name-absolute-p file-1) file-1 (expand-file-name file-1)))
+	 (file (expand-file-name
+		(concat (file-name-directory blogit-current-file) (plist-get element :file))))
 	 (mode (plist-get element :mode))
    	 (contents (or (blogit--file-to-string file) "")))
     (blogit--render-template

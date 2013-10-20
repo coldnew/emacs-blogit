@@ -229,12 +229,17 @@ Return output file name."
 
     ;; only publish when do-publish is t
     (when do-publish
+      ;; Store current process file to blogit-current-file
+      (setq blogit-current-file filename)
+
       (blogit-publish-org-to 'blogit-html filename
                              (concat "." (or (plist-get plist :html-extension)
                                              org-html-extension "html"))
                              plist pub-dir)
       ;; Add file info to blogit cache
-      (blogit-update-cache filename))))
+      (blogit-update-cache filename)
+      ;; clear cache
+      (setq blogit-current-file nil))))
 
 
 ;;; Extra functions for End-user functions

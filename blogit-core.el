@@ -568,6 +568,7 @@ many useful context is predefined here, but you can overwrite it.
     ("AUTHOR" (or (blogit--parse-option ,info :author) user-full-name "Unknown"))
     ("EMAIL" (or (blogit--parse-option ,info :email) user-mail-address ""))
     ("DATE" (or (blogit--parse-option ,info :date) ""))
+    ("CURRENT_DATE" (format-time-string (blogit-project-info :blogit-date-format)))
     ("YEAR" (format-time-string "%Y"))
     ("BLOG_URL" (or (blogit-project-info :blog-url) ""))
     ("URL" (or (blogit--parse-option ,info :url) ""))
