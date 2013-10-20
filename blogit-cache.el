@@ -112,10 +112,36 @@ Returns value on success, else nil."
     (error "`blogit-cache-set' called, but no cache present"))
   (puthash key value blogit-cache))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; FIXME:
-;; When use blogit-publish, some cache may vanish
+;; move to other place
 
-(file-relative-name "sample-init.el" (blogit--parse-option nil :url))
+(defun blogit--build-post-url (info &optional filename)
+  (format "%s%s"
+          (s-replace
+           (expand-file-name (blogit-project-info :publishing-directory)) ""
+           (expand-file-name (blogit--build-export-dir info)))
+          (blogit--get-post-filename info filename)))
+
+(defun blogit--build-post-link (info &optional filename)
+  (concat (blogit-project-info :blog-url) "/" (blogit--build-post-url info filename)))
+
+(defun blogit--build-post-file-directory (info &optional filename)
+  (file-name-base (blogit--get-post-filename info filename)))
+
+(defun blogit--build-post-content (info &optional filename)
+  ;; FIXME: fix file
+  (replace-regexp-in-string
+   (concat "<img src=\"" (blogit--build-post-file-directory info filename))
+   (concat "<img src=\"" (file-name-directory (blogit--build-post-url info filename))
+	   (blogit--build-post-file-directory info filename))
+   (blogit--file-in-temp-buffer
+    filename
+    (blogit--modify-option "OPTIONS"
+			   (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
+    (org-export-as 'blogit-html nil nil t nil))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun blogit-update-cache (filename)
   "Update blogit-cache to log post info."
@@ -128,13 +154,16 @@ Returns value on success, else nil."
                             (expand-file-name (blogit--build-export-dir nil)))
                            (blogit--get-post-filename nil filename)))
          (post-link ()
-		    (concat (blogit-project-info :blog-url) "/" (post-url)))
-	 (post-content ()
-		       (blogit--file-in-temp-buffer
-			filename
-			(blogit--modify-option "OPTIONS"
-					       (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
-			(org-export-as 'blogit-html nil nil t nil))))
+                    (concat (blogit-project-info :blog-url) "/" (post-url)))
+         (post-content ()
+		       (blogit--build-post-content nil filename)))
+
+         ;; (post-content ()
+         ;;               (blogit--file-in-temp-buffer
+         ;;                filename
+         ;;                (blogit--modify-option "OPTIONS"
+         ;;                                       (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
+         ;;                (org-export-as 'blogit-html nil nil t nil))))
     (let* ((info
             (blogit--file-in-temp-buffer
              filename
@@ -144,8 +173,8 @@ Returns value on success, else nil."
                :type (blogit--get-post-type nil)
                :post-url (post-url)
                :post-link (post-link)
-	       :atom (post-content)
-	       :rss (post-content)
+               :atom (post-content)
+               :rss (post-content)
                )))))
 
       ;; update fileinfo cache

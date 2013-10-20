@@ -131,6 +131,8 @@ In this function, we also add link file"
                  (downcase (file-name-extension encode-path ".")))
         ;; check if the file is also a blogit post, if t, not add
         ;; file to cache.
+	;; FIXME: How if I just want to lonk a org file, and it also
+	;; is a blogit post ?
         (if (blogit--check-post-file encode-path)
             ;; if file is really blogit post, get it url
             (setq new-path (blogit--calculate-post-relative-path encode-path))
@@ -153,7 +155,7 @@ In this function, we also add link file"
         ;; Since some of raw-path use absolute dir, some use relative
         ;; dir (like image), we make all raw-path to use relative path
         ;; here if it is at the same dir as post.
-        (setq raw-path (s-replace (file-name-directory blogit-current-file) "" raw-path))
+        (setq raw-path (s-replace (file-name-directory (or blogit-current-file (buffer-file-name))) "" raw-path))
 
         ;; we also need to modify org-html-link to relative path
         ;; for our post
@@ -212,7 +214,7 @@ is non-nil."
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to an HTML buffer for blogit.
 
-Export is done in a buffer named \"*Blogit Export*\", which
+Export is done in a buffer named \"*Blogit HTML Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
