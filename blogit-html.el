@@ -153,7 +153,7 @@ In this function, we also add link file"
         ;; Since some of raw-path use absolute dir, some use relative
         ;; dir (like image), we make all raw-path to use relative path
         ;; here if it is at the same dir as post.
-        (setq raw-path (s-replace (file-name-directory (buffer-file-name)) "" raw-path))
+        (setq raw-path (s-replace (file-name-directory blogit-current-file) "" raw-path))
 
         ;; we also need to modify org-html-link to relative path
         ;; for our post
