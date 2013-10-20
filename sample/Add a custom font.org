@@ -1,0 +1,76 @@
+#+TITLE: Add a custom font
+#+AUTHOR: coldnew
+#+EMAIL:  coldnew.tw@gmail.com
+#+DATE:   2013-10-19 21:50:29
+#+LANGUAGE: en
+#+URL:    add_a_custom_font
+#+OPTIONS: num:nil
+#+TAGS: usage bootstrap font
+
+[[http://www.google.com/webfonts][Google webfonts]] can be easily used in blogit in 2 different ways: using
+the Google API, or by providing resources in the =style= directory.
+
+#+HTML: <div class="alert alert-warning">
+*Caution*
+
+Using many font styles can slow down your webpage, so only select the font
+styles that you actually need on your webpage.
+#+HTML: </div>
+
+Both examples below use the [[http://www.yanone.de/typedesign/kaffeesatz/][Yanone Kaffeesatz]] font.
+
+* Using Google API
+
+The [[http://www.google.com/webfonts#QuickUsePlace:quickUse/Family:][quick use]] provides an import snippet such as:
+
+#+BEGIN_SRC css
+@import url("http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,200,300,700&subset=latin,latin-ext");
+#+END_SRC
+
+That line should be included into the
+=templates/style/less/o-blog-default.less= file in which you should also add
+something like:
+
+#+BEGIN_SRC css
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Yanone Kaffeesatz", sans-serif;
+}
+#+END_SRC
+
+And that's it.
+
+* Providing resources
+
+That is less efficient in terms of network resources but provides a good
+alternative for offline publications.
+
+
+The script =get-font.sh= does all needed jobs.
+
+#+BLOGIT_SOURCE: :file style/get-font.sh :mode sh
+
+You can run:
+
+#+BEGIN_SRC sh
+./get-font.sh 'http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,200,300,700&subset=latin,latin-ext'
+#+END_SRC
+
+And add the font declaration in =style/source/font.less=:
+
+#+BEGIN_SRC css
+@import "../font/font-Yanone-Kaffeesatz.less";
+#+END_SRC
+
+Finally, declare its use as in the Google API version:
+
+#+BEGIN_SRC css
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Yanone Kaffeesatz", sans-serif;
+}
+#+END_SRC
+
+* Note
+
+This post is based on [[http://renard.github.io/o-blog][o-blog's]] post: [[http://renard.github.io/o-blog/tips/2012/05/07_add-a-custom-font.html][Add a custom font]].
+
+I modify some content to suit to blogit.
