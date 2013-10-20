@@ -129,7 +129,7 @@ Returns value on success, else nil."
 (defun blogit--build-post-file-directory (info &optional filename)
   (file-name-base (blogit--get-post-filename info filename)))
 
-(defun blogit--build-post-content (info &optional filename)
+(defun blogit--build-feed-content (info &optional filename)
   ;; FIXME: fix file
   (replace-regexp-in-string
    (concat "<img src=\"" (blogit--build-post-file-directory info filename))
@@ -147,23 +147,8 @@ Returns value on success, else nil."
   "Update blogit-cache to log post info."
   (flet ((get-info (key)
                    (list key (or (blogit--parse-option nil key) "")))
-         (post-url ()
-                   (format "%s%s"
-                           (s-replace
-                            (expand-file-name (blogit-project-info :publishing-directory)) ""
-                            (expand-file-name (blogit--build-export-dir nil)))
-                           (blogit--get-post-filename nil filename)))
-         (post-link ()
-                    (concat (blogit-project-info :blog-url) "/" (post-url)))
-         (post-content ()
-		       (blogit--build-post-content nil filename)))
-
-         ;; (post-content ()
-         ;;               (blogit--file-in-temp-buffer
-         ;;                filename
-         ;;                (blogit--modify-option "OPTIONS"
-         ;;                                       (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
-         ;;                (org-export-as 'blogit-html nil nil t nil))))
+         (feed-content ()
+		       (blogit--build-feed-content nil filename)))
     (let* ((info
             (blogit--file-in-temp-buffer
              filename
@@ -171,10 +156,10 @@ Returns value on success, else nil."
               (list
                (map 'list 'get-info '(:title :date :language :tags))
                :type (blogit--get-post-type nil)
-               :post-url (post-url)
-               :post-link (post-link)
-               :atom (post-content)
-               :rss (post-content)
+               :post-url (blogit--build-post-url nil filename)
+               :post-link (blogit--build-post-link nil filename)
+               :atom (blogit--build-feed-content nil filename)
+               :rss  (blogit--build-feed-content nil filename)
                )))))
 
       ;; update fileinfo cache
