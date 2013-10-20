@@ -56,8 +56,10 @@ and is converted according to bootstrap-source templatate.
       ("FILENAME" file)
       ("FILENAME_BASE" (file-name-base file))
       ("FILENAME_SANITIZE" (blogit--sanitize-string (file-name-base file)))
+      ("TITLE" (or (plist-get element :title) (file-name-base file)))
       ("CONTENT" (blogit--file-to-source-html file mode))
-      ))))
+      ;; FIXME: A good name ?
+      ("BTN" (or (plist-get element :btn) "btn-info"))))))
 
 (defun blogit--file-to-source-html (file &optional mode)
   (let ((src-block
