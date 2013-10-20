@@ -198,7 +198,11 @@ is non-nil."
     ;; Set major mode.
     (with-current-buffer outbuf (set-auto-mode t))
     (when org-export-show-temporary-export-buffer
-      (switch-to-buffer-other-window outbuf))))
+      (switch-to-buffer-other-window outbuf)
+      ;; Indent html buffer to make debug more easy
+      (delete-trailing-whitespace)
+      (indent-region (point-min) (point-max))
+      (untabify (point-min) (point-max)))))
 
 
 ;;; End-user functions
@@ -216,7 +220,8 @@ is non-nil."
   ;; Find blogit project info to initialize, if file does not contains
   ;; in any blogit-project-alist, ask user to select template to
   ;; render.
-  (unless (blogit--swtich-to-file-project (buffer-file-name))
+  (if (blogit--swtich-to-file-project (buffer-file-name))
+      (blogit--export-as-html)
     (blogit--select-project
      'blogit--export-as-html
      "No match project found. Select Project to render current file.")))
