@@ -310,10 +310,7 @@ When force is t, re-publish all blogit project."
     ;; initialize cache for blogit
     (blogit-initialize-cache)
 
-    ;; publish all posts
-    ;; TODO: how about create multiple blogit project like org-publish
-    ;; do ?
-
+    ;; publish current project posts
     (org-publish-project blogit-current-project)
 
     ;; write cache file
