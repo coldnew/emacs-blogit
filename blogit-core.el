@@ -82,6 +82,36 @@ mode, format the string with MODE's format settings."
     (when (file-writable-p file)
       (write-region (point-min) (point-max) file))))
 
+(defun blogit--string-list-to-plist (str)
+  "Convert string-list to plist, for example:
+
+   (\":a test :b another test\")
+
+will be convert to
+
+   (:a \"test\" :b \"another test\")
+"
+  (let ((old-element "")
+        (tmp-plist
+         (mapcar (lambda (x)
+                   (if (s-starts-with? ":" x) (intern x) x))
+                 (split-string str " ")))
+        new-plist)
+    (dolist (e tmp-plist)
+      (if (stringp e)
+          (progn
+            (if (string= old-element "")
+                (setq old-element e)
+              (setq old-element (concat old-element " " e))))
+        (progn
+          (unless (string= old-element "")
+            (add-to-list 'new-plist old-element))
+          (add-to-list 'new-plist e)
+          (setq old-element ""))))
+    (unless (string= old-element "")
+      (add-to-list 'new-plist old-element))
+    (nreverse new-plist)))
+
 
 ;;; Internal Project Control functions
 

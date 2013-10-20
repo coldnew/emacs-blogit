@@ -33,19 +33,22 @@
 (require 'blogit-core)
 
 
+
+
 (defun blogit-bootstrap-publish-source (info val)
   "Publish an sourced file in HTML mode.
 
 A source file is defined using:
 
-    #+BLOGIT_SOURCE: path/to/file [mode]
+    #+BLOGIT_SOURCE: :file path/to/file [:mode mode]
 
 and is converted according to bootstrap-source templatate.
 "
   (let* ((val-list (split-string val " "))
-         (file (car val-list))
-         (mode (cadr val-list))
-         (contents (or (blogit--file-to-string file) "")))
+	 (element (blogit--string-list-to-plist val))
+	 (file (plist-get element :file))
+	 (mode (plist-get element :mode))
+   	 (contents (or (blogit--file-to-string file) "")))
     (blogit--render-template
      :bootstrap_source
      (blogit--build-context
@@ -53,27 +56,25 @@ and is converted according to bootstrap-source templatate.
       ("FILENAME" file)
       ("FILENAME_BASE" (file-name-base file))
       ("FILENAME_SANITIZE" (blogit--sanitize-string (file-name-base file)))
-;;      ("CONTENT" (org-html-src-block src-block contents info))
       ("CONTENT" (blogit--file-to-source-html file mode))
-      )))
-  )
+      ))))
 
 (defun blogit--file-to-source-html (file &optional mode)
   (let ((src-block
          (with-temp-buffer
-          (goto-char (point-min))
+           (goto-char (point-min))
 
-          (insert  (if mode (format "#+BEGIN_SRC %s\n" mode)
-                     (format "#+BEGIN_EXAMPLE\n")))
-	  (insert-file-contents file)
+           (insert  (if mode (format "#+BEGIN_SRC %s\n" mode)
+                      (format "#+BEGIN_EXAMPLE\n")))
+           (insert-file-contents file)
 
-          (goto-char (point-max))
+           (goto-char (point-max))
 
-          (insert  (if mode (format "#+END_SRC\n")
-                     (format "#+END_EXAMPLE\n")))
-	  (org-export-as 'html nil nil t nil)))
+           (insert  (if mode (format "#+END_SRC\n")
+                      (format "#+END_EXAMPLE\n")))
+           (org-export-as 'html nil nil t nil)))
 
-	)
+        )
     src-block))
 
 (provide 'blogit-bootstrap)
