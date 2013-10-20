@@ -1,0 +1,30 @@
+#+TITLE: Using modal source code
+#+AUTHOR: coldnew
+#+EMAIL:  coldnew.tw@gmail.com
+#+DATE:   2013-10-20 12:03:23
+#+LANGUAGE: en
+#+URL:    using_modal_source_code
+#+OPTIONS: num:nil
+#+TAGS: bootstrap modal source
+
+The [[http://twitter.github.com/bootstrap/javascript.html#modals][Modal]] bootstrap script can be used to display the content of an external
+file in a modal window. The magic line is:
+
+#+begin_src org
+  ,#+BLOGIT_SOURCE: :file path/to/file [:mode mode] [:btn class] [:title tiele]
+#+end_src
+
+The /org template shorcut/ is =<bs= =TAB=. Two parameters might be used:
+- The mandatory =/path/to/file= which is the path to the file from which
+  content should be read.
+- The optional =mode= parameter, which can be determined if omitted.
+- The optional =btn= parameter, which can define the modal button look
+  like. For example, you can use this parameter as =:btn btn-danger=.
+  If you want to have a larger icon, do as =:btn btn-info btn-lg=.
+- The optional =title= parameter, which can let you define the text on
+  the button, if you do not use this parameter, the default text is
+  the filename.
+
+Here is an example of the =sample-init.el= file:
+
+#+blogit_source: :file sample-init.el :mode emacs-lisp
