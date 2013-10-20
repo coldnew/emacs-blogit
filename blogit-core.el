@@ -608,7 +608,8 @@ many useful context is predefined here, but you can overwrite it.
     ("CURRENT_YEAR" (format-time-string "%Y"))
     ("CURRENT_MONTH" (format-time-string "%02m"))
     ("CURRENT_DAY" (format-time-string "%02d"))
-    ("BLOG_URL" (or (blogit-project-info :blog-url) ""))
+    ("BLOG_URL" (blogit--build-post-link info))
+    ("BLOG_URL_HEXIFY" (url-hexify-string (blogit--build-post-link info)))
     ("URL" (or (blogit--parse-option ,info :url) ""))
     ("LANGUAGE" (or (blogit--parse-option ,info :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option ,info :description) ""))
@@ -652,6 +653,9 @@ many useful context is predefined here, but you can overwrite it.
     (blogit--render-template
      :plugin_lloogg
      (ht ("LLOOGG" (or (blogit--parse-option info :lloogg) (blogit-project-info :lloogg)))))))
+
+(defun blogit--render-qrcode-template (info)
+    (blogit--render-template :plugin_qrcode (blogit--build-context info)))
 
 (provide 'blogit-core)
 ;;; blogit-core.el ends here.

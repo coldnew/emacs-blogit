@@ -183,7 +183,9 @@ holding export options."
     ("PAGE_HEADER" (blogit--render-header-template info))
     ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
     ("PAGE_FOOTER" (blogit--render-footer-template info))
-    ("CONTENT" (org-export-as 'blogit-html nil nil t nil)))))
+    ("CONTENT" (org-export-as 'blogit-html nil nil t nil))
+    ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template info) ""))
+    )))
 
 (defun blogit--export-as-html
   (&optional async subtreep visible-only body-only ext-plist)
