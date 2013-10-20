@@ -10,7 +10,7 @@
      xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
      xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
-    <title>{{MAIN_TITLE}}</title>
+    <title>{{BLOG_TITLE}}</title>
     <link>{{BLOG_URL}}</link>
     <description><![CDATA[]]></description>
     <pubDate>{{CURRENT_DATE}}</pubDate>
