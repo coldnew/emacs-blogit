@@ -312,6 +312,13 @@ the default format will be ignored."
              (filename-format (blogit--format-to-s-format blogit-format)))
         (s-format filename-format 'aget (blogit--build-format-list info filename))))))
 
+(defun blogit--get-post-date-list (info &optional filename)
+  "Get post date in list. This function will return like
+
+   (:year \"2013\" :month \"10\" :day \"12\")"
+  (blogit--parse-date-string
+   (blogit--parse-option info :date filename)))
+
 (defun blogit--get-tags (info &optional filename)
   "Get blogit tags in list from info or filename."
   (let* ((tag-opt (or (blogit--parse-option info :tags filename) ""))
@@ -594,6 +601,9 @@ many useful context is predefined here, but you can overwrite it.
     ("AUTHOR" (or (blogit--parse-option ,info :author) user-full-name "Unknown"))
     ("EMAIL" (or (blogit--parse-option ,info :email) user-mail-address ""))
     ("DATE" (or (blogit--parse-option ,info :date) ""))
+    ("POST_DAY" (or (plist-get (blogit--get-post-date-list ,info) :day) ""))
+    ("POST_MONTH" (or (plist-get (blogit--get-post-date-list ,info) :month) ""))
+    ("POST_YEAR" (or (plist-get (blogit--get-post-date-list ,info) :year) ""))
     ("CURRENT_DATE" (format-time-string (blogit-project-info :blogit-date-format)))
     ("YEAR" (format-time-string "%Y"))
     ("BLOG_URL" (or (blogit-project-info :blog-url) ""))
