@@ -28,7 +28,7 @@ The [[http://www.google.com/webfonts#QuickUsePlace:quickUse/Family:][quick use]]
 #+END_SRC
 
 That line should be included into the
-=templates/style/less/o-blog-default.less= file in which you should also add
+=style/source/fonts.less= file in which you should also add
 something like:
 
 #+BEGIN_SRC css
