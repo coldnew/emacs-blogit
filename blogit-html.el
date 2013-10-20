@@ -102,7 +102,7 @@
 (defun org-blogit-html-keyword (keyword contents info)
   "Transcode a KEYWORD element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((key (org-element-property :key keyword))
+  (let ((key (upcase (org-element-property :key keyword)))
         (value (org-element-property :value keyword)))
     (cond
      ((string= key "BLOGIT_SOURCE") (blogit-bootstrap-publish-source info value))
