@@ -412,6 +412,7 @@ This function is used to create directory for new blog post.
             (setq dd (if date (format "%02d" date) ""))
             (blogit--parse-date-string1 (concat yyyy "/" mm "/" dd) 1 2 3)))))))
 
+;; FIXME: rename to `blogit--build-export-dirrectory'
 (defun blogit--build-export-dir (info)
   "Build export dir path according to #+DATE: option."
   (let* ((filepath-format-1 (blogit--get-filepath-format info))
@@ -438,6 +439,31 @@ This function is used to create directory for new blog post.
     ;; remove dulpicate /
     (blogit--remove-dulpicate-backslash
      (format "%s/%s" (directory-file-name (blogit-project-info :publishing-directory)) filepath))))
+
+(defun blogit--build-post-url (info &optional filename)
+  (format "%s%s"
+          (s-replace
+           (expand-file-name (blogit-project-info :publishing-directory)) ""
+           (expand-file-name (blogit--build-export-dir info)))
+          (blogit--get-post-filename info filename)))
+
+(defun blogit--build-post-link (info &optional filename)
+  (concat (blogit-project-info :blog-url) "/" (blogit--build-post-url info filename)))
+
+(defun blogit--build-post-file-directory (info &optional filename)
+  (file-name-base (blogit--get-post-filename info filename)))
+
+(defun blogit--build-feed-content (info &optional filename)
+  ;; FIXME: fix file
+  (replace-regexp-in-string
+   (concat "<img src=\"" (blogit--build-post-file-directory info filename))
+   (concat "<img src=\"" (file-name-directory (blogit--build-post-url info filename))
+	   (blogit--build-post-file-directory info filename))
+   (blogit--file-in-temp-buffer
+    filename
+    (blogit--modify-option "OPTIONS"
+			   (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
+    (org-export-as 'blogit-html nil nil t nil))))
 
 ;; FIXME: what about ./ ?
 (defun blogit--path-to-root (path)
