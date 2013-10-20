@@ -128,8 +128,7 @@ Returns value on success, else nil."
                             (expand-file-name (blogit--build-export-dir nil)))
                            (blogit--get-post-filename nil filename)))
          (post-link ()
-                    (blogit--remove-dulpicate-backslash
-                     (concat (blogit-project-info :blog-url) "/" (post-url))))
+		    (concat (blogit-project-info :blog-url) "/" (post-url)))
 	 (post-content ()
 		       (blogit--file-in-temp-buffer
 			filename
