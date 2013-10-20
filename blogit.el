@@ -39,6 +39,8 @@
 
 (eval-when-compile (require 'cl))
 
+;; TODO: migrate some function to f.el
+
 
 ;;; Blogit info
 

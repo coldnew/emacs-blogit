@@ -1,0 +1,9 @@
+[submodule "example/style/Font-Awesome"]
+	path = example/style/Font-Awesome
+	url = https://github.com/FortAwesome/Font-Awesome.git
+[submodule "example/style/less.js"]
+	path = example/style/less.js
+	url = https://github.com/cloudhead/less.js.git
+[submodule "example/style/bootstrap"]
+	path = example/style/bootstrap
+	url = https://github.com/twbs/bootstrap.git
