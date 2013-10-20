@@ -22,9 +22,12 @@
     <item>
       <title>{{TITLE}}</title>
       <link>{{POST_URL}}</link>
-      <description>{{DESCRIPTION}}</description>
       <pubDate>{{DATE}}</pubDate>
       <guid>{{POST_LINK}}</guid>
+      <description><![CDATA[
+      {{DESCRIPTION}}
+      <br><a href="{{POST_LINK}}"> Read more </a><br>
+      ]]></description>
     </item>
     {{/ITEMS}}
 
