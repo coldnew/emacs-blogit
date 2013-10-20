@@ -55,10 +55,10 @@ You can run:
 ./get-font.sh 'http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,200,300,700&subset=latin,latin-ext'
 #+END_SRC
 
-And add the font declaration in =style/source/font.less=:
+And add the font declaration in =style/source/fonts.less=:
 
 #+BEGIN_SRC css
-@import "../font/font-Yanone-Kaffeesatz.less";
+@import "../fonts/font-Yanone-Kaffeesatz.less";
 #+END_SRC
 
 Finally, declare its use as in the Google API version:
