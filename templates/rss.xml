@@ -25,7 +25,7 @@
       <pubDate>{{DATE}}</pubDate>
       <guid>{{POST_LINK}}</guid>
       <description><![CDATA[
-      {{DESCRIPTION}}
+      {{{CONTENT}}}
       <br><a href="{{POST_LINK}}"> Read more </a><br>
       ]]></description>
     </item>

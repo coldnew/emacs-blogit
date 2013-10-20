@@ -59,40 +59,47 @@
     ;; do not forget to clear cache
     (setq blogit-linked-cache nil)))
 
-;; TODO: finish this function
-;; TODO: how about add atom support ?
-(defun blogit-publish-rss ()
+(defun blogit-publish-rss/atom ()
   "Publish rss or atom file for blogit."
 
-  ;; TODO: generate rss contenst, how to?
   (let* ((cache ":recents:")
-         (cache-val (blogit-cache-get cache)))
+         (cache-val (blogit-cache-get cache))
+         (feed-list (list
+                     (if (blogit-project-info :export-rss)  :rss)
+                     (if (blogit-project-info :export-atom) :atom))))
 
-    ;; since we only get rss/atom length defined in
-    ;; `(blogit-project-info :export-rss-number)', reset cache-val length
-    (setq cache-val (-take (blogit-project-info :export-rss-number) cache-val))
+    (dolist (f feed-list)
+      (let* ((feed-name (blogit--key-to-string f))
+	    (feed-file-name
+	     (blogit-project-info
+              (blogit--string-to-key (format "%s-filename" feed-name))))
+            (feed-number
+             (blogit-project-info
+              (blogit--string-to-key (format "export-%s-number" feed-name)))))
+        ;; since we only get rss/atom length defined in
+        ;; `(blogit-project-info :export-rss-number)', reset cache-val length
+        (setq cache-val (-take feed-number cache-val))
 
-    ;; pass cache info to create rss
-    (blogit--string-to-file
-     (blogit--render-template
-      :rss
-      (blogit--build-context
-       nil
-       ("ITEMS"
-        (--map
-         (ht
-          ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
-          ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
-          ("DESCRIPTION" (plist-get (blogit-cache-get (cdr it)) :description))
-          ("DATE" (plist-get (blogit-cache-get (cdr it)) :date))
-          ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link))
-          )
-         cache-val))))
+        ;; pass cache info to create rss
+        (blogit--string-to-file
+         (blogit--render-template
+	  f
+          (blogit--build-context
+           nil
+           ("ITEMS"
+            (--map
+             (ht
+              ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
+              ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
+              ("CONTENT" (plist-get (blogit-cache-get (cdr it)) f))
+              ("DATE" (plist-get (blogit-cache-get (cdr it)) :date))
+              ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link)))
+             cache-val))))
 
-     ;; FIXME: add option to optimize this
-     (blogit--remove-dulpicate-backslash
-      (concat (blogit-project-info :publishing-directory) "/" "rss.xml")))
-    ))
+         ;; FIXME: add option to optimize this
+         (blogit--remove-dulpicate-backslash
+          (concat (blogit-project-info :publishing-directory) "/" feed-file-name)))
+	))))
 
 
 ;;; Rewrite some org function to make blogit work more properly
@@ -249,10 +256,10 @@ Return output file name."
        (lambda (current-project)
          ;; Initial project info to current project
          (blogit-initialize-project current-project)
-	 ;; NOTE: we will initial cache again at
-	 ;; `blogit--publish-blog'. This will help us to prevent cache
-	 ;; mismatch to current project.
-	 (blogit-initialize-cache)
+         ;; NOTE: we will initial cache again at
+         ;; `blogit--publish-blog'. This will help us to prevent cache
+         ;; mismatch to current project.
+         (blogit-initialize-cache)
          (funcall func current-project))
        (org-publish-expand-projects (car project-list))))))
 
@@ -308,7 +315,7 @@ When force is t, re-publish all blogit project."
     (blogit-write-cache-file)
 
     ;; publish rss
-    (blogit-publish-rss)
+    (blogit-publish-rss/atom)
 
     ;; Copy style dir according to `:always-copy-style-directory',
     ;; when republish blogit posts, always re-copy style dir event it exist.

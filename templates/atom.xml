@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title>{{MAIN_TITLE}}</title>
+  <subtitle></subtitle>
+  <link href="{{BLOG_URL}}"/>
+  <updated>{{DATE}}</updated>
+  <author>
+    <name>{{AUTHOR}}</name>
+    <email>{{EMAIL}}</email>
+  </author>
+
+  {{#ITEMS}}
+  <entry>
+    <title>{{TITLE}}</title>
+    <link href="{{POST_LINK}}"/>
+    <id>{{POST_LINK}}</id>
+    <updated>{{DATE}}</updated>
+    <summary>
+      {{{CONTENT}}}
+    </summary>
+  </entry>
+  {{/ITEMS}}
+
+</feed>

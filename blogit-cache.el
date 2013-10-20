@@ -115,6 +115,8 @@ Returns value on success, else nil."
 ;; FIXME:
 ;; When use blogit-publish, some cache may vanish
 
+(file-relative-name "sample-init.el" (blogit--parse-option nil :url))
+
 (defun blogit-update-cache (filename)
   "Update blogit-cache to log post info."
   (flet ((get-info (key)
@@ -127,16 +129,23 @@ Returns value on success, else nil."
                            (blogit--get-post-filename nil filename)))
          (post-link ()
                     (blogit--remove-dulpicate-backslash
-                     (concat (blogit-project-info :blog-url) "/" (post-url)))))
+                     (concat (blogit-project-info :blog-url) "/" (post-url))))
+	 (post-content ()
+		       (blogit--file-in-temp-buffer
+			filename
+			(blogit--modify-option "OPTIONS"
+					       (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
+			(org-export-as 'blogit-html nil nil t nil))))
     (let* ((info
             (blogit--file-in-temp-buffer
              filename
              (-flatten
               (list
-               (map 'list 'get-info '(:title :date :language :tags :description))
+               (map 'list 'get-info '(:title :date :language :tags :rss))
                :type (blogit--get-post-type nil)
                :post-url (post-url)
                :post-link (post-link)
+	       :atom (post-content)
                )))))
 
       ;; update fileinfo cache

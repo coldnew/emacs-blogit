@@ -67,8 +67,17 @@
         :template-list blogit-template-list
         :publishing-function org-blogit-publish-to-html
 
-        :export-rss t                   ; TODO:
+	;; Rss support
+        :export-rss t
         :export-rss-number 10
+        :rss-filename "rss.xml"
+;;        :rss-filepath "" ;; TODO:
+
+	;; Atom support
+        :export-atom t
+        :export-atom-number 10
+        :atom-filename "atom.xml"
+;;        :atom-filepath "" ;; TODO:
 
         :export-recents-post t          ; TODO:
         :export-recents-number 10
@@ -177,6 +186,7 @@ Currently blogit only support following format:
    :plugin_disqus      "plugin_disqus.html"
    :plugin_lloogg      "plugin_lloogg.html"
    :rss                "rss.xml"
+   :atom               "atom.xml"
    :newpost            "newpost.org"
 
    ;; combine other templates
