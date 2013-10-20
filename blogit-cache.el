@@ -141,11 +141,12 @@ Returns value on success, else nil."
              filename
              (-flatten
               (list
-               (map 'list 'get-info '(:title :date :language :tags :rss))
+               (map 'list 'get-info '(:title :date :language :tags))
                :type (blogit--get-post-type nil)
                :post-url (post-url)
                :post-link (post-link)
 	       :atom (post-content)
+	       :rss (post-content)
                )))))
 
       ;; update fileinfo cache
