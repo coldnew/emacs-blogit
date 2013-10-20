@@ -46,7 +46,8 @@ and is converted according to bootstrap-source templatate.
 "
   (let* ((val-list (split-string val " "))
 	 (element (blogit--string-list-to-plist val))
-	 (file (plist-get element :file))
+	 (file-1 (plist-get element :file))
+	 (file (if (file-name-absolute-p file-1) file-1 (expand-file-name file-1)))
 	 (mode (plist-get element :mode))
    	 (contents (or (blogit--file-to-string file) "")))
     (blogit--render-template
