@@ -103,7 +103,7 @@
   "Transcode a KEYWORD element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((key (org-element-property :key keyword))
-	(value (org-element-property :value keyword)))
+        (value (org-element-property :value keyword)))
     (cond
      ((string= key "BLOGIT_SOURCE") (blogit-bootstrap-publish-source info value))
      (t (org-html-keyword keyword contents info)))))
@@ -183,23 +183,13 @@ holding export options."
     ("PAGE_FOOTER" (blogit--render-footer-template info))
     ("CONTENT" (org-export-as 'blogit-html nil nil t nil)))))
 
-
-;;; End-user functions
-
-;;;###autoload
-;;; FIXME: deprecate since we can have multi blogit project
-
-(defun blogit-export-as-html
+(defun blogit--export-as-html
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to an HTML buffer for blogit.
 
 Export is done in a buffer named \"*Blogit Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
-  (interactive)
-
-  ;; Initial some blogit project info
-  (blogit-initialize-project blogit-project-alist)
 
   (let ((outbuf (org-export-to-buffer
                     'blogit-html "*Blogit HTML Export*"
@@ -209,6 +199,27 @@ is non-nil."
     (with-current-buffer outbuf (set-auto-mode t))
     (when org-export-show-temporary-export-buffer
       (switch-to-buffer-other-window outbuf))))
+
+
+;;; End-user functions
+
+;;;###autoload
+(defun blogit-export-as-html
+  (&optional async subtreep visible-only body-only ext-plist)
+  "Export current buffer to an HTML buffer for blogit.
+
+Export is done in a buffer named \"*Blogit Export*\", which
+will be displayed when `org-export-show-temporary-export-buffer'
+is non-nil."
+  (interactive)
+
+  ;; Find blogit project info to initialize, if file does not contains
+  ;; in any blogit-project-alist, ask user to select template to
+  ;; render.
+  (unless (blogit--swtich-to-file-project (buffer-file-name))
+    (blogit--select-project
+     'blogit--export-as-html
+     "No match project found. Select Project to render current file.")))
 
 (provide 'blogit-html)
 ;;; blogit-html.el ends here.

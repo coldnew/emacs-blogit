@@ -200,6 +200,27 @@ will be convert to
   (blogit-project-convert-standard-filename :blogit-template-directory)
   )
 
+;; FIXME: This match method may contains some error
+
+(defun blogit--swtich-to-file-project (file)
+  "Switch to file's relative project if file is under
+project list. Return nil when failed."
+  (let ((ret))
+    (dolist (p blogit-project-alist)
+      (let* ((info (cdr p))
+             (base-directory (plist-get info :base-directory))
+             (project-directory
+              (convert-standard-filename
+               (blogit--remove-dulpicate-backslash
+                (concat base-directory "/")))))
+
+        (when (blogit--file-in-dir-p project-directory file)
+          ;; Initialize project info
+          (blogit-initialize-project p)
+          (blogit-initialize-cache)
+	  (setq ret t))))
+    ret))
+
 
 ;;; Internal functions
 
@@ -210,7 +231,7 @@ will be convert to
 
 (defun blogit--file-in-dir-p (file dir)
   "Check if file is under directory."
-  (let ((file-dir (file-name-directory (expand-file-name filename))))
+  (let ((file-dir (file-name-directory (expand-file-name file))))
     (string= file-dir
              (file-name-directory (expand-file-name dir)))))
 
