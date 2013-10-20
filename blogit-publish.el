@@ -324,7 +324,7 @@ When force is t, re-publish all blogit project."
     (when (or force
               (blogit-project-info :always-copy-style-directory)
               (not (file-exists-p output-style-dir)))
-      (message "Copy style dir to blogit-output-dir.")
+      (message (format "Copy style dir to %s." output-dir))
       (blogit--do-copy source-style-dir output-dir))
 
     ;; calculate publish time

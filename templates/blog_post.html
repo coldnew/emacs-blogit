@@ -6,15 +6,24 @@
     <div class="container">
 
       <!-- begin blog post content -->
-      <h1>{{TITLE}}</h1>
+      <div class="post-header">
+        <div class="well">
+          <div class="date col-md-1">
+            <div class="date-d">{{POST_DAY}}</div>
+            <div class="date-m"><a href="">{{POST_MONTH}}</a></div>
+            <div class="date-y"><a href="">{{POST_YEAR}}</a></div>
+          </div>
+          <h1 class="col-md-offset-1">{{TITLE}}</h1>
+        </div>
+      </div>
 
       {{{CONTENT}}}
 
       <!-- TODO: rewrite this -->
       <div class="post-footer">
-	<ul>
-	  <li> Author: {{AUTHOR}}   Posted on {{DATE}} </li>
-	</ul>
+        <ul>
+          <li> Author: {{AUTHOR}}   Posted on {{DATE}} </li>
+        </ul>
       </div>
       <!-- end blog post content -->
 
