@@ -56,32 +56,6 @@
 	'("vars" "core" "bootstrap" "html" "cache" "publish"))
 
 
-;;; Debugging functions
-
-;;;###autoload
-(defun blogit-verify-configuration ()
-  "Ensure all required configuration fields are properly configured,
-include:
-
-`(blogit-project-info :base-directory)'
-`(blogit-project-info :publishing-directory)'
-`(blogit-project-info :blog-url)'
-
-Blogit will throw error if not properly configure, this will help to debug
-the problem."
-  (interactive)
-  (unless (and (blogit-project-info :base-directory) (file-directory-p (blogit-project-info :base-directory)))
-    (error "Variable `%s' is not properly configured or directory does not exist."
-           (symbol-name '(blogit-project-info :base-directory))))
-  (unless (and (blogit-project-info :publishing-directory) (file-directory-p (blogit-project-info :publishing-directory)))
-    (error "Variable `%s' is not properly configured or directory does not exist."
-           (symbol-name '(blogit-project-info :publishing-directory))))
-  (unless (blogit-project-info :blog-url)
-    (error "Variable `%s' is not properly configured."
-           (symbol-name '(blogit-project-info :blog-url))))
-  (message "Blogit verify configuration SUCCESS!"))
-
-
 ;;; End-user functions
 
 ;; FIXME: since we re-ask user the project want to use, this is abit
