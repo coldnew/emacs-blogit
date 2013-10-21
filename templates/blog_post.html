@@ -22,11 +22,18 @@
 
       {{{CONTENT}}}
 
-      <!-- TODO: rewrite this -->
       <div class="post-footer">
-        <ul>
-          <li> Author: {{{AUTHOR}}}   Posted on {{{DATE}}} </li>
-        </ul>
+        <div class="well">
+          Posted on {{{POST_DATE}}}
+          <nav class="tag-cloud">
+            <h1><i class="icon-tags"></i> related tags</h1>
+            <ul>
+	      {{#TAGS}}
+              <li class="label label-inverse small"><a href="{{{TAG_URL}}}">{{{TAG}}}</a></li>
+	      {{/TAGS}}
+            </ul>
+          </nav>
+        </div>
       </div>
       <!-- end blog post content -->
 

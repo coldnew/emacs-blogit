@@ -19,6 +19,12 @@
 .text-center() { text-align: center; }
 .text-right()  { text-align: right;  }
 
+// NOTE:
+// since bootstrap 3 dropped the .label-inverse , we add on our own
+.label-inverse             { background-color: @gray-dark; }
+.label-inverse:hover       { background-color: darken(@gray-dark, 10%); }
+
+
 body {
     width:100%;
     margin: 0 auto;
