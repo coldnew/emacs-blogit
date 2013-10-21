@@ -606,7 +606,9 @@ many useful context is predefined here, but you can overwrite it.
     ("TITLE"  (or (blogit--parse-option ,info :title) "Untitled"))
     ("AUTHOR" (or (blogit--parse-option ,info :author) user-full-name "Unknown"))
     ("EMAIL" (or (blogit--parse-option ,info :email) user-mail-address ""))
+    ;; FIXME: dropped DATE
     ("DATE" (or (blogit--parse-option ,info :date) ""))
+    ("POST_DATE" (or (blogit--parse-option ,info :date) ""))
     ("POST_DAY" (or (plist-get (blogit--get-post-date-list ,info) :day) ""))
     ("POST_MONTH" (or (plist-get (blogit--get-post-date-list ,info) :month) ""))
     ("POST_MONTH_ABBREV" (or (plist-get (blogit--get-post-date-list ,info) :month_abbrev) ""))
