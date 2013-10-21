@@ -271,7 +271,8 @@ When filename is specified, open the file and get it's post type."
          (month (or (plist-get date-list :month) ""))
          (day (or (plist-get date-list :day) ""))
          (url (or (blogit--parse-option info :url) ""))
-         (filename (file-name-base (or file (buffer-base-buffer) "")))
+         (filename (file-name-base (or file blogit-current-file
+				       (buffer-file-name (current-buffer)) "")))
          (sanitize (if (not (string= "" url)) url
                      (blogit--sanitize-string
                       filename
