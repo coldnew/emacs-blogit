@@ -272,7 +272,7 @@ When filename is specified, open the file and get it's post type."
          (day (or (plist-get date-list :day) ""))
          (url (or (blogit--parse-option info :url) ""))
          (filename (file-name-base (or file blogit-current-file
-				       (buffer-file-name (current-buffer)) "")))
+                                       (buffer-file-name (current-buffer)) "")))
          (sanitize (if (not (string= "" url)) url
                      (blogit--sanitize-string
                       filename
@@ -643,22 +643,19 @@ many useful context is predefined here, but you can overwrite it.
   (blogit--render-template :page_footer (blogit--build-context info)))
 
 (defun blogit--render-disqus-template (info)
-  (when (or (blogit--parse-option info :disqus) (blogit-project-info :disqus))
-    (blogit--render-template
-     :plugin_disqus
-     (ht ("DISQUS" (or (blogit--parse-option info :disqus) (blogit-project-info :disqus)))))))
+  (let ((disqus (or (blogit--parse-option info :disqus) (blogit-project-info :disqus) "")))
+    (when (and disqus (not (string= "" disqus)))
+      (blogit--render-template :plugin_disqus (ht ("DISQUS" disqus))))))
 
 (defun blogit--render-analytics-template (info)
-  (when (or (blogit--parse-option info :analytics) (blogit-project-info :google-analytics))
-    (blogit--render-template
-     :plugin_analytics
-     (ht ("ANALYTICS" (or (blogit--parse-option info :analytics) (blogit-project-info :google-analytics)))))))
+  (let ((analytics (or (blogit--parse-option info :analytics) (blogit-project-info :google-analytics) "")))
+    (when (and analytics (not (string= "" analytics)))
+      (blogit--render-template :plugin_analytics (ht ("ANALYTICS" analytics))))))
 
 (defun blogit--render-lloogg-template (info)
-  (when (or (blogit--parse-option info :lloogg) (blogit-project-info :lloogg))
-    (blogit--render-template
-     :plugin_lloogg
-     (ht ("LLOOGG" (or (blogit--parse-option info :lloogg) (blogit-project-info :lloogg)))))))
+  (let ((lloogg (or (blogit--parse-option info :lloogg) (blogit-project-info :lloogg) "")))
+    (when (and lloogg (not (string= "" lloogg)))
+      (blogit--render-template :plugin_lloogg (ht ("LLOOGG" lloogg))))))
 
 (defun blogit--render-qrcode-template (info)
   (blogit--render-template :plugin_qrcode (blogit--build-context info)))
