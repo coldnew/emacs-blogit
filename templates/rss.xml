@@ -10,23 +10,23 @@
      xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
      xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
-    <title>{{BLOG_TITLE}}</title>
-    <link>{{BLOG_URL}}</link>
+    <title>{{{BLOG_TITLE}}}</title>
+    <link>{{{BLOG_URL}}}</link>
     <description><![CDATA[]]></description>
-    <pubDate>{{CURRENT_DATE}}</pubDate>
-    <lastBuildDate>{{DATE}}</lastBuildDate>
+    <pubDate>{{{CURRENT_DATE}}}</pubDate>
+    <lastBuildDate>{{{DATE}}}</lastBuildDate>
     <generator>Emace Blogit (https://github.com/coldnew/blogit)</generator>
-    <webMaster>{{EMAIL}} ({{AUTHOR}})</webMaster>
+    <webMaster>{{{EMAIL}}} ({{{AUTHOR}}})</webMaster>
 
     {{#ITEMS}}
     <item>
-      <title>{{TITLE}}</title>
-      <link>{{POST_URL}}</link>
-      <pubDate>{{DATE}}</pubDate>
-      <guid>{{POST_LINK}}</guid>
+      <title>{{{TITLE}}}</title>
+      <link>{{{POST_URL}}}</link>
+      <pubDate>{{{DATE}}}</pubDate>
+      <guid>{{{POST_LINK}}}</guid>
       <description><![CDATA[
       {{{CONTENT}}}
-      <br><a href="{{POST_LINK}}"> Read more </a><br>
+      <br><a href="{{{POST_LINK}}}"> Read more </a><br>
       ]]></description>
     </item>
     {{/ITEMS}}
