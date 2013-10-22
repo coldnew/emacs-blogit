@@ -141,21 +141,33 @@ Returns value on success, else nil."
       ;; update recent post cache, this cache also for rss
       (blogit-update-recents-cache info filename)
       )))
+(merge 'list '("a" "b") '("c" "d") '<)
 
 ;; FIXME: should static page need to be ignore by tags?
+(setq a ((lambda (&rest args)
+	    (mapcar '(lambda (n)
+		       (delq nil (mapcar '(lambda (arg) (nth n arg)) args)))
+		    (number-sequence 0 (1- (apply 'max (mapcar 'length args))))))
+	    '("a" ) '("c" "d"))
+      )
+(cadr (car ((lambda (&rest args) (apply (function mapcar*) (function list) args))  '("a") '("c"))))
+
 
 (defun blogit-update-tags-cache (info)
   "Build tags info for all files, this function will also count every
 tags repeat times."
   (let* ((tags (blogit--get-tags info))
+	 (tags-sanitize (mapcar 'blogit--sanitize-string tags))
+	 (tags-list ((lambda (&rest args) (apply (function mapcar*) (function list) args)) tags tags-sanitize))
          (cache ":tags:")
          (cache-val (blogit-cache-get cache)))
 
-    (dolist (tag tags)
-      (let ((key (blogit--string-to-key tag)))
-
+    (dolist (tag-list tags-list)
         ;; add filename to every `tags-name' cache that files has
-        (let* ((tag-cache (format ":tags-%s:" tag))
+        (let* ((tag-name (car tag-list))
+	       (tag (cadr tag-list))
+	       (key (blogit--string-to-key tag))
+	       (tag-cache (format ":tags-%s:" tag))
                (tag-cache-val (blogit-cache-get tag-cache))
 
                (title (plist-get info :title))
@@ -167,8 +179,8 @@ tags repeat times."
           ;; calculate tags count
           (if (member key cache-val)
               (let ((count (length (blogit-cache-get tag-cache))))
-                (setq cache-val (plist-put cache-val key count)))
-            (setq cache-val (plist-put cache-val key 1))))))
+                (setq cache-val (plist-put cache-val key (list :count count :name tag-name))))
+            (setq cache-val (plist-put cache-val key (list :count 1 :name tag-name))))))
 
     (blogit-cache-set cache cache-val)))
 

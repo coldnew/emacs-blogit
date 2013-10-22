@@ -322,10 +322,16 @@ the default format will be ignored."
 
 (defun blogit--get-tags (info &optional filename)
   "Get blogit tags in list from info or filename."
-  (let* ((tag-opt (or (blogit--parse-option info :tags filename) ""))
-         (tags (split-string tag-opt " ")))
-    ;; remove empty string and dulpicate tag
-    (remove-duplicates (remove "" tags) :test 'string=)))
+  (flet ((modify-tag-string (x)
+                            (replace-regexp-in-string
+                             "_" " "
+                             (replace-regexp-in-string "@" "-" x ))))
+    (let* ((tag-opt (or (blogit--parse-option info :tags filename) ""))
+           (tags-list (split-string tag-opt " ")))
+      ;; replace all '_' to ' ' and '@' to '-' in tags
+      (mapcar 'modify-tag-string
+              ;; remove empty string and dulpicate tag
+              (remove-duplicates (remove "" tags-list) :test 'string=)))))
 
 ;; FIXME: how about remove this ?
 (defun blogit--template-to-string (file)
@@ -343,7 +349,7 @@ the default format will be ignored."
   "Sanitize string S by:
 
 - converting all charcters to pure ASCII
-- replacing non alphanumerical by the first char of sha1 algorithm
+- replacing non alphanumerical by the first three char of sha1 algorithm
 - downcasing all letters
 - trimming leading and tailing \"_\"
 
@@ -363,7 +369,7 @@ This function is used to generate blog post url if not specified."
           else if (member gc '(Zs))
           collect "_" into ret
           else if (member gc '(Lo))
-          collect (s-left 1 (sha1 (char-to-string (if cd (car cd) c))))
+          collect (s-left 3 (sha1 (char-to-string (if cd (car cd) c))))
           into ret
           finally return (replace-regexp-in-string
                           "--+" "_"
