@@ -46,6 +46,7 @@ and is converted according to bootstrap-source templatate.
 	 (file (expand-file-name
 		(concat (file-name-directory blogit-current-file) (plist-get element :file))))
 	 (mode (plist-get element :mode))
+	 (title (or (plist-get element :title) (file-name-nondirectory file)))
    	 (contents (or (blogit--file-to-string file) "")))
     (blogit--render-template
      :bootstrap_source
@@ -54,8 +55,8 @@ and is converted according to bootstrap-source templatate.
       ("FILENAME" (file-name-nondirectory file))
       ("FILENAME_BASE" (file-name-base file))
       ("FILENAME_SANITIZE" (blogit--sanitize-string (file-name-base file)))
-      ;; FIXME: how about text?
-      ("TITLE" (or (plist-get element :title) (file-name-nondirectory file)))
+      ("TEXT" (or (plist-get element :text) title))
+      ("TITLE" title)
       ("CONTENT" (blogit--file-to-source-html file mode))
       ("BTN" (or (plist-get element :btn) "btn-info"))))))
 
