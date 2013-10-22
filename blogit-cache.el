@@ -141,17 +141,6 @@ Returns value on success, else nil."
       ;; update recent post cache, this cache also for rss
       (blogit-update-recents-cache info filename)
       )))
-(merge 'list '("a" "b") '("c" "d") '<)
-
-;; FIXME: should static page need to be ignore by tags?
-(setq a ((lambda (&rest args)
-	    (mapcar '(lambda (n)
-		       (delq nil (mapcar '(lambda (arg) (nth n arg)) args)))
-		    (number-sequence 0 (1- (apply 'max (mapcar 'length args))))))
-	    '("a" ) '("c" "d"))
-      )
-(cadr (car ((lambda (&rest args) (apply (function mapcar*) (function list) args))  '("a") '("c"))))
-
 
 (defun blogit-update-tags-cache (info)
   "Build tags info for all files, this function will also count every
