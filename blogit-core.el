@@ -182,6 +182,12 @@ will be convert to
            "/"
            (format "%s-publish.cache" (car blogit-current-project))))
 
+  ;; Initial tags dir
+  (blogit-project-set
+   :blogit-tags-directory
+   (concat (blogit-project-info :base-directory) "/"
+           (blogit-project-info :tags-directory-name) "/"))
+
   (blogit-project-set
    :blogit-style-directory
    (concat (blogit-project-info :base-directory) "/"
@@ -197,6 +203,7 @@ will be convert to
   (blogit-project-convert-standard-filename :publishing-directory)
   (blogit-project-convert-standard-filename :blogit-cache-directory)
   (blogit-project-convert-standard-filename :blogit-style-directory)
+  (blogit-project-convert-standard-filename :blogit-tags-directory)
   (blogit-project-convert-standard-filename :blogit-template-directory)
   )
 

@@ -52,6 +52,7 @@
         :default-language "en"
         :template-directory-name "templates"
         :style-directory-name    "style"
+        :tags-directory-name "tags"
 
         :always-copy-style-directory t
 
@@ -94,8 +95,8 @@
 
         :blogit-style-directory ""
         :blogit-template-directory ""
+        :blogit-tags-directory ""
         :blogit-default-type blog
-        :blogit-tags-directory-name "tags"
         ))
 
 (defvar blogit-project-alist nil
