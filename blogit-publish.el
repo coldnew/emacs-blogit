@@ -59,7 +59,7 @@
     ;; do not forget to clear cache
     (setq blogit-linked-cache nil)))
 
-;; FIXME: unuse
+;; FIXME: buggy
 (defun blogit-publish-tags ()
   "Publish tags static page"
   (let* ((cache ":tags:")
@@ -75,8 +75,8 @@
       (when (symbolp key) (add-to-list 'tag-list key)))
 
     (dolist (key tag-list)
-      (let* ((tag-name (plist-get (plist-get cache-val key) :name))
-             (tag-cache (format ":tags-%s:" (blogit--key-to-string key)))
+      (let* ((tag-sanitize (blogit--key-to-string key))
+             (tag-cache (format ":tags-%s:" tag-sanitize))
              (tag-cache-val (blogit-cache-get tag-cache)))
 
         (blogit--string-to-file
@@ -95,7 +95,7 @@
 
          ;; FIXME: add option to optimize this
          (blogit--remove-dulpicate-backslash
-          (concat (blogit-project-info :blogit-tags-directory) "/" tag-name ".html")))))))
+          (concat (blogit-project-info :blogit-tags-directory) "/" tag-sanitize ".html")))))))
 
 (defun blogit-publish-rss/atom ()
   "Publish rss or atom file for blogit."
