@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="{{{LANGUAGE}}}">
+  {{{PAGE_HEADER}}}
+  <body>
+    {{{PAGE_NAVIGATOR}}}
+    <div class="container">
+
+      <!-- begin tag content -->
+
+      <nav class="tag-detail">
+        <ul>
+	  {{#LISTS}}
+          <li>
+	    <a href="{{{POST_URL}}}">{{{POST_TITLE}}}</a>
+	  </li>
+	  {{/LISTS}}
+        </ul>
+      </nav>
+
+      <!-- end tag content -->
+
+      {{{PAGE_FOOTER}}}
+    </div>
+  </body>
+</html>
