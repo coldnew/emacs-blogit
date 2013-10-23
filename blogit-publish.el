@@ -59,6 +59,44 @@
     ;; do not forget to clear cache
     (setq blogit-linked-cache nil)))
 
+;; FIXME: unuse
+(defun blogit-publish-tags ()
+  "Publish tags static page"
+  (let* ((cache ":tags:")
+         (cache-val (blogit-cache-get cache))
+         tag-list)
+
+    ;; if tags directory does not exist, create it
+    (unless (file-exists-p (blogit-project-info :blogit-tags-directory))
+      (make-directory (blogit-project-info :blogit-tags-directory) t))
+
+    ;; create tag-list
+    (dolist (key cache-val)
+      (when (symbolp key) (add-to-list 'tag-list key)))
+
+    (dolist (key tag-list)
+      (let* ((tag-name (plist-get (plist-get cache-val key) :name))
+             (tag-cache (format ":tags-%s:" (blogit--key-to-string key)))
+             (tag-cache-val (blogit-cache-get tag-cache)))
+
+        (blogit--string-to-file
+         (blogit--render-template
+          :tag
+          (blogit--build-context
+           nil
+           ("LISTS"
+            (--map
+             (ht
+              ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
+              ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
+              ("POST_DATE" (plist-get (blogit-cache-get (cdr it)) :date))
+              ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link)))
+             tag-cache-val))))
+
+         ;; FIXME: add option to optimize this
+         (blogit--remove-dulpicate-backslash
+          (concat (blogit-project-info :blogit-tags-directory) "/" tag-name ".html")))))))
+
 (defun blogit-publish-rss/atom ()
   "Publish rss or atom file for blogit."
 
@@ -70,12 +108,12 @@
 
     (dolist (f feed-list)
       (let* ((feed-name (blogit--key-to-string f))
-	    (feed-file-name
-	     (blogit-project-info
-              (blogit--string-to-key (format "%s-filename" feed-name))))
-            (feed-number
-             (blogit-project-info
-              (blogit--string-to-key (format "export-%s-number" feed-name)))))
+             (feed-file-name
+              (blogit-project-info
+               (blogit--string-to-key (format "%s-filename" feed-name))))
+             (feed-number
+              (blogit-project-info
+               (blogit--string-to-key (format "export-%s-number" feed-name)))))
         ;; since we only get rss/atom length defined in
         ;; `(blogit-project-info :export-rss-number)', reset cache-val length
         (setq cache-val (-take feed-number cache-val))
@@ -83,7 +121,7 @@
         ;; pass cache info to create rss
         (blogit--string-to-file
          (blogit--render-template
-	  f
+          f
           (blogit--build-context
            nil
            ("ITEMS"
@@ -99,7 +137,7 @@
          ;; FIXME: add option to optimize this
          (blogit--remove-dulpicate-backslash
           (concat (blogit-project-info :publishing-directory) "/" feed-file-name)))
-	))))
+        ))))
 
 
 ;;; Rewrite some org function to make blogit work more properly
@@ -315,6 +353,9 @@ When force is t, re-publish all blogit project."
 
     ;; write cache file
     (blogit-write-cache-file)
+
+    ;; publish tags
+    (blogit-publish-tags)
 
     ;; publish rss
     (blogit-publish-rss/atom)
