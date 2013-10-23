@@ -175,18 +175,18 @@ will be convert to
    (concat (blogit-project-info :publishing-directory) "/"
            (blogit-project-info :blogit-cache-directory-name) "/"))
 
+  ;; Initial tags dir
+  (blogit-project-set
+   :blogit-tags-directory
+   (concat (blogit-project-info :publishing-directory) "/"
+           (blogit-project-info :tags-directory-name) "/"))
+
   ;; Initial cache file
   (blogit-project-set
    :blogit-cache-file
    (concat (blogit-project-info :blogit-cache-directory)
            "/"
            (format "%s-publish.cache" (car blogit-current-project))))
-
-  ;; Initial tags dir
-  (blogit-project-set
-   :blogit-tags-directory
-   (concat (blogit-project-info :base-directory) "/"
-           (blogit-project-info :tags-directory-name) "/"))
 
   (blogit-project-set
    :blogit-style-directory
