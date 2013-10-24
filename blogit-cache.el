@@ -136,13 +136,13 @@ Returns value on success, else nil."
       (blogit-cache-set filename info)
 
       ;; update tags cache
-      (blogit-update-tags-cache info)
+      (blogit-update-tags-cache info filename)
 
       ;; update recent post cache, this cache also for rss
       (blogit-update-recents-cache info filename)
       )))
 
-(defun blogit-update-tags-cache (info)
+(defun blogit-update-tags-cache (info filename)
   "Build tags info for all files, this function will also count every
 tags repeat times."
   (let* ((tags (blogit--get-tags info))
@@ -162,14 +162,15 @@ tags repeat times."
                (title (plist-get info :title))
                (post-url (plist-get info :post-url)))
 
+	  ;; FIXME: maybe remove ?
           (add-to-list 'tag-cache-val `(,title . ,post-url))
           (blogit-cache-set tag-cache tag-cache-val)
 
           ;; calculate tags count
           (if (member key cache-val)
               (let ((count (length (blogit-cache-get tag-cache))))
-                (setq cache-val (plist-put cache-val key (list :count count :name tag-name))))
-            (setq cache-val (plist-put cache-val key (list :count 1 :name tag-name))))))
+                (setq cache-val (plist-put cache-val key (list :count count :name tag-name :file filename))))
+            (setq cache-val (plist-put cache-val key (list :count 1 :name tag-name :file filename))))))
 
     (blogit-cache-set cache cache-val)))
 

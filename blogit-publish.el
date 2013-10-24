@@ -59,6 +59,17 @@
     ;; do not forget to clear cache
     (setq blogit-linked-cache nil)))
 
+;; (plist-get  (blogit-cache-get ":tags:") :bootstrap)
+
+;; (--map
+;;  (plist-get it :file)
+;; ;;  ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
+;; ;;  ("POST_DATE" (plist-get (blogit-cache-get (cdr it)) :date))
+;; ;;  ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link)))
+;; ;; (plist-get  (blogit-cache-get ":tags:") :bootstrap)
+;;  (blogit-cache-get ":tags:"))
+
+
 ;; FIXME: buggy
 (defun blogit-publish-tags ()
   "Publish tags static page"
@@ -77,10 +88,11 @@
     (dolist (key tag-list)
       (let* ((tag-sanitize (blogit--key-to-string key))
              (tag-cache (format ":tags-%s:" tag-sanitize))
-             (tag-cache-val (blogit-cache-get tag-cache)))
+             ;;(tag-cache-val (blogit-cache-get tag-cache))
+             (tag-cache-val (plist-get cache-val key)))
 
-	;; FIXME: need to use other template method
-	;; bug on cache
+        ;; FIXME: need to use other template method
+        ;; bug on cache
         (blogit--string-to-file
          (blogit--render-template
           :tag
