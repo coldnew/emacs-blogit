@@ -80,6 +80,7 @@
              (tag-cache-val (blogit-cache-get tag-cache)))
 
 	;; FIXME: need to use other template method
+	;; bug on cache
         (blogit--string-to-file
          (blogit--render-template
           :tag
