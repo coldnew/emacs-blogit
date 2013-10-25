@@ -60,9 +60,12 @@
   "Conver key to symbol. eq: test -> :test"
   (intern (blogit--key-to-string key)))
 
+;; FIXME: not elegant
 (defun blogit--remove-dulpicate-backslash (str)
-  "Remove dulpicate backslash for str."
-  (replace-regexp-in-string "//*" "/"  str))
+  "Remove dulpicate backslash for str. If str contains `://', make it not modified."
+  (replace-regexp-in-string
+   ":/" "://"
+   (replace-regexp-in-string "//*" "/"  str)))
 
 (defun blogit--file-to-string (file)
   "Read the content of FILE and return it as a string."
