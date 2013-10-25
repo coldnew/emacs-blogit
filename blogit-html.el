@@ -131,8 +131,8 @@ In this function, we also add link file"
                  (downcase (file-name-extension encode-path ".")))
         ;; check if the file is also a blogit post, if t, not add
         ;; file to cache.
-	;; FIXME: How if I just want to lonk a org file, and it also
-	;; is a blogit post ?
+        ;; FIXME: How if I just want to lonk a org file, and it also
+        ;; is a blogit post ?
         (if (blogit--check-post-file encode-path)
             ;; if file is really blogit post, get it url
             (setq new-path (blogit--calculate-post-relative-path encode-path))
@@ -167,25 +167,41 @@ In this function, we also add link file"
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (blogit--render-template
-   :blog_post
-   (blogit--build-context
-    info
-    ;; context derived from ox-html
-    ("HTML_META" (org-html--build-meta-info info))
-    ("HTML_HEAD" (org-html--build-head info))
-    ("HTML_MATHJAX" (org-html--build-mathjax-config info))
-    ("HTML_PREAMBLE" (org-html--build-pre/postamble 'preamble info))
-    ("HTML_POSTAMBLE" (org-html--build-pre/postamble 'postamble info))
+  (let* ((tags (split-string (blogit--parse-option info :tags)" "))
+         (tags-sanitize (mapcar 'blogit--sanitize-string tags))
+         (tags-url (mapcar '(lambda (x)
+			      (blogit--remove-dulpicate-backslash
+			       (concat (blogit-project-info :blog-url) "/"
+				       (blogit-project-info :tags-directory-name) "/" x ".html")))
+			      tags-sanitize))
+         (tags-list ((lambda (&rest args)
+                       (apply (function mapcar*) (function list) args))
+                     tags-url tags)))
 
-    ;; context from blogit template
-    ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template info) ""))
+    (blogit--render-template
+     :blog_post
+     (blogit--build-context
+      info
+      ;; context derived from ox-html
+      ("HTML_META" (org-html--build-meta-info info))
+      ("HTML_HEAD" (org-html--build-head info))
+      ("HTML_MATHJAX" (org-html--build-mathjax-config info))
+      ("HTML_PREAMBLE" (org-html--build-pre/postamble 'preamble info))
+      ("HTML_POSTAMBLE" (org-html--build-pre/postamble 'postamble info))
 
-    ("PAGE_HEADER" (blogit--render-header-template info))
-    ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
-    ("PAGE_FOOTER" (blogit--render-footer-template info))
-    ("CONTENT" (org-export-as 'blogit-html nil nil t nil))
-    )))
+      ;; context from blogit template
+      ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template info) ""))
+
+      ("PAGE_HEADER" (blogit--render-header-template info))
+      ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
+      ("PAGE_FOOTER" (blogit--render-footer-template info))
+      ("CONTENT" (org-export-as 'blogit-html nil nil t nil))
+      ("TAG_LIST"
+       (--map
+        (ht
+         ("TAG_URL" (car it))
+         ("TAG_NAME" (cadr it)))
+        tags-list))))))
 
 (defun blogit--export-as-html
   (&optional async subtreep visible-only body-only ext-plist)
