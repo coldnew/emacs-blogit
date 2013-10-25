@@ -83,6 +83,10 @@
         :export-recents-post t          ; TODO:
         :export-recents-number 10
 
+	;; hooks
+	:before-publish-hook nil
+	:after-publish-hook nil
+
         ;; Advanced options for customize blogit
         ;; some will be set by `blogit-initialize-project'
         :blogit-sanitize-length 5
@@ -199,15 +203,6 @@ Currently blogit only support following format:
    :bootstrap_source   "bootstrap_source.html"
    )
   "Template filename define for blogit to parse.")
-
-(defvar blogit-before-publish-hook nil
-  "Hook to be run before publishing a blog.
-Each hook is a function that could be called with no parameter.")
-
-(defvar blogit-after-publish-hook nil
-  "Hook to be run after publishing a blog.
-Each hook is a function that could be called with no parameter.")
-
 
 
 ;;; Internal variables
