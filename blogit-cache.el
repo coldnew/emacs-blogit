@@ -163,7 +163,8 @@ tags repeat times."
                (post-url (plist-get info :post-url)))
 
 	  ;; FIXME: maybe remove ?
-          (add-to-list 'tag-cache-val `(,title . ,post-url))
+          ;;(add-to-list 'tag-cache-val `(,title . ,post-url))
+          (add-to-list 'tag-cache-val filename)
           (blogit-cache-set tag-cache tag-cache-val)
 
           ;; calculate tags count
