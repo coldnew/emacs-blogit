@@ -196,12 +196,8 @@ holding export options."
       ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
       ("PAGE_FOOTER" (blogit--render-footer-template info))
       ("CONTENT" (org-export-as 'blogit-html nil nil t nil))
-      ("TAG_LIST"
-       (--map
-        (ht
-         ("TAG_URL" (car it))
-         ("TAG_NAME" (cadr it)))
-        tags-list))))))
+      ("TAG_LIST" (--map (ht ("TAG_URL" (car it)) ("TAG_NAME" (cadr it))) tags-list))
+      ))))
 
 (defun blogit--export-as-html
   (&optional async subtreep visible-only body-only ext-plist)
