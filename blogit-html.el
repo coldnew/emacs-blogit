@@ -167,7 +167,6 @@ In this function, we also add link file"
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  ;;(org-html-template contents info)
   (blogit--render-template
    :blog_post
    (blogit--build-context

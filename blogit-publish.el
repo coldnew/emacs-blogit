@@ -79,12 +79,16 @@
              (tag-cache-val (blogit-cache-get tag-cache)))
 
         ;; FIXME: need to use other template method
-        ;; bug on cache
         (blogit--string-to-file
          (blogit--render-template
           :tag
           (blogit--build-context
            nil
+	   ("TITLE" (or (blogit-project-info :blog-title) ""))
+	   ("PAGE_HEADER" (blogit--render-header-template nil))
+	   ("PAGE_NAVIGATOR" (blogit--render-navigator-template nil))
+	   ("PAGE_FOOTER" (blogit--render-footer-template nil))
+	   ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template nil) ""))
            ("LISTS"
             (--map
              (ht
