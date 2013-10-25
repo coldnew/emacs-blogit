@@ -179,11 +179,12 @@ holding export options."
     ("HTML_POSTAMBLE" (org-html--build-pre/postamble 'postamble info))
 
     ;; context from blogit template
+    ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template info) ""))
+
     ("PAGE_HEADER" (blogit--render-header-template info))
     ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
     ("PAGE_FOOTER" (blogit--render-footer-template info))
     ("CONTENT" (org-export-as 'blogit-html nil nil t nil))
-    ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template info) ""))
     )))
 
 (defun blogit--export-as-html

@@ -637,6 +637,11 @@ many useful context is predefined here, but you can overwrite it.
     ("DESCRIPTION" (or (blogit--parse-option ,info :description) ""))
     ("KEYWORDS" (or (blogit--parse-option ,info :keywords) ""))
     ("ROOT" (blogit--path-to-root (blogit--build-export-dir ,info)))
+
+    ;; TODO: move to other place
+    ("PLUGIN_DISQUS" (or (blogit--render-disqus-template ,info) ""))
+    ("PLUGIN_ANALYTICS" (or (blogit--render-analytics-template ,info) ""))
+    ("PLUGIN_LLOOGG" (or (blogit--render-lloogg-template ,info) ""))
     ,@pairs))
 
 ;; TODO: seems like we can reduce some function here.
