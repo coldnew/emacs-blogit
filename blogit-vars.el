@@ -200,6 +200,15 @@ Currently blogit only support following format:
    )
   "Template filename define for blogit to parse.")
 
+(defvar blogit-before-publish-hook nil
+  "Hook to be run before publishing a blog.
+Each hook is a function that could be called with no parameter.")
+
+(defvar blogit-after-publish-hook nil
+  "Hook to be run after publishing a blog.
+Each hook is a function that could be called with no parameter.")
+
+
 
 ;;; Internal variables
 

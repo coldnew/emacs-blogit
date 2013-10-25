@@ -353,6 +353,8 @@ When force is t, re-publish all blogit project."
     ;; initialize cache for blogit
     (blogit-initialize-cache)
 
+    (run-hooks 'blogit-before-publish-hook)
+
     ;; publish current project posts
     (org-publish-project blogit-current-project)
 
@@ -372,6 +374,8 @@ When force is t, re-publish all blogit project."
               (not (file-exists-p output-style-dir)))
       (message (format "Copy style dir to %s." output-dir))
       (blogit--do-copy source-style-dir output-dir))
+
+    (run-hooks 'blogit-after-publish-hook)
 
     ;; calculate publish time
     (message (format "All files published in %ss"
