@@ -89,7 +89,7 @@
 	   ("PAGE_NAVIGATOR" (blogit--render-navigator-template nil))
 	   ("PAGE_FOOTER" (blogit--render-footer-template nil))
 	   ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template nil) ""))
-           ("LISTS"
+           ("TAG_LIST"
             (--map
              (ht
               ("POST_TITLE"    (plist-get (blogit-cache-get it)  :title))

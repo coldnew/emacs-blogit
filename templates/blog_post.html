@@ -28,9 +28,9 @@
           <nav class="tag-cloud">
             <h1><i class="icon-tags"></i> related tags</h1>
             <ul>
-	      {{#TAGS}}
-              <li class="label label-inverse small"><a href="{{{TAG_URL}}}">{{{TAG}}}</a></li>
-	      {{/TAGS}}
+	      {{#TAG_LIST}}
+              <li class="label label-inverse small"><a href="{{{TAG_URL}}}">{{{TAG_NAME}}}</a></li>
+	      {{/TAG_LIST}}
             </ul>
           </nav>
         </div>
