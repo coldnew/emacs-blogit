@@ -171,8 +171,10 @@ holding export options."
          (tags-sanitize (mapcar 'blogit--sanitize-string tags))
          (tags-url (mapcar '(lambda (x)
 			      (blogit--remove-dulpicate-backslash
-			       (concat (blogit-project-info :blog-url) "/"
-				       (blogit-project-info :tags-directory-name) "/" x ".html")))
+			       ;;blogit--calculate-post-relative-path
+			       (concat
+				(blogit-project-info :blog-url) "/"
+				 (blogit-project-info :tags-directory-name) "/" x ".html")))
 			      tags-sanitize))
          (tags-list ((lambda (&rest args)
                        (apply (function mapcar*) (function list) args))

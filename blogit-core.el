@@ -497,7 +497,8 @@ ex:
     (root)/2013/12/23/test.html -> ../../..
     (root)/theme                -> ..
 "
-  (let* ((root (blogit-project-info :publishing-directory))
+  (let* ((root
+          (expand-file-name (blogit-project-info :publishing-directory)))
          (rpath (file-relative-name
                  (expand-file-name path) root))
          (dpath (directory-file-name
@@ -514,6 +515,16 @@ ex:
     ;; remove last / and return
     (s-left (- (string-width nroot) 1) nroot)))
 
+(defun blogit--path-from-root (path)
+  "Return path from site root.
+ex:
+   (root)/tags/xxx.hmlt -> tags/
+"
+  (let* ((root
+          (expand-file-name (blogit-project-info :publishing-directory)))
+         (fpath (expand-file-name path)))
+    (replace-regexp-in-string root "" fpath)))
+
 (defun blogit--calculate-post-relative-path (path)
   "Calculate post path from root."
   (let* ((epath (expand-file-name (blogit--get-post-url path)))
@@ -522,7 +533,6 @@ ex:
          (rpath (s-replace (expand-file-name (blogit-project-info :publishing-directory)) "" path-dir)))
     (blogit--remove-dulpicate-backslash
      (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
-
 
 (defun blogit--parse-option (info key &optional filename)
   "Read option value of org file opened in current buffer.
