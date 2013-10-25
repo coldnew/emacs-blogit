@@ -636,9 +636,6 @@ many useful context is predefined here, but you can overwrite it.
     ("LANGUAGE" (or (blogit--parse-option ,info :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option ,info :description) ""))
     ("KEYWORDS" (or (blogit--parse-option ,info :keywords) ""))
-    ("DISQUS" (or (blogit--render-disqus-template ,info) ""))
-    ("ANALYTICS" (or (blogit--render-analytics-template ,info) ""))
-    ("LLOOGG" (or (blogit--render-lloogg-template ,info) ""))
     ("ROOT" (blogit--path-to-root (blogit--build-export-dir ,info)))
     ,@pairs))
 
