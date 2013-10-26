@@ -163,15 +163,14 @@ tags repeat times."
                (post-url (plist-get info :post-url)))
 
 	  ;; FIXME: maybe remove ?
-          ;;(add-to-list 'tag-cache-val `(,title . ,post-url))
           (add-to-list 'tag-cache-val filename)
           (blogit-cache-set tag-cache tag-cache-val)
 
           ;; calculate tags count
           (if (member key cache-val)
               (let ((count (length (blogit-cache-get tag-cache))))
-                (setq cache-val (plist-put cache-val key (list :count count :name tag-name :file filename))))
-            (setq cache-val (plist-put cache-val key (list :count 1 :name tag-name :file filename))))))
+                (setq cache-val (plist-put cache-val key (list :count count :name tag-name))))
+            (setq cache-val (plist-put cache-val key (list :count 1 :name tag-name))))))
 
     (blogit-cache-set cache cache-val)))
 
