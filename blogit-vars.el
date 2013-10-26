@@ -198,6 +198,7 @@ Currently blogit only support following format:
    ;; combine other templates
    :blog_post          "blog_post.html"
    :tag                "tag.html"
+   :tag_index          "tag_index.html"
 
    ;; bootstrap support
    :bootstrap_source   "bootstrap_source.html"
