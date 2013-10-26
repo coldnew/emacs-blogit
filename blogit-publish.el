@@ -82,20 +82,16 @@
         (blogit--string-to-file
          (blogit--render-template
           :tag
-          (blogit--build-context
-           nil
-	   ("TITLE" (or (blogit-project-info :blog-title) ""))
-	   ("PAGE_HEADER" (blogit--render-header-template nil))
-	   ("PAGE_NAVIGATOR" (blogit--render-navigator-template nil))
-	   ("PAGE_FOOTER" (blogit--render-footer-template nil))
-	   ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template nil) ""))
+          (blogit--build-context-html
+	   nil
+	   ;;("BLOG_TITLE" (or (blogit-project-info :blog-title) ""))
            ("TAG_LIST"
             (--map
              (ht
-              ("POST_TITLE"    (plist-get (blogit-cache-get it)  :title))
-              ("POST_URL" (plist-get (blogit-cache-get it) :post-url))
-              ("POST_DATE" (plist-get (blogit-cache-get it) :date))
-              ("POST_LINK" (plist-get (blogit-cache-get it) :post-link)))
+              ("POST_TITLE" (plist-get (blogit-cache-get it)  :title))
+              ("POST_URL"   (plist-get (blogit-cache-get it) :post-url))
+              ("POST_DATE"  (plist-get (blogit-cache-get it) :date))
+              ("POST_LINK"  (plist-get (blogit-cache-get it) :post-link)))
              tag-cache-val))))
 
          ;; FIXME: add option to optimize this

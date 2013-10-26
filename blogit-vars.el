@@ -214,7 +214,7 @@ Currently blogit only support following format:
   "Cache to store current project plist info.")
 
 (defvar blogit-current-file nil
-  "Cache to store current processing file info.")
+  "Cache to store current processing file path.")
 
 (defvar blogit-cache nil
   "Cache to store post info, this cache will be used to

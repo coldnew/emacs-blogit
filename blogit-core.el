@@ -651,10 +651,12 @@ many useful context is predefined here, but you can overwrite it.
     ("KEYWORDS" (or (blogit--parse-option ,info :keywords) ""))
     ("ROOT" (blogit--path-to-root (blogit--build-export-dir ,info)))
 
-    ;; TODO: move to other place
+    ;; Extra blogit plugin
+    ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template ,info) ""))
     ("PLUGIN_DISQUS" (or (blogit--render-disqus-template ,info) ""))
     ("PLUGIN_ANALYTICS" (or (blogit--render-analytics-template ,info) ""))
     ("PLUGIN_LLOOGG" (or (blogit--render-lloogg-template ,info) ""))
+
     ,@pairs))
 
 ;; TODO: seems like we can reduce some function here.
@@ -663,15 +665,6 @@ many useful context is predefined here, but you can overwrite it.
   "Read the file contents, then render it with a hashtable context."
   (let ((file (or (blogit--template-fullfile type) type)))
     (mustache-render (blogit--template-to-string file) context)))
-
-(defun blogit--render-header-template (info)
-  (blogit--render-template :page_header (blogit--build-context info)))
-
-(defun blogit--render-navigator-template (info)
-  (blogit--render-template :page_navigator (blogit--build-context info)))
-
-(defun blogit--render-footer-template (info)
-  (blogit--render-template :page_footer (blogit--build-context info)))
 
 (defun blogit--render-disqus-template (info)
   (let ((disqus (or (blogit--parse-option info :disqus) (blogit-project-info :disqus) "")))
@@ -689,7 +682,8 @@ many useful context is predefined here, but you can overwrite it.
       (blogit--render-template :plugin_lloogg (ht ("LLOOGG" lloogg))))))
 
 (defun blogit--render-qrcode-template (info)
-  (blogit--render-template :plugin_qrcode (blogit--build-context info)))
+  (blogit--render-template :plugin_qrcode
+			   (ht ("POST_URL_HEXIFY" (url-hexify-string (blogit--build-post-url info))))))
 
 (provide 'blogit-core)
 ;;; blogit-core.el ends here.

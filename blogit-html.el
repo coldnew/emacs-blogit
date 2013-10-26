@@ -44,6 +44,49 @@
 (eval-when-compile (require 'cl))
 
 
+;;; Core function for building blogit HTML
+
+(defmacro blogit--build-context-html (info &rest pairs)
+  "Create a hash table with the key-value pairs given.
+Keys are compared with `equal'.
+
+\(fn (KEY-1 VALUE-1) (KEY-2 VALUE-2) ...)
+
+This function is used to create context for blogit-render function,
+many useful context is predefined here, but you can overwrite it.
+"
+  `(blogit--build-context
+    ,info
+
+    ;; context derived from ox-html
+    ("HTML_META" (if ,info (org-html--build-meta-info ,info)))
+    ("HTML_HEAD" (if ,info (org-html--build-head ,info)))
+    ("HTML_MATHJAX" (if ,info (org-html--build-mathjax-config ,info)))
+    ("HTML_PREAMBLE" (if ,info (org-html--build-pre/postamble 'preamble ,info)))
+    ("HTML_POSTAMBLE" (if ,info (org-html--build-pre/postamble 'postamble ,info)))
+
+    ;; context from blogit template
+    ("PAGE_HEADER" (blogit--render-header-template ,info))
+    ("PAGE_NAVIGATOR" (blogit--render-navigator-template ,info))
+    ("PAGE_FOOTER" (blogit--render-footer-template ,info))
+
+    ,@pairs))
+
+
+;;; Template render function
+
+(defun blogit--render-header-template (info)
+  (blogit--render-template :page_header (blogit--build-context info)))
+
+(defun blogit--render-navigator-template (info)
+  (blogit--render-template :page_navigator (blogit--build-context info)))
+
+(defun blogit--render-footer-template (info)
+  (blogit--render-template :page_footer (blogit--build-context info)))
+
+
+
+
 ;;; Define Back-End for org-export
 
 (org-export-define-derived-backend 'blogit-html 'html
@@ -170,34 +213,23 @@ holding export options."
   (let* ((tags (split-string (blogit--parse-option info :tags)" "))
          (tags-sanitize (mapcar 'blogit--sanitize-string tags))
          (tags-url (mapcar '(lambda (x)
-			      (blogit--remove-dulpicate-backslash
-			       ;;blogit--calculate-post-relative-path
-			       (concat
-				(blogit-project-info :blog-url) "/"
-				 (blogit-project-info :tags-directory-name) "/" x ".html")))
-			      tags-sanitize))
+                              (blogit--remove-dulpicate-backslash
+                               (concat
+                                (blogit-project-info :blog-url) "/"
+                                (blogit-project-info :tags-directory-name) "/" x ".html")))
+                           tags-sanitize))
          (tags-list ((lambda (&rest args)
                        (apply (function mapcar*) (function list) args))
                      tags-url tags)))
 
     (blogit--render-template
      :blog_post
-     (blogit--build-context
+     ;;     (blogit--build-context
+     (blogit--build-context-html
       info
-      ;; context derived from ox-html
-      ("HTML_META" (org-html--build-meta-info info))
-      ("HTML_HEAD" (org-html--build-head info))
-      ("HTML_MATHJAX" (org-html--build-mathjax-config info))
-      ("HTML_PREAMBLE" (org-html--build-pre/postamble 'preamble info))
-      ("HTML_POSTAMBLE" (org-html--build-pre/postamble 'postamble info))
-
-      ;; context from blogit template
-      ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template info) ""))
-
-      ("PAGE_HEADER" (blogit--render-header-template info))
-      ("PAGE_NAVIGATOR" (blogit--render-navigator-template info))
-      ("PAGE_FOOTER" (blogit--render-footer-template info))
+      ;;
       ("CONTENT" (org-export-as 'blogit-html nil nil t nil))
+      ;; tag list
       ("TAG_LIST" (--map (ht ("TAG_URL" (car it)) ("TAG_NAME" (cadr it))) tags-list))
       ))))
 
