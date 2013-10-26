@@ -629,7 +629,7 @@ many useful context is predefined here, but you can overwrite it.
     ("BLOG_TITLE" (or (blogit-project-info :blog-title) ""))
     ("BLOG_DESCRIPTION"  (or (blogit-project-info :blog-description) ""))
     ("BLOG_URL"  (or (blogit-project-info :blog-url) ""))
-    ("TITLE"  (or (blogit--parse-option ,info :title) "Untitled"))
+    ("TITLE"  (or (blogit--parse-option ,info :title) (blogit-project-info :blog-title) "Untitled"))
     ("AUTHOR" (or (blogit--parse-option ,info :author) user-full-name "Unknown"))
     ("EMAIL" (or (blogit--parse-option ,info :email) user-mail-address ""))
     ;; FIXME: dropped DATE
