@@ -468,15 +468,15 @@ This function is used to create directory for new blog post.
     (blogit--remove-dulpicate-backslash
      (format "%s/%s" (directory-file-name (blogit-project-info :publishing-directory)) filepath))))
 
-(defun blogit--build-post-url (info &optional filename)
+(defun blogit--build-post-url-relative (info &optional filename)
   (format "%s%s"
           (s-replace
            (expand-file-name (blogit-project-info :publishing-directory)) ""
            (expand-file-name (blogit--build-export-dir info)))
           (blogit--get-post-filename info filename)))
 
-(defun blogit--build-post-link (info &optional filename)
-  (concat (blogit-project-info :blog-url) "/" (blogit--build-post-url info filename)))
+(defun blogit--build-post-url (info &optional filename)
+  (concat (blogit-project-info :blog-url) "/" (blogit--build-post-url-relative info filename)))
 
 (defun blogit--build-post-file-directory (info &optional filename)
   (file-name-base (blogit--get-post-filename info filename)))
@@ -643,8 +643,8 @@ many useful context is predefined here, but you can overwrite it.
     ("CURRENT_YEAR" (format-time-string "%Y"))
     ("CURRENT_MONTH" (format-time-string "%02m"))
     ("CURRENT_DAY" (format-time-string "%02d"))
-    ("POST_URL" (blogit--build-post-link ,info))
-    ("POST_URL_HEXIFY" (url-hexify-string (blogit--build-post-link ,info)))
+    ("POST_URL" (blogit--build-post-url ,info))
+    ("POST_URL_HEXIFY" (url-hexify-string (blogit--build-post-url ,info)))
     ("URL" (or (blogit--parse-option ,info :url) ""))
     ("LANGUAGE" (or (blogit--parse-option ,info :language) "en"))
     ("DESCRIPTION" (or (blogit--parse-option ,info :description) ""))
