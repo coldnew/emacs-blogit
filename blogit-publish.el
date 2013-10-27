@@ -84,7 +84,6 @@
           :tag
           (blogit--build-context-html
 	   nil
-	   ;;("BLOG_TITLE" (or (blogit-project-info :blog-title) ""))
            ("TAG_LIST"
             (--map
              (ht

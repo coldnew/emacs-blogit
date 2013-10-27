@@ -210,7 +210,7 @@ In this function, we also add link file"
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let* ((tags (split-string (blogit--parse-option info :tags)" "))
+  (let* ((tags (blogit--get-tags info))
          (tags-sanitize (mapcar 'blogit--sanitize-string tags))
          (tags-url (mapcar '(lambda (x)
                               (blogit--remove-dulpicate-backslash
