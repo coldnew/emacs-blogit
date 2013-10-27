@@ -223,11 +223,11 @@ holding export options."
                      tags-url tags)))
 
     (blogit--render-template
+     ;; TODO: make static post can build with this template
      :blog_post
-     ;;     (blogit--build-context
      (blogit--build-context-html
       info
-      ;;
+      ;; CONTENT always mean the file content we care
       ("CONTENT" (org-export-as 'blogit-html nil nil t nil))
       ;; tag list
       ("TAG_LIST" (--map (ht ("TAG_URL" (car it)) ("TAG_NAME" (cadr it))) tags-list))
