@@ -103,3 +103,4 @@
 ;; TODO:
 ;; 1. how about make user can publish many bligit project ?
 ;; 2. make some link be relative, it will more easy to debug offline
+;; 3. add blogit-rename-post
