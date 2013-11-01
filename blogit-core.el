@@ -343,10 +343,11 @@ the default format will be ignored."
               ;; remove empty string and dulpicate tag
               (remove-duplicates (remove "" tags-list) :test 'string=)))))
 
-;; FIXME: how about remove this ?
 (defun blogit--template-to-string (file)
-  "Read the content of FILE in template dir and return it as string."
-  (blogit--file-to-string file))
+  "Read the content of FILE in template dir and return it as string.
+If template contains <lisp> ... </lisp>, evalute this block like o-blog does."
+  (with-temp-buffer
+    (insert-file-contents file) (blogit--eval-lisp) (buffer-string)))
 
 (defun blogit--template-fullfile (key)
   "Get match template filename with fullpath according to key."
@@ -354,6 +355,52 @@ the default format will be ignored."
    (blogit--remove-dulpicate-backslash
     (concat (blogit-project-info :blogit-template-directory) "/"
             (plist-get blogit-template-list key)))))
+
+(defun blogit--eval-lisp()
+  "Eval embeded lisp code defined by <lisp> tags in html fragment
+when parsing a template."
+  (save-excursion
+    (save-restriction
+      (save-match-data
+	;; needed for thing-at-point
+	(html-mode)
+	(beginning-of-buffer)
+	(let ((open-tag "<lisp>\\|{lisp}\\|\\[lisp\\]")
+	      (close-tag "</lisp>\\|{/lisp}\\|\\[/lisp\\]")
+	      beg end sexp)
+	  (while (search-forward-regexp open-tag nil t)
+	    (setq beg (- (point) (length  (match-string 0))))
+	    (when (search-forward-regexp close-tag nil t)
+	      (setq end (point))
+	      (backward-char (length (match-string 0)))
+	      (backward-sexp)
+	      (setq sexp (substring-no-properties (thing-at-point 'sexp)))
+	      (narrow-to-region beg end)
+	      (delete-region (point-min) (point-max))
+	      (insert
+	       (save-match-data
+		 (condition-case err
+		     (let ((object (eval (read sexp))))
+		       (cond
+			;; result is a string
+			((stringp object) object)
+			;; a list
+			((and (listp object)
+			      (not (eq object nil)))
+			 (let ((string (pp-to-string object)))
+			   (substring string 0 (1- (length string)))))
+			;; a number
+			((numberp object)
+			 (number-to-string object))
+			;; nil
+			((eq object nil) "")
+			;; otherwise
+			(t (pp-to-string object))))
+		   ;; error handler
+		   (error
+		    (format "Lisp error in %s: %s" (buffer-file-name) err)))))
+	      (goto-char (point-min))
+	      (widen))))))))
 
 (defun blogit--sanitize-string (s &optional length)
   "Sanitize string S by:
@@ -660,6 +707,8 @@ many useful context is predefined here, but you can overwrite it.
     ,@pairs))
 
 ;; TODO: seems like we can reduce some function here.
+
+
 
 (defun blogit--render-template (type context)
   "Read the file contents, then render it with a hashtable context."
