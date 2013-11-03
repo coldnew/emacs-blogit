@@ -708,8 +708,6 @@ many useful context is predefined here, but you can overwrite it.
 
 ;; TODO: seems like we can reduce some function here.
 
-
-
 (defun blogit--render-template (type context)
   "Read the file contents, then render it with a hashtable context."
   (let ((file (or (blogit--template-fullfile type) type)))
