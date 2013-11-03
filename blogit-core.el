@@ -568,7 +568,7 @@ ex:
 (defun blogit--path-from-root (path)
   "Return path from site root.
 ex:
-   (root)/tags/xxx.hmlt -> tags/
+   (root)/tags/xxx.html -> tags/
 "
   (let* ((root
           (expand-file-name (blogit-project-info :publishing-directory)))
