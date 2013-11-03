@@ -245,6 +245,7 @@ project list. Return nil when failed."
     (string= file-dir
              (file-name-directory (expand-file-name dir)))))
 
+;; FIXME: rewrite this function to make get type more easy
 (defun blogit--get-post-type (info &optional filename)
   "Get current post type, return `(blogit-project-info :blogit-default-type)' if not found.
 When filename is specified, open the file and get it's post type."
