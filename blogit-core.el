@@ -529,6 +529,7 @@ This function is used to create directory for new blog post.
 (defun blogit--build-post-file-directory (info &optional filename)
   (file-name-base (blogit--get-post-filename info filename)))
 
+;; TODO: move this to blogit-html.el ?
 (defun blogit--build-feed-content (info &optional filename)
   ;; FIXME: fix file
   (replace-regexp-in-string
