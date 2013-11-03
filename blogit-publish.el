@@ -283,13 +283,17 @@ Return output file name."
 ;;; Extra functions for End-user functions
 
 (defun blogit--select-project (func &optional msg)
+  "Prompt to select project to publish. If only one project
+list in `blogit-project-alist', do not prompt."
   (let ((project
-         (list
-          (assoc (org-icompleting-read
-                  (or msg "Publish blogit project: ")
-                  blogit-project-alist nil t)
-                 blogit-project-alist)
-          current-prefix-arg)))
+	 (if (= (length blogit-project-alist) 1)
+	     (list (car blogit-project-alist))
+	   (list
+	    (assoc (org-icompleting-read
+		    (or msg "Publish blogit project: ")
+		    blogit-project-alist nil t)
+		   blogit-project-alist)
+	    current-prefix-arg))))
     (let ((project-list
            (if (not (stringp project)) (list project)
              ;; If this function is called in batch mode,
