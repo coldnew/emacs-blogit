@@ -322,7 +322,7 @@ list in `blogit-project-alist', do not prompt."
        nil
        ("TITLE" (file-name-base (or filename (buffer-file-name) "")))
        ("DATE" (format-time-string (blogit-project-info :blogit-date-format)))
-       ("URL" (blogit--sanitize-string filename))
+       ("URL" (blogit--sanitize-string filename :blogit-sanitize-length))
        ("LANGUAGE" (or (blogit-project-info :default-language) "en"))))))
   (end-of-buffer)
   (newline-and-indent))
