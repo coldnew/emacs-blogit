@@ -322,7 +322,7 @@ list in `blogit-project-alist', do not prompt."
        nil
        ("TITLE" (file-name-base (or filename (buffer-file-name) "")))
        ("DATE" (format-time-string (blogit-project-info :blogit-date-format)))
-       ("URL" (blogit--sanitize-string filename :blogit-sanitize-length))
+       ("URL" (blogit--sanitize-string filename (blogit-project-info :blogit-sanitize-length)))
        ("LANGUAGE" (or (blogit-project-info :default-language) "en"))))))
   (end-of-buffer)
   (newline-and-indent))
@@ -353,6 +353,11 @@ When force is t, re-publish all blogit project."
     (blogit-initialize-cache)
 
     (run-hooks (blogit-project-info :before-publish-hook))
+
+    ;; To prevent github render page failed, we add a `.nojekyll' file
+    ;; under the publishing-directory
+    (when (not (file-exists-p (concat output-dir "/" ".nojekyll")))
+      (blogit--string-to-file "" (concat output-dir "/" ".nojekyll")))
 
     ;; publish current project posts
     (org-publish-project blogit-current-project)
