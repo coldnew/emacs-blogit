@@ -705,6 +705,7 @@ many useful context is predefined here, but you can overwrite it.
     ("PLUGIN_DISQUS" (or (blogit--render-disqus-template ,info) ""))
     ("PLUGIN_ANALYTICS" (or (blogit--render-analytics-template ,info) ""))
     ("PLUGIN_LLOOGG" (or (blogit--render-lloogg-template ,info) ""))
+    ("PLUGIN_FANCYBOX" (or (blogit--render-fancybox-template ,info) ""))
 
     ,@pairs))
 
@@ -733,6 +734,11 @@ many useful context is predefined here, but you can overwrite it.
 (defun blogit--render-qrcode-template (info)
   (blogit--render-template :plugin_qrcode
 			   (ht ("POST_URL_HEXIFY" (url-hexify-string (blogit--build-post-url info))))))
+
+(defun blogit--render-fancybox-template (info)
+  (blogit--render-template :plugin_fancybox
+			   (ht ("ROOT" (blogit--path-to-root (blogit--build-export-dir info))))))
+
 
 (provide 'blogit-core)
 ;;; blogit-core.el ends here.

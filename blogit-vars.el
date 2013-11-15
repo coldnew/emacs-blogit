@@ -191,6 +191,7 @@ Currently blogit only support following format:
    :plugin_disqus      "plugin_disqus.html"
    :plugin_lloogg      "plugin_lloogg.html"
    :plugin_qrcode      "plugin_qrcode.html"
+   :plugin_fancybox    "plugin_fancybox.html"
    :rss                "rss.xml"
    :atom               "atom.xml"
    :newpost            "newpost.org"
