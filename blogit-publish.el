@@ -97,11 +97,6 @@
          (blogit--remove-dulpicate-backslash
           (concat (blogit-project-info :blogit-tags-directory) "/" tag-sanitize ".html")))))))
 
-
-'(:a (:b) :c (d))
-
-(-flatten (cons '(:a "b") '(:C "d")))
-
 (defun blogit-publish-tags-index ()
   "Publish tags index static page"
   (let* ((cache ":tags:")
@@ -134,8 +129,6 @@
       ;; FIXME: add option to optimize this
       (blogit--remove-dulpicate-backslash
        (concat (blogit-project-info :blogit-tags-directory) "/" "index.html")))))
-
-(blogit-publish-tags-index)
 
 (defun blogit-publish-rss/atom ()
   "Publish rss or atom file for blogit."
@@ -407,6 +400,9 @@ When force is t, re-publish all blogit project."
 
     ;; publish tags
     (blogit-publish-tags)
+
+    ;; publish tag index
+    (blogit-publish-tags-index)
 
     ;; publish rss
     (blogit-publish-rss/atom)

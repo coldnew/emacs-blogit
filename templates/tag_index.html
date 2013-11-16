@@ -6,11 +6,16 @@
     window.onload = function() {
         try {
             TagCanvas.Start('tagCanvas','tags',{
-                textColour: '#ff0000',
-                outlineColour: '#ff00ff',
+		interval: 50,
+                textColour: '#00f',
+                outlineColour: '#f96',
+		outlineThickness: 5,
+		minBrightness: 0.1,
+		depth: 0.92,
                 reverse: true,
-                depth: 0.8,
-                maxSpeed: 0.05
+		shadow: '#ccf',
+		shadowBlur: 3,
+                maxSpeed: 0.05,
             });
         } catch(e) {
             // something went wrong, hide the canvas container
