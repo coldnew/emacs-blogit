@@ -1,19 +1,43 @@
 <!DOCTYPE html>
 <html lang="{{{LANGUAGE}}}">
   {{{PAGE_HEADER}}}
+
+  <script type="text/javascript">
+    window.onload = function() {
+        try {
+            TagCanvas.Start('tagCanvas','tags',{
+                textColour: '#ff0000',
+                outlineColour: '#ff00ff',
+                reverse: true,
+                depth: 0.8,
+                maxSpeed: 0.05
+            });
+        } catch(e) {
+            // something went wrong, hide the canvas container
+            document.getElementById('tagCanvasContainer').style.display = 'none';
+        }
+    };
+  </script>
+
   <body>
     {{{PAGE_NAVIGATOR}}}
     <div class="container">
 
       <!-- begin tag content -->
 
-      <nav class="tags">
+      <div id="tagCanvasContainer">
+	<canvas width="300" height="300" id="tagCanvas">
+          <p>Anything in here will be replaced on browsers that support the canvas element</p>
+	</canvas>
+      </div>
+
+      <div id="tags">
         <ul>
-	  {{#TAG_LIST}}
+          {{#TAG_LIST}}
           <li style="font-size: {{{TAG_WEIGHT}}}%;"><a href="{{{TAG_URL}}}">{{{TAG_NAME}}}</a></li>
-	  {{/TAG_LIST}}
+          {{/TAG_LIST}}
         </ul>
-      </nav>
+      </div>
 
       <!-- end tag content -->
 

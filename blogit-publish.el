@@ -83,11 +83,11 @@
          (blogit--render-template
           :tag
           (blogit--build-context-html
-	   nil
+           nil
            ("TAG_LIST"
             (--map
              (ht
-              ("POST_TITLE" (plist-get (blogit-cache-get it)  :title))
+              ("POST_TITLE" (plist-get (blogit-cache-get it) :title))
               ("POST_URL"   (plist-get (blogit-cache-get it) :post-url))
               ("POST_DATE"  (plist-get (blogit-cache-get it) :date))
               ("POST_LINK"  (plist-get (blogit-cache-get it) :post-link)))
@@ -96,6 +96,46 @@
          ;; FIXME: add option to optimize this
          (blogit--remove-dulpicate-backslash
           (concat (blogit-project-info :blogit-tags-directory) "/" tag-sanitize ".html")))))))
+
+
+'(:a (:b) :c (d))
+
+(-flatten (cons '(:a "b") '(:C "d")))
+
+(defun blogit-publish-tags-index ()
+  "Publish tags index static page"
+  (let* ((cache ":tags:")
+         (cache-val (blogit-cache-get cache))
+         tag-list)
+
+    ;; if tags directory does not exist, create it
+    (unless (file-exists-p (blogit-project-info :blogit-tags-directory))
+      (make-directory (blogit-project-info :blogit-tags-directory) t))
+
+    ;; create tag-list
+    (dolist (key cache-val)
+      (when (not (symbolp key)) (add-to-list 'tag-list key)))
+
+    ;; FIXME: need to use other template method
+    (blogit--string-to-file
+     (blogit--render-template
+      :tag_index
+      (blogit--build-context-html
+       nil
+       ("TAG_LIST"
+        (--map
+         (ht
+;;          ("TAG_WEIGHT" (plist-get it :title))
+          ("TAG_WEIGHT" 100)
+          ("TAG_URL" (concat (plist-get  it :sanitize) ".html"))
+          ("TAG_NAME"  (plist-get  it :name)))
+         tag-list))))
+
+      ;; FIXME: add option to optimize this
+      (blogit--remove-dulpicate-backslash
+       (concat (blogit-project-info :blogit-tags-directory) "/" "index.html")))))
+
+(blogit-publish-tags-index)
 
 (defun blogit-publish-rss/atom ()
   "Publish rss or atom file for blogit."
@@ -286,14 +326,14 @@ Return output file name."
   "Prompt to select project to publish. If only one project
 list in `blogit-project-alist', do not prompt."
   (let ((project
-	 (if (= (length blogit-project-alist) 1)
-	     (list (car blogit-project-alist))
-	   (list
-	    (assoc (org-icompleting-read
-		    (or msg "Publish blogit project: ")
-		    blogit-project-alist nil t)
-		   blogit-project-alist)
-	    current-prefix-arg))))
+         (if (= (length blogit-project-alist) 1)
+             (list (car blogit-project-alist))
+           (list
+            (assoc (org-icompleting-read
+                    (or msg "Publish blogit project: ")
+                    blogit-project-alist nil t)
+                   blogit-project-alist)
+            current-prefix-arg))))
     (let ((project-list
            (if (not (stringp project)) (list project)
              ;; If this function is called in batch mode,
