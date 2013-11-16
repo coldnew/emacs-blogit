@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{{LANGUAGE}}}">
   {{{PAGE_HEADER}}}
-
+  <body>
   <script type="text/javascript">
     window.onload = function() {
         try {
@@ -24,12 +24,11 @@
     };
   </script>
 
-  <body>
     {{{PAGE_NAVIGATOR}}}
+
     <div class="container">
 
       <!-- begin tag content -->
-
       <div id="tagCanvasContainer">
 	<canvas width="300" height="300" id="tagCanvas">
           <p>Anything in here will be replaced on browsers that support the canvas element</p>
@@ -43,7 +42,6 @@
           {{/TAG_LIST}}
         </ul>
       </div>
-
       <!-- end tag content -->
 
       {{{PAGE_FOOTER}}}
