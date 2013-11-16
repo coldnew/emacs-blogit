@@ -97,21 +97,25 @@
          (blogit--remove-dulpicate-backslash
           (concat (blogit-project-info :blogit-tags-directory) "/" tag-sanitize ".html")))))))
 
-(defun blogit--compute-tag-font-size (length val)
-  (let ((min 80) (max 220))
-     (+ min
-        (* (/ val (float length)) (- max min)))))
+(defun blogit--compute-tag-font-size (length val tag_min tag_max)
+  (let ((min 80.0) (max 220.0))
+     ;; (+ min
+     ;;    (* (/ val (float length)) (- max min)))
+    (round (+ min
+    (* val (/ (- max min) (- tag_max tag_min)))
+     ))))
 
-(defun blogit--compute-tag-weight (length val)
+(defun blogit--compute-tag-weight (length val tag_min tag_max)
   (let ((min 12) (max 80))
-      (+ min
-	 (* val (/ max (float length))))))
+    (round
+     (+ min
+	(* val (/ max (float length)))))))
 
 (defun blogit-publish-tags-index ()
   "Publish tags index static page"
   (let* ((cache ":tags:")
          (cache-val (blogit-cache-get cache))
-         (sum 0) (length 0) tag-list)
+         (sum 0) (length 0) (max 0) (min 0) tag-list)
 
     ;; if tags directory does not exist, create it
     (unless (file-exists-p (blogit-project-info :blogit-tags-directory))
@@ -122,7 +126,9 @@
       (when (not (symbolp key))
         (add-to-list 'tag-list key)
         (setq sum (+ sum (plist-get key :count)))
-        (setq length (1+ length))))
+        (setq length (1+ length))
+	(when (< max (plist-get key :count)) (setq max (plist-get key :count)))
+	(when (> min (plist-get key :count)) (setq min (plist-get key :count)))))
 
     ;; FIXME: need to use other template method
     (blogit--string-to-file
@@ -133,8 +139,8 @@
        ("TAG_LIST"
         (--map
          (ht
-          ("TAG_WEIGHT" (blogit--compute-tag-weight length (plist-get it :count)))
-          ("FONT_SIZE" (blogit--compute-tag-font-size length (plist-get it :count)))
+          ("TAG_WEIGHT" (blogit--compute-tag-weight length (plist-get it :count) min max))
+          ("FONT_SIZE" (blogit--compute-tag-font-size length (plist-get it :count) min max))
           ("TAG_URL" (concat (plist-get  it :sanitize) ".html"))
           ("TAG_NAME"  (plist-get  it :name)))
          tag-list))))

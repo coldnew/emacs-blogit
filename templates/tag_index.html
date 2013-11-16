@@ -7,7 +7,8 @@
           try {
               TagCanvas.Start('tagCanvas','tags',{
                   interval: 50,
-                  textColour: '#00f',
+		  textColour: null,
+		  textFont: null,
                   outlineColour: '#f96',
                   outlineThickness: 5,
                   minBrightness: 0.1,
@@ -18,7 +19,7 @@
                   maxSpeed: 0.05,
                   weight: true,
                   weightFrom: 'data-weight',
-                  weightMode: 'both',
+                  weightMode: 'size',
                   weightGradient: gradient,
               });
               var gradient = {
