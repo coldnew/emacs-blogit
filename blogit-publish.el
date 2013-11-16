@@ -97,11 +97,21 @@
          (blogit--remove-dulpicate-backslash
           (concat (blogit-project-info :blogit-tags-directory) "/" tag-sanitize ".html")))))))
 
+(defun blogit--compute-tag-font-size (length val)
+  (let ((min 80) (max 220))
+     (+ min
+        (* (/ val (float length)) (- max min)))))
+
+(defun blogit--compute-tag-weight (length val)
+  (let ((min 12) (max 80))
+      (+ min
+	 (* val (/ max (float length))))))
+
 (defun blogit-publish-tags-index ()
   "Publish tags index static page"
   (let* ((cache ":tags:")
          (cache-val (blogit-cache-get cache))
-         tag-list)
+         (sum 0) (length 0) tag-list)
 
     ;; if tags directory does not exist, create it
     (unless (file-exists-p (blogit-project-info :blogit-tags-directory))
@@ -109,7 +119,10 @@
 
     ;; create tag-list
     (dolist (key cache-val)
-      (when (not (symbolp key)) (add-to-list 'tag-list key)))
+      (when (not (symbolp key))
+        (add-to-list 'tag-list key)
+        (setq sum (+ sum (plist-get key :count)))
+        (setq length (1+ length))))
 
     ;; FIXME: need to use other template method
     (blogit--string-to-file
@@ -120,15 +133,15 @@
        ("TAG_LIST"
         (--map
          (ht
-;;          ("TAG_WEIGHT" (plist-get it :title))
-          ("TAG_WEIGHT" 100)
+          ("TAG_WEIGHT" (blogit--compute-tag-weight length (plist-get it :count)))
+          ("FONT_SIZE" (blogit--compute-tag-font-size length (plist-get it :count)))
           ("TAG_URL" (concat (plist-get  it :sanitize) ".html"))
           ("TAG_NAME"  (plist-get  it :name)))
          tag-list))))
 
-      ;; FIXME: add option to optimize this
-      (blogit--remove-dulpicate-backslash
-       (concat (blogit-project-info :blogit-tags-directory) "/" "index.html")))))
+     ;; FIXME: add option to optimize this
+     (blogit--remove-dulpicate-backslash
+      (concat (blogit-project-info :blogit-tags-directory) "/" "index.html")))))
 
 (defun blogit-publish-rss/atom ()
   "Publish rss or atom file for blogit."

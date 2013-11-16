@@ -2,27 +2,36 @@
 <html lang="{{{LANGUAGE}}}">
   {{{PAGE_HEADER}}}
   <body>
-  <script type="text/javascript">
-    window.onload = function() {
-        try {
-            TagCanvas.Start('tagCanvas','tags',{
-		interval: 50,
-                textColour: '#00f',
-                outlineColour: '#f96',
-		outlineThickness: 5,
-		minBrightness: 0.1,
-		depth: 0.92,
-                reverse: true,
-		shadow: '#ccf',
-		shadowBlur: 3,
-                maxSpeed: 0.05,
-            });
-        } catch(e) {
-            // something went wrong, hide the canvas container
-            document.getElementById('tagCanvasContainer').style.display = 'none';
-        }
-    };
-  </script>
+    <script type="text/javascript">
+      window.onload = function() {
+          try {
+              TagCanvas.Start('tagCanvas','tags',{
+                  interval: 50,
+                  textColour: '#00f',
+                  outlineColour: '#f96',
+                  outlineThickness: 5,
+                  minBrightness: 0.1,
+                  depth: 0.92,
+                  reverse: true,
+                  shadow: '#ccf',
+                  shadowBlur: 3,
+                  maxSpeed: 0.05,
+                  weight: true,
+                  weightFrom: 'data-weight',
+                  weightMode: 'both',
+                  weightGradient: gradient,
+              });
+              var gradient = {
+                  0:   'red',
+                  0.5: 'orange',
+                  1:   'rgba(0,0,0,0.1)'
+              };
+          } catch(e) {
+              // something went wrong, hide the canvas container
+              document.getElementById('tagCanvasContainer').style.display = 'none';
+          }
+      };
+    </script>
 
     {{{PAGE_NAVIGATOR}}}
 
@@ -30,18 +39,19 @@
 
       <!-- begin tag content -->
       <div id="tagCanvasContainer">
-	<canvas width="480" height="320" id="tagCanvas">
+        <canvas width="480" height="320" id="tagCanvas">
           <p>Anything in here will be replaced on browsers that support the canvas element</p>
-	</canvas>
+        </canvas>
       </div>
 
-      <div id="tags">
-        <ul>
-          {{#TAG_LIST}}
-          <li style="font-size: {{{TAG_WEIGHT}}}%;"><a href="{{{TAG_URL}}}">{{{TAG_NAME}}}</a></li>
-          {{/TAG_LIST}}
-        </ul>
-      </div>
+      <!-- <div id="tags"> -->
+      <ul class="weighted" style="font-size: 80%" id="tags">
+        <!-- <ul> -->
+        {{#TAG_LIST}}
+        <li ><a data-weight="{{{TAG_WEIGHT}}}" style="font-size: {{{FONT_SIZE}}}%;" href="{{{TAG_URL}}}">{{{TAG_NAME}}}</a></li>
+        {{/TAG_LIST}}
+      </ul>
+      <!-- </div> -->
       <!-- end tag content -->
 
       {{{PAGE_FOOTER}}}
