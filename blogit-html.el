@@ -260,8 +260,9 @@ holding export options."
                      tags-url tags)))
 
     (blogit--render-template
-     ;; TODO: make static post can build with this template
-     :blog_post
+     ;; Render HTML according to blogit type and suitable template
+     (blogit--get-post-template info)
+     ;; Build HTML context
      (blogit--build-context-html
       info
       ;; CONTENT always mean the file content we care

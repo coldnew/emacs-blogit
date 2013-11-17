@@ -261,6 +261,11 @@ When filename is specified, open the file and get it's post type."
        ((eq type 'draft)  'draft)
        (t (blogit-project-info :blogit-default-type))))))
 
+(defun blogit--get-post-template (info &optional filename)
+  "Get post template in `key' format, all key ends with `_post'. ex: :blog_post"
+  (blogit--string-to-key
+   (format "%s_post" (blogit--get-post-type info filename))))
+
 ;; FIXME: This function looks ogly
 (defun blogit--format-to-s-format (str)
   "Unelegant way to convert blogit file fotmat to s-format."
