@@ -107,7 +107,8 @@ many useful context is predefined here, but you can overwrite it.
   :translate-alist
   '((keyword . org-blogit-html-keyword)
     (link . org-blogit-html-link)
-    (template     . org-blogit-template)))
+    (template     . org-blogit-template)
+    (special-block . org-blogit-special-block)))
 
 (defun blogit--check-post-file (file)
   "If file is valid blogit post, return t, else nil."
@@ -139,6 +140,42 @@ many useful context is predefined here, but you can overwrite it.
       ;; all blogit valid post must contains #+DATE option.
       (format "%s%s" (blogit--build-export-dir nil)
               (blogit--get-post-filename nil file)))))
+
+;;;; Special Block
+
+(defun org-blogit-special-block (special-block contents info)
+  "Transcode a SPECIAL-BLOCK element from Org to HTML.
+CONTENTS holds the contents of the block.  INFO is a plist
+holding contextual information."
+  (let ((block-type (upcase
+		      (org-element-property :type special-block))))
+    (cond
+     ((string= block-type "BLOGIT") (blogit--html-special-block special-block contents info))
+     (t (org-html-special-block special-block contents info)))))
+
+(defun blogit--html-special-block (special-block contents info)
+  "Transcode a SPECIAL-BLOCK element from Org to HTML.
+CONTENTS holds the contents of the block.  INFO is a plist
+holding contextual information."
+  (let* ((block-type (downcase
+		      (org-element-property :type special-block)))
+	 (contents (or contents ""))
+	 (html5-fancy (and (org-html-html5-p info)
+			   (plist-get info :html-html5-fancy)
+			   (member block-type org-html-html5-elements)))
+	 (attributes (org-export-read-attribute :attr_html special-block)))
+    (unless html5-fancy
+      (let ((class (plist-get attributes :class)))
+	(setq attributes (plist-put attributes :class
+				    (if class (concat class " " block-type)
+				      block-type)))))
+    (setq attributes (org-html--make-attribute-string attributes))
+    (when (not (equal attributes ""))
+      (setq attributes (concat " " attributes)))
+    (if html5-fancy
+	(format "<%s%s>\n%s</%s>" block-type attributes
+		contents block-type)
+      (format "<div%s>\n%s\n</div>" attributes contents))))
 
 ;;;; Keyword
 
