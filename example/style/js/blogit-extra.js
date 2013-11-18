@@ -6,9 +6,9 @@ function colorShellPrompt () {
     var block = document.getElementsByClassName('example');
     for(var i = 0, l = block.length; i < l; i++) {
         // highlight `user@hostname $'
-        block[i].innerHTML = block[i].innerHTML.replace(/^(\w*@\w*)\s*([:](.+)\/([^/]+)[$])/, userHighlight);
+        block[i].innerHTML = block[i].innerHTML.replace(/^(\w*@\w*)\s*([:~](.+)\/([^/]+)[$])/, userHighlight);
         // highlight `root@hostname #'
-        block[i].innerHTML = block[i].innerHTML.replace(/^(root@\w*)\s*([:](.+)\/([^/]+)[#])/, rootHighlight);
+        block[i].innerHTML = block[i].innerHTML.replace(/^(root@\w*)\s*([:~](.+)\/([^/]+)[#])/, rootHighlight);
         // highlight `hostname #'
         block[i].innerHTML = block[i].innerHTML.replace(/^(\w*)\s*([:](.+)\/([^/]+)[#])/, rootHighlight);
         // highlight `hostname directory #' (Gentoo Linux root)
