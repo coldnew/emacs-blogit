@@ -11,6 +11,8 @@ function colorShellPrompt () {
         block[i].innerHTML = block[i].innerHTML.replace(/^(root@\w*)\s*([:](.+)\/([^/]+)[#])/, rootHighlight);
         // highlight `hostname #'
         block[i].innerHTML = block[i].innerHTML.replace(/^(\w*)\s*([:](.+)\/([^/]+)[#])/, rootHighlight);
+        // highlight `hostname directory #' (Gentoo Linux root)
+        block[i].innerHTML = block[i].innerHTML.replace(/^(\w*)(\s*\w* [#])/, rootHighlight);
     }
 }
 
