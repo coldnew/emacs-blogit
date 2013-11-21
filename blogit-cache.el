@@ -128,8 +128,7 @@ Returns value on success, else nil."
                :type (blogit--get-post-type nil)
                :post-url (blogit--build-post-url nil filename)
                :post-url-relative (blogit--build-post-url-relative nil filename)
-               :atom (blogit--build-feed-content nil filename)
-               :rss  (blogit--build-feed-content nil filename)
+               :feed (blogit--build-feed-content nil filename)
                )))))
 
       ;; update fileinfo cache

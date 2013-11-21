@@ -181,7 +181,7 @@
              (ht
               ("TITLE"    (plist-get (blogit-cache-get (cdr it))  :title))
               ("POST_URL" (plist-get (blogit-cache-get (cdr it)) :post-url))
-              ("CONTENT" (plist-get (blogit-cache-get (cdr it)) f))
+              ("CONTENT" (plist-get (blogit-cache-get (cdr it)) :feed))
               ("DATE" (plist-get (blogit-cache-get (cdr it)) :date))
               ("POST_LINK" (plist-get (blogit-cache-get (cdr it)) :post-link)))
              cache-val))))
