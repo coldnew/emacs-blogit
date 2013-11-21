@@ -173,14 +173,9 @@ tags repeat times."
 
     (blogit-cache-set cache cache-val)))
 
-;; TODO:
-;; In traditional way, a `static' page should not be log into rss
-;; feed, we also prevent add static page in our feed, but what if user
-;; want this feature ?
-
 (defun blogit-update-recents-cache (info filename)
   "Build recents post cache, post are store in `anti-chronologically' order.
-This cache will be used to build rss and recent post."
+This cache will be used to build rss and recent blog post."
   (flet ((anti-chronologically
           (a b)
           (let* ((adate (org-time-string-to-time (car a)))
