@@ -2,8 +2,9 @@
 @import "../bootstrap/less/responsive-utilities.less";
 
 @import "fonts.less";
+@import "bootstrap2.less";
 
-@link-color: #933;
+// @link-color: #933;
 
 @base-font-size: 18px;
 @base-line-height: @base-font-size * (18/13);
@@ -19,12 +20,6 @@
 .text-center() { text-align: center; }
 .text-right()  { text-align: right;  }
 
-// NOTE:
-// since bootstrap 3 dropped the .label-inverse , we add on our own
-.label-inverse             { background-color: @gray-dark; }
-.label-inverse:hover       { background-color: darken(@gray-dark, 10%); }
-
-
 body {
     width:100%;
     margin: 0 auto;
@@ -36,19 +31,15 @@ h1, h2, h3, h4, h5, h6 {
     font-family: "Yanone Kaffeesatz", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-
-
-
 // Make img response by bootstrap
 img {
     &:extend(.img-responsive);
     margin: 0 auto;
 }
 
-
 // FIXME: tmp add here, this derived from org-html
 .center {
     margin-left:auto;
-   margin-right:auto;
+    margin-right:auto;
     text-align:center;
 }

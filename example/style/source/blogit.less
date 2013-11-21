@@ -2,33 +2,7 @@
 @import "navigator.less";
 @import "toc.less";
 
-h2, h3, h4, h5, h6 {
-    border-bottom: 2px LightGrey solid;
-    line-height: @base-line-height;
-}
-
-h2 {
-    margin-bottom: 20px;
-    padding: 5px;
-    width: 90%;
-    color: DarkGreen;
-}
-
-h3 {
-    margin-top: 40px;
-    margin-bottom: 15px;
-    border-bottom: 1px LightGrey solid;
-    width: 80%;
-    color: DarkBlue;
-}
-
-h4 {
-    margin-top: 40px;
-    margin-bottom: 10px;
-    border-bottom: 1px LightGrey solid;
-    width: 80%;
-    color: DarkBlue;
-}
+@import "blog.less";
 
 // FIXME: port more from o-blog
 pre.src, pre.example, .modal-body > pre {
@@ -39,84 +13,24 @@ pre.src, pre.example, .modal-body > pre {
     color: @blog-foreground;
 }
 
-a {
-    text-decoration: none;
-    padding: 1px;
-    color: @link-color;
-}
+// a {
+//     text-decoration: none;
+//     padding: 1px;
+//     color: @link-color;
+// }
 
 #footer {
-    min-height: 50px;
-    margin-top: 30px;
-    text-align: center;
-}
-#footer ul{
-    list-style: none;
-}
-#footer li {
-    float: center;
-    display: inline-block;
-    vertical-align: baseline;
-    padding: 0px 0px 0px 0.3em;
-    margin: 0px 0px 0px 0.6em;
-}
-
-#post-footer {
-
-    ul {
-        list-style: none;
-    }
-
-}
-
-.post-header {
-    .date {
-        border: 1px solid @gray-light;
-        display: inline-block;
-        width: 4em;             // FIXME: use 3em here
-        .text-center();
-        a {
-            display: block;
-            color: fade(@link-color, 50%);
-        }
-        .date-d {
-            font-size: 1.5em;
-        }
-        .date-m {
-            text-transform: uppercase;
-            font-size: 1em;
-            font-weight: bolder;
-        }
-        .date-y {
-            background: @gray-light;
-            font-size: 1em;
-            font-weight: bolder;
-        }
-    }
-}
-
-
-.post-footer {
-    background: lighten(#f5f5f5, 1%);
-
-    h1 {
-        font-size: 1.0em;
-        margin: 0;
-    }
-    .tag-cloud ul {
-        margin-bottom: 0;
-        li {
-            display: inline;
-            padding-right: 0.5em;
-            margin-left: 0.5em;
-            font-size: 0.80 * @base-font-size / (18/13);
-            line-height: 0.92 * @base-line-height / (18/13);
-            a {
-                color: lighten(#f5f5f5, 1%);
-            }
-            a:hover {
-                zoom: 1;
-            }
-        }
-    }
+     min-height: 50px;
+     margin-top: 30px;
+     text-align: center;
+     ul {
+	 list-style: none;
+     }
+     li {
+	 float: center;
+	 display: inline-block;
+	 vertical-align: baseline;
+	 padding: 0px 0px 0px 0.3em;
+	 margin: 0px 0px 0px 0.6em;
+     }
 }

@@ -68,24 +68,24 @@
         :template-list blogit-template-list
         :publishing-function org-blogit-publish-to-html
 
-	;; Rss support
+        ;; Rss support
         :export-rss t
         :export-rss-number 10
         :rss-filename "rss.xml"
-;;        :rss-filepath "" ;; TODO:
+        ;;        :rss-filepath "" ;; TODO:
 
-	;; Atom support
+        ;; Atom support
         :export-atom t
         :export-atom-number 10
         :atom-filename "atom.xml"
-;;        :atom-filepath "" ;; TODO:
+        ;;        :atom-filepath "" ;; TODO:
 
         :export-recents-post t          ; TODO:
         :export-recents-number 10
 
-	;; hooks
-	:before-publish-hook nil
-	:after-publish-hook nil
+        ;; hooks
+        :before-publish-hook nil
+        :after-publish-hook nil
 
         ;; Advanced options for customize blogit
         ;; some will be set by `blogit-initialize-project'
@@ -165,7 +165,8 @@ Some option you may set to make blog more complete:
   (list
    :draft  '(:type draft)
    :blog   '(:type blog   :root "blog" :filepath "%y/%m"  :filename "%d_%s.html")
-   :static '(:type static :root ""     :filepath ""       :filename "%s.html"))
+   :static '(:type static :root ""     :filepath ""       :filename "%s.html")
+   :note   '(:type note   :root "note" :filepath ""       :filename "%s.html"))
   "Output dir formate for blogit, use `(blogit-project-info :publishing-directory)' as root when
 this value is empty string.
 
@@ -196,6 +197,9 @@ Currently blogit only support following format:
    :atom               "atom.xml"
    :newpost            "newpost.org"
 
+   ;; TODO: new template
+   :note_post          "note_post.html"
+
    ;; combine other templates
    :blog_post          "blog_post.html"
    :static_post        "static_post.html"
@@ -222,6 +226,15 @@ Currently blogit only support following format:
 (defvar blogit-cache nil
   "Cache to store post info, this cache will be used to
 generate rss and tage.")
+
+
+(defvar a '(
+            :type-draft nil
+                        :type-note nil
+                        :type-blog nil
+                        :type-static nil
+                        :oo
+                        ))
 
 
 (provide 'blogit-vars)

@@ -259,6 +259,7 @@ When filename is specified, open the file and get it's post type."
        ((eq type 'blog) 'blog)
        ((eq type 'static) 'static)
        ((eq type 'draft)  'draft)
+       ((eq type 'note)  'note)
        (t (blogit-project-info :blogit-default-type))))))
 
 (defun blogit--get-post-template (info &optional filename)
@@ -368,45 +369,45 @@ when parsing a template."
   (save-excursion
     (save-restriction
       (save-match-data
-	;; needed for thing-at-point
-	(html-mode)
-	(beginning-of-buffer)
-	(let ((open-tag "<lisp>\\|{lisp}\\|\\[lisp\\]")
-	      (close-tag "</lisp>\\|{/lisp}\\|\\[/lisp\\]")
-	      beg end sexp)
-	  (while (search-forward-regexp open-tag nil t)
-	    (setq beg (- (point) (length  (match-string 0))))
-	    (when (search-forward-regexp close-tag nil t)
-	      (setq end (point))
-	      (backward-char (length (match-string 0)))
-	      (backward-sexp)
-	      (setq sexp (substring-no-properties (thing-at-point 'sexp)))
-	      (narrow-to-region beg end)
-	      (delete-region (point-min) (point-max))
-	      (insert
-	       (save-match-data
-		 (condition-case err
-		     (let ((object (eval (read sexp))))
-		       (cond
-			;; result is a string
-			((stringp object) object)
-			;; a list
-			((and (listp object)
-			      (not (eq object nil)))
-			 (let ((string (pp-to-string object)))
-			   (substring string 0 (1- (length string)))))
-			;; a number
-			((numberp object)
-			 (number-to-string object))
-			;; nil
-			((eq object nil) "")
-			;; otherwise
-			(t (pp-to-string object))))
-		   ;; error handler
-		   (error
-		    (format "Lisp error in %s: %s" (buffer-file-name) err)))))
-	      (goto-char (point-min))
-	      (widen))))))))
+        ;; needed for thing-at-point
+        (html-mode)
+        (beginning-of-buffer)
+        (let ((open-tag "<lisp>\\|{lisp}\\|\\[lisp\\]")
+              (close-tag "</lisp>\\|{/lisp}\\|\\[/lisp\\]")
+              beg end sexp)
+          (while (search-forward-regexp open-tag nil t)
+            (setq beg (- (point) (length  (match-string 0))))
+            (when (search-forward-regexp close-tag nil t)
+              (setq end (point))
+              (backward-char (length (match-string 0)))
+              (backward-sexp)
+              (setq sexp (substring-no-properties (thing-at-point 'sexp)))
+              (narrow-to-region beg end)
+              (delete-region (point-min) (point-max))
+              (insert
+               (save-match-data
+                 (condition-case err
+                     (let ((object (eval (read sexp))))
+                       (cond
+                        ;; result is a string
+                        ((stringp object) object)
+                        ;; a list
+                        ((and (listp object)
+                              (not (eq object nil)))
+                         (let ((string (pp-to-string object)))
+                           (substring string 0 (1- (length string)))))
+                        ;; a number
+                        ((numberp object)
+                         (number-to-string object))
+                        ;; nil
+                        ((eq object nil) "")
+                        ;; otherwise
+                        (t (pp-to-string object))))
+                   ;; error handler
+                   (error
+                    (format "Lisp error in %s: %s" (buffer-file-name) err)))))
+              (goto-char (point-min))
+              (widen))))))))
 
 (defun blogit--sanitize-string (s &optional length)
   "Sanitize string S by:
@@ -738,11 +739,11 @@ many useful context is predefined here, but you can overwrite it.
 
 (defun blogit--render-qrcode-template (info)
   (blogit--render-template :plugin_qrcode
-			   (ht ("POST_URL_HEXIFY" (url-hexify-string (blogit--build-post-url info))))))
+                           (ht ("POST_URL_HEXIFY" (url-hexify-string (blogit--build-post-url info))))))
 
 (defun blogit--render-fancybox-template (info)
   (blogit--render-template :plugin_fancybox
-			   (ht ("ROOT" (blogit--path-to-root (blogit--build-export-dir info))))))
+                           (ht ("ROOT" (blogit--path-to-root (blogit--build-export-dir info))))))
 
 
 (provide 'blogit-core)
