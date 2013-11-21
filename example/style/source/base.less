@@ -2,9 +2,8 @@
 @import "../bootstrap/less/responsive-utilities.less";
 
 @import "fonts.less";
-@import "bootstrap2.less";
 
-// @link-color: #933;
+@link-color: #933;
 
 @base-font-size: 18px;
 @base-line-height: @base-font-size * (18/13);
@@ -43,3 +42,9 @@ img {
     margin-right:auto;
     text-align:center;
 }
+
+
+// label-inverse
+// since bootstrap 3 dropped the .label-inverse , we add on our own
+.label-inverse             { background-color: @gray-dark; }
+.label-inverse:hover       { background-color: darken(@gray-dark, 10%); }

@@ -3,28 +3,25 @@
   {{{PAGE_HEADER}}}
   <body>
 
-    <div class="container">
-      <div class="row">
-        <div class="col-md-3">
-          <div id="toc"> </div>
-        </div>
+    <div class="col-md-3">
+      <div id="toc"> </div>
+    </div>
+    <div class="col-md-8">
+      {{{CONTENT}}}
 
-        <div class="col-md-8 col-md-offset-1">
-          {{{CONTENT}}}
+      {{{PLUGIN_DISQUS}}}
+      {{{PAGE_FOOTER}}}
+    </div>
 
-          {{{PLUGIN_DISQUS}}}
-          {{{PAGE_FOOTER}}}
-        </div>
-
-      </div> <!-- row -->
-    </div> <!-- container -->
 
     <!-- Extra javscript and css for note_post.html -->
 
     <!-- tocify -->
     <script src="{{{ROOT}}}/style/js/jquery-ui-1.10.3.custom.min.js " type="text/javascript"></script>
-    <link href="{{{ROOT}}}/style/js/jquery-tocify/jquery.tocify.css"  rel="stylesheet" type="text/css" />
     <script src="{{{ROOT}}}/style/js/jquery-tocify/jquery.tocify.min.js" type="text/javascript"></script>
+
+    <!-- jquery.tocify.css is merged into blogit.less -->
+    <!-- <link href="{{{ROOT}}}/style/js/jquery-tocify/jquery.tocify.css"  rel="stylesheet" type="text/css" /> -->
 
     <script type="text/javascript">
       $(document).ready(function () {
@@ -32,6 +29,17 @@
           $("#toc").tocify({selectors: "h2, h3, h4"}).data("toc-tocify");
       });
     </script>
-
+    <style type="text/css">
+      body {
+          padding-top: 20px;
+      }
+      @media (max-width: 767px) {
+          #toc {
+              position: relative;
+              width: 100%;
+              margin: 0px 0px 20px 0px;
+          }
+      }
+    </style>
   </body>
 </html>
