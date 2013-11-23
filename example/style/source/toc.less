@@ -1,0 +1,60 @@
+
+#table-of-contents {
+    position: fixed;
+    display: block;
+    right: 0;
+    background: #FFF;
+    top: 0em;
+    padding: 10px 20px 10px 10px;
+    margin-top: @base-line-height * 2;
+
+    float: right;
+    outline: none;
+    font-size: 20px;
+    font-weight: bold;
+    display: block;
+    max-width: 50%;
+    border: ;
+
+    -webkit-box-shadow: 0 0 1em #777777;
+    -moz-box-shadow: 0 0 1em #777777;
+    -webkit-border-bottom-left-radius: 5px;
+    -moz-border-radius-bottomleft: 5px;
+
+    /* ensure doesn't flow off the screen when expanded */
+    max-height: 80%;
+    overflow: auto;
+
+    h2 {
+        background: transparent url(/style/icons/arrow.png) no-repeat 0 0;
+        height: 64px;
+        width: 64px;
+        margin: 0;
+        padding: 0;
+        display: block;
+        content: " ";
+        text-indent: -9999px;
+        right: 2em;
+        border-bottom: 0px;
+    }
+
+    &:hover {
+	h2 {
+	    display: none;
+	}
+
+	border: 1px solid #CCC;
+    }
+    #text-table-of-contents {
+        display: none;
+        text-align: left;
+    }
+
+    &:hover {
+        #text-table-of-contents {
+            display: block;
+            padding: 0.5em;
+	    font-size: 10pt;
+        }
+    }
+}
