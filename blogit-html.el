@@ -232,10 +232,14 @@ In this function, we also add link file"
         (if (file-name-absolute-p raw-path)
             (setq html-link (s-replace (concat link-prefix "file://") link-prefix html-link)))
 
+	;; Convert raw-path to it's true name file
+	(setq raw-path (file-truename raw-path))
+
         ;; Since some of raw-path use absolute dir, some use relative
         ;; dir (like image), we make all raw-path to use relative path
         ;; here if it is at the same dir as post.
-        (setq raw-path (s-replace (file-name-directory (or blogit-current-file (buffer-file-name))) "" raw-path))
+        (setq raw-path (s-replace (file-name-directory
+				   (file-truename (or blogit-current-file (buffer-file-name)))) "" raw-path))
 
         ;; we also need to modify org-html-link to relative path
         ;; for our post
