@@ -7,6 +7,15 @@
       <div id="toc"> </div>
     </div>
     <div class="col-md-8">
+      <div class="blog-header">
+        <div class="well">
+          <div class="row">
+            <div class="col-md-2"> {{{PLUGIN_QRCODE}}} </div>
+            <h1 class="col-md-offset-1">{{{TITLE}}}</h1>
+          </div>
+        </div>
+      </div>
+
       {{{CONTENT}}}
 
       {{{PLUGIN_DISQUS}}}
@@ -25,8 +34,11 @@
 
     <script type="text/javascript">
       $(document).ready(function () {
-          // Calls the tocify method on your HTML div.
-          $("#toc").tocify({selectors: "h2, h3, h4"}).data("toc-tocify");
+          // Calls the tocify method on your HTML div and make it ignore org-mode's toc.
+          $("#toc").tocify({
+	      selectors: "h2, h3, h4",
+	      ignoreSelector: "#table-of-contents h2"
+	  }).data("toc-tocify");
       });
     </script>
     <style type="text/css">
