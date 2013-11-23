@@ -220,6 +220,9 @@ Currently blogit only support following format:
 (defvar blogit-current-project nil
   "Cache to store current project plist info.")
 
+(defvar blogit-tags-list nil
+  "Cache to store all need refresh tag list for tag page.")
+
 (defvar blogit-current-file nil
   "Cache to store current processing file path.")
 

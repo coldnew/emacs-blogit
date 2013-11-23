@@ -69,12 +69,21 @@
     (unless (file-exists-p (blogit-project-info :blogit-tags-directory))
       (make-directory (blogit-project-info :blogit-tags-directory) t))
 
+    ;; FIXME: we remove old generate tags method, since
+    ;; if we only publish one page, regenerate all tags page
+    ;; may waste lots of time, we only re-generate tag page according
+    ;; to `blogit-tags-list'
+
+    ;; After verify this function, following comments should be remove
+
     ;; create tag-list
-    (dolist (key cache-val)
-      (when (symbolp key) (add-to-list 'tag-list key)))
+    ;; (dolist (key cache-val)
+    ;;   (when (symbolp key) (add-to-list 'tag-list key)))
+    (setq tag-list (-flatten blogit-tags-list))
 
     (dolist (key tag-list)
-      (let* ((tag-sanitize (blogit--key-to-string key))
+      (let* (;;(tag-sanitize (blogit--key-to-string key))
+	     (tag-sanitize key)
              (tag-cache (format ":tags-%s:" tag-sanitize))
              (tag-cache-val (blogit-cache-get tag-cache)))
 
@@ -95,7 +104,9 @@
 
          ;; FIXME: add option to optimize this
          (blogit--remove-dulpicate-backslash
-          (concat (blogit-project-info :blogit-tags-directory) "/" tag-sanitize ".html")))))))
+          (concat (blogit-project-info :blogit-tags-directory) "/" tag-sanitize ".html")))))
+    ;; clear `blogit-tags-list'
+    (setq blogit-tags-list nil)))
 
 (defun blogit--compute-tag-font-size (length val tag_min tag_max)
   (let ((min 80.0) (max 220.0))

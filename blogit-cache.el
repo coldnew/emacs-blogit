@@ -150,6 +150,10 @@ tags repeat times."
          (cache ":tags:")
          (cache-val (blogit-cache-get cache)))
 
+    ;; Add tags list to `blogit-tags-list' to make publish tag page
+    ;; more quick.
+    (add-to-list 'blogit-tags-list tags-sanitize)
+
     (dolist (tag-list tags-list)
         ;; add filename to every `tags-name' cache that files has
         (let* ((tag-name (car tag-list))
