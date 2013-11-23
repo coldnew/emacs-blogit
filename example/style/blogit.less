@@ -6,6 +6,8 @@
 
 @import "source/tocify.less";
 
+@import "source/note.less";
+
 // FIXME: port more from o-blog
 pre.src, pre.example, .modal-body > pre {
     .resizable(both);
@@ -15,24 +17,20 @@ pre.src, pre.example, .modal-body > pre {
     color: @blog-foreground;
 }
 
-// a {
-//     text-decoration: none;
-//     padding: 1px;
-//     color: @link-color;
-// }
-
 #footer {
-     min-height: 50px;
-     margin-top: 30px;
-     text-align: center;
-     ul {
-	 list-style: none;
-     }
-     li {
-	 float: center;
-	 display: inline-block;
-	 vertical-align: baseline;
-	 padding: 0px 0px 0px 0.3em;
-	 margin: 0px 0px 0px 0.6em;
-     }
+    min-height: 50px;
+    margin-top: 30px;
+    text-align: center;
+    margin-bottom: 0;
+
+    ul {
+        list-style: none;
+    }
+    li {
+        float: center;
+        display: inline-block;
+        vertical-align: baseline;
+        padding: 0px 0px 0px 0.3em;
+        margin: 0px 0px 0px 0.6em;
+    }
 }
