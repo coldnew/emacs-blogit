@@ -4,7 +4,7 @@
     display: block;
     right: 0;
     background: #FFF;
-    top: 0em;
+    top: 40%;
     padding: 10px 20px 10px 10px;
     margin-top: @base-line-height * 2;
 
@@ -39,22 +39,21 @@
     }
 
     &:hover {
+	border: 1px solid #CCC;
+	top: 0em;
+	min-height: 50%;
+	z-index: 1;
 	h2 {
 	    display: none;
 	}
-
-	border: 1px solid #CCC;
+        #text-table-of-contents {
+            display: block;
+            padding: 0.5em;
+	    font-size: 11pt;
+        }
     }
     #text-table-of-contents {
         display: none;
         text-align: left;
-    }
-
-    &:hover {
-        #text-table-of-contents {
-            display: block;
-            padding: 0.5em;
-	    font-size: 10pt;
-        }
     }
 }
