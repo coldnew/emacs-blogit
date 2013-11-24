@@ -143,6 +143,7 @@ Returns value on success, else nil."
       ;; update type cache, this will help to build index
       (blogit-update-type-cache info filename))))
 
+;; TODO: Add option to make post not add to cache
 (defun blogit-update-type-cache (info filename)
   "Build type cache, this cache will be used to create index or archives."
   (let* ((cache ":type:")
