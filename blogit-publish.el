@@ -369,6 +369,7 @@ list in `blogit-project-alist', do not prompt."
          ;; NOTE: we will initial cache again at
          ;; `blogit--publish-blog'. This will help us to prevent cache
          ;; mismatch to current project.
+	 (setq blogit-cache nil)
          (blogit-initialize-cache)
          (funcall func current-project))
        (org-publish-expand-projects (car project-list))))))
