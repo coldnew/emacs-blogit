@@ -211,6 +211,7 @@ This cache will be used to build rss and recent blog post."
            (cache ":recents:")
            (cache-val (blogit-cache-get cache)))
 
+      ;; Only add blog type to recent post
       (when (eq type 'blog)
 
         ;; add current file info to cache and sort by date
