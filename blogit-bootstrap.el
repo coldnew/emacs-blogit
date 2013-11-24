@@ -5,7 +5,7 @@
 ;; Author: coldnew <coldnew.tw@gmail.com>
 ;; Keywords: html blog org-mode
 ;; X-URL: http://github.com/coldnew/emacs-blogit
-;; Version: 0.2
+;; Version: 0.3
 
 ;; This file is not part of GNU Emacs.
 
