@@ -25,6 +25,13 @@
 }
 
 .blog-content {
+    @outlineShift: 2em;
+    .outline-1 { margin-left: 0 * @outlineShift; }
+    .outline-2 { margin-left: 0 * @outlineShift; }
+    .outline-3 { margin-left: 1 * @outlineShift; }
+    .outline-4 { margin-left: 2 * @outlineShift; }
+    .outline-5 { margin-left: 3 * @outlineShift; }
+    .outline-6 { margin-left: 4 * @outlineShift; }
 
     h2, h3, h4, h5, h6 {
         border-bottom: 2px LightGrey solid;
@@ -32,10 +39,13 @@
     }
 
     h2 {
-        margin-bottom: 20px;
-        padding: 5px;
-        width: 90%;
-        color: DarkGreen;
+	font-size: @base-font-size * 1.40;
+	line-height:16px;
+	padding:10px 0 10px 0;
+	border-bottom: 1px solid #ddd;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        margin-bottom: 15px;
+	color: black;
     }
 
     h3 {
