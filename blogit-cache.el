@@ -221,7 +221,8 @@ This cache will be used to build rss and recent blog post."
 
         ;; we only take what we need in recents cache
         (setq cache-val (-take
-                         (max (blogit-project-info :export-rss-number) (blogit-project-info :export-recents-number))
+                         (max (blogit-project-info :export-rss-number)
+			      (blogit-project-info :export-recents-number))
                          cache-val))
 
         (blogit-cache-set cache cache-val)))))
