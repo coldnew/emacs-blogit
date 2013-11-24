@@ -95,12 +95,3 @@
 
 (provide 'blogit)
 ;;; blogit.el ends here.
-
-;; FIXME:
-;; 1. if post does not conatin #+DATE:, we need to add it automatically
-;; 2. make template more useful
-
-;; TODO:
-;; 1. how about make user can publish many bligit project ?
-;; 2. make some link be relative, it will more easy to debug offline
-;; 3. add blogit-rename-post
