@@ -234,14 +234,5 @@ Currently blogit only support following format:
 generate rss and tage.")
 
 
-(defvar a '(
-            :type-draft nil
-                        :type-note nil
-                        :type-blog nil
-                        :type-static nil
-                        :oo
-                        ))
-
-
 (provide 'blogit-vars)
 ;;; blogit-vars.el ends here.
