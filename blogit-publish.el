@@ -300,6 +300,7 @@ This function is rewrite from `org-publish-org-to'."
                     ,(cons 'org-publish-collect-numbering
                            (cons 'org-publish-collect-index
                                  (plist-get plist :filter-final-output))))))
+	       ;; FIXME: copy file behavor error
                ;; copy all needed file for output-file
                (blogit-publish-linked-file output-file)))
       ;; Remove opened buffer in the process.
