@@ -198,6 +198,9 @@ Currently blogit only support following format:
    :newpost            "newpost.org"
 
    ;; TODO: new template
+   :debug              "debug.html"
+   :index              "static_post.html"
+
    :note_post          "note_post.html"
 
    ;; combine other templates

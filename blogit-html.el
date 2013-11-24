@@ -95,7 +95,7 @@ many useful context is predefined here, but you can overwrite it.
     (:analytics         "ANALYTICS"         nil   nil   nil)
     (:disqus            "DISQUS"            nil   nil   nil)
     (:url               "URL"               nil   nil   nil)
-    (:type              "TYPE"              nil   nil   nil)
+    (:blogit_type       "BLOGIT_TYPE"       nil   nil   nil)
 
     ;; FIXME: maybe this can remove ?
     ;; disable org-html default style

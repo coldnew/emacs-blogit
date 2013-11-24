@@ -245,22 +245,20 @@ project list. Return nil when failed."
     (string= file-dir
              (file-name-directory (expand-file-name dir)))))
 
-;; FIXME: rewrite this function to make get type more easy
 (defun blogit--get-post-type (info &optional filename)
   "Get current post type, return `(blogit-project-info :blogit-default-type)' if not found.
 When filename is specified, open the file and get it's post type."
   (if filename
       (blogit--file-in-temp-buffer filename (blogit--get-post-type nil))
-    (let* ((typestr (blogit--parse-option info :type))
+    (let* ((typestr (blogit--parse-option info :blogit_type))
            (key (blogit--string-to-key typestr))
            (info (plist-get blogit-type-list key))
            (type (plist-get info :type)))
-      (cond
-       ((eq type 'blog) 'blog)
-       ((eq type 'static) 'static)
-       ((eq type 'draft)  'draft)
-       ((eq type 'note)  'note)
-       (t (blogit-project-info :blogit-default-type))))))
+
+      ;; If user specify type is in blogit-type-list, use it.
+      ;; else return default blogit type.
+      (if (member key blogit-type-list) type
+	(blogit-project-info :blogit-default-type)))))
 
 (defun blogit--get-post-template (info &optional filename)
   "Get post template in `key' format, all key ends with `_post'. ex: :blog_post"
