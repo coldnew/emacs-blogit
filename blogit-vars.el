@@ -201,6 +201,12 @@ Currently blogit only support following format:
    :debug              "debug.html"
    :index              "static_post.html"
 
+   ;; TODO: o-blog has blog_index_month, blog_index_year
+   ;; how about create generic index to rule them all ?
+   :index_month        "index_month.html"
+   :index_year         "index_year.html"
+   :index_post         "index_post.html"
+
    :note_post          "note_post.html"
 
    ;; combine other templates
