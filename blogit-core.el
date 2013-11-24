@@ -363,7 +363,8 @@ If template contains <lisp> ... </lisp>, evalute this block like o-blog does."
   (let* ((filename (plist-get blogit-template-list key))
 	 (keystr (blogit--key-to-string key))
 	 (keypost (blogit--string-to-key (format "%s_post" keystr)))
-	 (filename1 (plist-get blogit-template-list keypost)))
+	 (filename1 (plist-get blogit-template-list keypost))
+	 fullfile)
 
     ;; Check if key is exist in `blogit-template-list', if not
     ;; take it as real file
@@ -372,9 +373,15 @@ If template contains <lisp> ... </lisp>, evalute this block like o-blog does."
       (if filename1 (setq filename filename1)
 	(setq filename keystr)))
 
-    (convert-standard-filename
-     (blogit--remove-dulpicate-backslash
-      (concat (blogit-project-info :blogit-template-directory) "/" filename)))))
+    ;; find file, if file is exist, take it as absolute file,
+    ;; else think it under :blogit-template-directory
+    (setq fullfile
+	  (if (file-exists-p filename)
+	      (expand-file-name filename)
+	      (concat (blogit-project-info :blogit-template-directory) "/" filename)))
+
+    ;; Convert file to standart filename
+    (convert-standard-filename (blogit--remove-dulpicate-backslash fullfile))))
 
 (defun blogit--eval-lisp()
   "Eval embeded lisp code defined by <lisp> tags in html fragment
