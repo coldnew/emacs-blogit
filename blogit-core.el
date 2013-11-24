@@ -258,12 +258,16 @@ When filename is specified, open the file and get it's post type."
       ;; If user specify type is in blogit-type-list, use it.
       ;; else return default blogit type.
       (if (member key blogit-type-list) type
-	(blogit-project-info :blogit-default-type)))))
+        (blogit-project-info :blogit-default-type)))))
 
 (defun blogit--get-post-template (info &optional filename)
-  "Get post template in `key' format, all key ends with `_post'. ex: :blog_post"
-  (blogit--string-to-key
-   (format "%s_post" (blogit--get-post-type info filename))))
+  "If user specify `BLOGIT_TEMPLATE', use template directly, else
+Get post template in `key' format, all key ends with `_post'. ex: :blog_post"
+  (let ((template (blogit--parse-option info :blogit_template)))
+	(blogit--string-to-key
+	 (if template template
+	     ;; If no template specify, use `type_post' as template
+	     (format "%s_post" (blogit--get-post-type info filename))))))
 
 ;; FIXME: This function looks ogly
 (defun blogit--format-to-s-format (str)
@@ -356,10 +360,21 @@ If template contains <lisp> ... </lisp>, evalute this block like o-blog does."
 
 (defun blogit--template-fullfile (key)
   "Get match template filename with fullpath according to key."
-  (convert-standard-filename
-   (blogit--remove-dulpicate-backslash
-    (concat (blogit-project-info :blogit-template-directory) "/"
-            (plist-get blogit-template-list key)))))
+  (let* ((filename (plist-get blogit-template-list key))
+	 (keystr (blogit--key-to-string key))
+	 (keypost (blogit--string-to-key (format "%s_post" keystr)))
+	 (filename1 (plist-get blogit-template-list keypost)))
+
+    ;; Check if key is exist in `blogit-template-list', if not
+    ;; take it as real file
+    (when (not filename)
+      ;; If template in key_post format exist
+      (if filename1 (setq filename filename1)
+	(setq filename keystr)))
+
+    (convert-standard-filename
+     (blogit--remove-dulpicate-backslash
+      (concat (blogit-project-info :blogit-template-directory) "/" filename)))))
 
 (defun blogit--eval-lisp()
   "Eval embeded lisp code defined by <lisp> tags in html fragment
