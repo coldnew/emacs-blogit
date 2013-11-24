@@ -548,18 +548,19 @@ This function is used to create directory for new blog post.
 (defun blogit--build-post-file-directory (info &optional filename)
   (file-name-base (blogit--get-post-filename info filename)))
 
-;; TODO: move this to blogit-html.el ?
 (defun blogit--build-feed-content (info &optional filename)
-  ;; FIXME: fix file
-  (replace-regexp-in-string
-   (concat "<img src=\"" (blogit--build-post-file-directory info filename))
-   (concat "<img src=\"" (file-name-directory (blogit--build-post-url info filename))
-           (blogit--build-post-file-directory info filename))
-   (blogit--file-in-temp-buffer
-    filename
-    (blogit--modify-option "OPTIONS"
-                           (concat (or (blogit--parse-option nil :options) "") " toc:nil"))
-    (org-export-as 'blogit-html nil nil t nil))))
+  (let ((contex (blogit--file-in-temp-buffer
+		 filename
+		 (blogit--modify-option "OPTIONS"
+					(concat (or (blogit--parse-option nil :options) "") " toc:nil"))
+		 (org-export-as 'blogit-html nil nil t nil))))
+    (if contex
+	(replace-regexp-in-string
+	 (concat "<img src=\"" (blogit--build-post-file-directory info filename))
+	 (concat "<img src=\"" (file-name-directory (blogit--build-post-url info filename))
+		 (blogit--build-post-file-directory info filename))
+	 contex)
+	contex)))
 
 ;; FIXME: what about ./ ?
 (defun blogit--path-to-root (path)
