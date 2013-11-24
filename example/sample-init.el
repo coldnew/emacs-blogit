@@ -23,9 +23,9 @@
         (output-style-dir
          (concat output-dir "/" (blogit-project-info :style-directory-name)))
         (input-file
-         (concat output-style-dir "/source/blogit.less"))
+         (concat output-style-dir "/blogit.less"))
         (output-file
-         (concat output-style-dir "/source/blogit.css"))
+         (concat output-style-dir "/blogit.css"))
         (lessc
          (concat output-style-dir "/less.js/bin/lessc")))
 
