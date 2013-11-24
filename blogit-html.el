@@ -97,12 +97,6 @@ many useful context is predefined here, but you can overwrite it.
     (:url               "URL"               nil   nil   nil)
     (:blogit_type       "BLOGIT_TYPE"       nil   nil   nil)
     (:blogit_template   "BLOGIT_TEMPLATE"   nil   nil   nil)
-
-    ;; FIXME: maybe this can remove ?
-    ;; disable org-html default style
-    ;; WARNING: DO NOT edit folling since it may break blogit functions
-    ;;(:html-head-include-default-style nil "html-style" nil)
-    ;;(:html-head-include-scripts nil "html-scripts" nil)
     )
 
   :translate-alist
