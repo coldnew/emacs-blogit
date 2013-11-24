@@ -139,7 +139,24 @@ Returns value on success, else nil."
 
       ;; update recent post cache, this cache also for rss
       (blogit-update-recents-cache info filename)
-      )))
+
+      ;; update type cache, this will help to build index
+      (blogit-update-type-cache info filename))))
+
+(defun blogit-update-type-cache (info filename)
+  "Build type cache, this cache will be used to create index or archives."
+  (let* ((cache ":type:")
+	 (cache-val (blogit-cache-get cache))
+	 (type (plist-get info :type))
+	 (key (blogit--symbol-to-key type))
+	 (type-val (plist-get cache-val key)))
+
+    ;; Add current file info to type cache
+    (add-to-list 'type-val filename)
+    (setq cache-val (plist-put cache-val key type-val))
+
+    ;; Write to cache
+    (blogit-cache-set cache cache-val)))
 
 (defun blogit-update-tags-cache (info filename)
   "Build tags info for all files, this function will also count every
