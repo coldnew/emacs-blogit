@@ -18,6 +18,6 @@ CSS=$(curl -H "${UA}" ${FONT_URL})
 
 echo "${CSS}" | sed -n "s#.*local('\([^']\+\)'), url('\([^']\+\)').*#curl -o ${FONT_DIR}/\1.woff \2#p" | sh -
 
-echo "${CSS}" | sed  "s#\(.*\)local('\([^']\+\)'), url('\([^']\+\)')\(.*\)#\1local('\2'), url('../font/\2.woff')\4#"  > "${FONT_DIR}/font-${LESS_FILE}.less"
+echo "${CSS}" | sed  "s#\(.*\)local('\([^']\+\)'), url('\([^']\+\)')\(.*\)#\1local('\2'), url('/style/font/\2.woff')\4#"  > "${FONT_DIR}/font-${LESS_FILE}.less"
 
 echo "You should add '@import \"../font/fonts-${LESS_FILE}.less\";' to style/source/fonts.less"
