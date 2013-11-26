@@ -95,3 +95,5 @@
 
 (provide 'blogit)
 ;;; blogit.el ends here.
+
+;; TODO: add more user friendly commands
