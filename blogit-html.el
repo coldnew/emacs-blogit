@@ -197,6 +197,7 @@ In this function, we also add link file"
          (encode-path (expand-file-name (org-link-unescape raw-path)))
          (html-link (org-html-link link desc info))
          (file-dir (file-name-base (blogit--get-post-filename info)))
+	 (root-dir (blogit--path-to-root (blogit--get-post-filename info)))
          (link-prefix "<a href=\"")
          new-path file-to-cache)
     ;; file
@@ -210,7 +211,8 @@ In this function, we also add link file"
         ;; is a blogit post ?
         (if (blogit--check-post-file encode-path)
             ;; if file is really blogit post, get it url
-            (setq new-path (blogit--calculate-post-relative-path encode-path))
+            (setq new-path (concat root-dir "/"
+				   (blogit--calculate-post-relative-path encode-path)))
           (setq file-to-cache raw-path)))
        (t (setq file-to-cache raw-path)))
       ;; add file to cache, we will use this cache to copy file
@@ -227,18 +229,20 @@ In this function, we also add link file"
         (if (file-name-absolute-p raw-path)
             (setq html-link (s-replace (concat link-prefix "file://") link-prefix html-link)))
 
-	;; Convert raw-path to it's true name file
-	(setq raw-path (file-truename raw-path))
+	;; To prevent replace original raw-path failed, we generate
+	;; raw-path-1 to store the file true name.
+	(setq raw-path-1 (file-truename raw-path))
 
         ;; Since some of raw-path use absolute dir, some use relative
         ;; dir (like image), we make all raw-path to use relative path
         ;; here if it is at the same dir as post.
-        (setq raw-path (s-replace (file-name-directory
-				   (file-truename (or blogit-current-file (buffer-file-name)))) "" raw-path))
+        (setq raw-path-1 (s-replace (file-name-directory
+				   (file-truename (or blogit-current-file (buffer-file-name)))) "" raw-path-1))
 
-        ;; we also need to modify org-html-link to relative path
-        ;; for our post
-        (setq html-link (s-replace (concat "=\"" raw-path) (concat "=\"" new-path) html-link))))
+        ;; we also need to modify org-html-link to relative path for our post
+        (setq html-link (s-replace (concat "=\"" raw-path) (concat "=\"" new-path) html-link))
+        (setq html-link (s-replace (concat "=\"" raw-path-1) (concat "=\"" new-path) html-link))))
+
     ;; done and done, now return our new-link
     html-link))
 

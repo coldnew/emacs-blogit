@@ -611,7 +611,7 @@ ex:
          (path-dir (file-name-directory epath))
          (rpath (s-replace (expand-file-name (blogit-project-info :publishing-directory)) "" path-dir)))
     (blogit--remove-dulpicate-backslash
-     (concat (blogit--path-to-root  path-dir) "/"  rpath filename))))
+     (concat (blogit--path-from-root  path-dir) "/" filename))))
 
 (defun blogit--parse-option (info key &optional filename)
   "Read option value of org file opened in current buffer.
