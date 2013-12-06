@@ -5,8 +5,10 @@ function colorShellPrompt () {
     var rootHighlight  = '<font color=\"crimson\">$1</font><font color=\"lightblue\">$2</font>';
     var block = document.getElementsByClassName('example');
     for(var i = 0, l = block.length; i < l; i++) {
-        // highlight `user@hostname $'
+        // highlight `user@hostname directory $'
         block[i].innerHTML = block[i].innerHTML.replace(/^(\w*@\w*)(\s*[:~](.+)\/([^/]+)[$])/, userHighlight);
+        // highlight `user@hostname ~ $'
+        block[i].innerHTML = block[i].innerHTML.replace(/^(\w*@\w*)(\s*[:~](.*)([^/]+)[$])/, userHighlight);
         // highlight `root@hostname #'
         block[i].innerHTML = block[i].innerHTML.replace(/^(root@\w*)(\s*[:~](.+)\/([^/]+)[#])/, rootHighlight);
         // highlight `hostname #'
