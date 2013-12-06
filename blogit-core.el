@@ -726,6 +726,7 @@ many useful context is predefined here, but you can overwrite it.
     ("DESCRIPTION" (or (blogit--parse-option ,info :description) ""))
     ("KEYWORDS" (or (blogit--parse-option ,info :keywords) ""))
     ("ROOT" (blogit--path-to-root (blogit--build-export-dir ,info)))
+    ("CHARSET" (or (blogit-project-info :charset) "utf-8"))
 
     ;; Extra blogit plugin
     ("PLUGIN_QRCODE" (or (blogit--render-qrcode-template ,info) ""))

@@ -49,6 +49,7 @@
         :base-extension "org"
 
         ;; extra options defined in blogit
+	:charset "utf-8"
         :default-language "en"
         :template-directory-name "templates"
         :style-directory-name    "style"
