@@ -7,7 +7,7 @@
       <div id="toc"></div>
     </div>
     <div class="col-md-8">
-      <div class="blog-header">
+      <div class="note-header">
         <div class="well">
           <div class="row">
             <div class="col-md-2"> {{{PLUGIN_QRCODE}}} </div>
@@ -15,13 +15,15 @@
           </div>
         </div>
       </div>
-
-      {{{CONTENT}}}
-
-      {{{PAGE_FOOTER}}}
+      <div class="note-content">
+        {{{CONTENT}}}
+      </div>
+      <div class="note-footer">
+	{{{PAGE_FOOTER}}}
+      </div>
     </div>
 
-    <div id="note-footer">
+    <div class="note-toc-footer">
       <a href="{{{BLOG_URL}}}"> Back to {{{BLOG_TITLE}}} </a>
     </div>
 
@@ -38,21 +40,21 @@
       $(document).ready(function () {
           // Calls the tocify method on your HTML div and make it ignore org-mode's toc.
           $("#toc").tocify({
-	      selectors: "h2, h3, h4",
-	      ignoreSelector: "#table-of-contents h2"
-	  }).data("toc-tocify");
+              selectors: "h2, h3, h4",
+              ignoreSelector: "#table-of-contents h2"
+          }).data("toc-tocify");
       });
     </script>
     <style type="text/css">
       body {
-          padding-top: 20px;
+      padding-top: 20px;
       }
       @media (max-width: 767px) {
-          #toc {
-              position: relative;
-              width: 100%;
-              margin: 0px 0px 20px 0px;
-          }
+      #toc {
+      position: relative;
+      width: 100%;
+      margin: 0px 0px 20px 0px;
+      }
       }
     </style>
   </body>
