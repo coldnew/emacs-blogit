@@ -103,7 +103,8 @@ many useful context is predefined here, but you can overwrite it.
   '((keyword . org-blogit-html-keyword)
     (link . org-blogit-html-link)
     (template     . org-blogit-template)
-    (special-block . org-blogit-special-block)))
+    (special-block . org-blogit-special-block)
+    (paragraph . org-blogit-html-paragraph)))
 
 (defun blogit--check-post-file (file)
   "If file is valid blogit post, return t, else nil."
@@ -171,6 +172,25 @@ holding contextual information."
 	(format "<%s%s>\n%s</%s>" block-type attributes
 		contents block-type)
       (format "<div%s>\n%s\n</div>" attributes contents))))
+
+;;;; Paragraph
+
+(defun org-blogit-html-paragraph (paragraph contents info)
+  "Transcode a PARAGRAPH element from Org to HTML.
+CONTENTS is the contents of the paragraph, as a string.  INFO is
+the plist used as a communication channel."
+  ;; Fix multibyte language like chinese will be automatically add
+  ;; some space since org-mode will transpose auto-fill-mode's space
+  ;; to newline char.
+  (let* ((fix-regexp "[[:multibyte:]]")
+	 (fix-contents
+	  (replace-regexp-in-string
+	   (concat
+	    "\\(" fix-regexp "\\) *\n *\\(" fix-regexp "\\)")
+	   "\\1\\2" contents)))
+
+    ;; Send modify data to org-html-paragraph
+    (org-html-paragraph paragraph fix-contents info)))
 
 ;;;; Keyword
 
