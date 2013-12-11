@@ -102,8 +102,8 @@ many useful context is predefined here, but you can overwrite it.
   :translate-alist
   '((keyword . org-blogit-html-keyword)
     (link . org-blogit-html-link)
-    (template     . org-blogit-template)
-    (special-block . org-blogit-special-block)
+    (template     . org-blogit-html-template)
+    (special-block . org-blogit-html-special-block)
     (paragraph . org-blogit-html-paragraph)))
 
 (defun blogit--check-post-file (file)
@@ -139,7 +139,7 @@ many useful context is predefined here, but you can overwrite it.
 
 ;;;; Special Block
 
-(defun org-blogit-special-block (special-block contents info)
+(defun org-blogit-html-special-block (special-block contents info)
   "Transcode a SPECIAL-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
@@ -264,7 +264,7 @@ In this function, we also add link file"
     ;; done and done, now return our new-link
     html-link))
 
-(defun org-blogit-template (contents info)
+(defun org-blogit-html-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
