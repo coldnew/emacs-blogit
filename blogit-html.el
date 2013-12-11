@@ -106,37 +106,6 @@ many useful context is predefined here, but you can overwrite it.
     (special-block . org-blogit-html-special-block)
     (paragraph . org-blogit-html-paragraph)))
 
-(defun blogit--check-post-file (file)
-  "If file is valid blogit post, return t, else nil."
-  (if (and (file-directory-p file) (file-exists-p file))
-      nil
-    (blogit--file-in-temp-buffer
-     file
-     ;; BLogit use following way to check if the post is valid
-     ;;
-     ;; 1. All blogit valid post must contains `DATE' option.
-     ;; 2. If post type is `draft', it's not valid
-     ;; 3. All blogit post must under `(blogit-project-info :base-directory)'.
-
-     ;; FIXME: This algorithm may porduce some problem ?
-     (if (and (blogit--parse-option nil :date)
-              (not (eq 'draft (blogit--get-post-type nil)))
-              (s-starts-with?
-               (directory-file-name (expand-file-name (concat (blogit-project-info :base-directory) "/")))
-               (file-name-directory (expand-file-name file))))
-
-         t nil))))
-
-(defun blogit--get-post-url (file)
-  "Get the post url from file."
-  (if (and (file-directory-p file) (file-exists-p file))
-      nil
-    (with-temp-buffer
-      (insert-file-contents file)
-      ;; all blogit valid post must contains #+DATE option.
-      (format "%s%s" (blogit--build-export-dir nil)
-              (blogit--get-post-filename nil file)))))
-
 ;;;; Special Block
 
 (defun org-blogit-html-special-block (special-block contents info)
