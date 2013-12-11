@@ -185,9 +185,7 @@ the plist used as a communication channel."
   (let* ((fix-regexp "[[:multibyte:]]")
 	 (fix-contents
 	  (replace-regexp-in-string
-	   (concat
-	    "\\(" fix-regexp "\\) *\n *\\(" fix-regexp "\\)")
-	   "\\1\\2" contents)))
+	   (concat "\\(" fix-regexp "\\) *\n *\\(" fix-regexp "\\)") "\\1\\2" contents)))
 
     ;; Send modify data to org-html-paragraph
     (org-html-paragraph paragraph fix-contents info)))
