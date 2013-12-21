@@ -4,10 +4,8 @@ function colorShellPrompt () {
 
     // prevent selectable in shell prompt
     function span (x) {
-//	var pre = '<span onmousedown=\"return false;\" onselectstart=\"return false;\">';
-//	var pos = '</span>';
-	var pre = "";
-	var pos = "";
+	var pre = '<span onmousedown=\"return false;\" onselectstart=\"return false;\">';
+	var pos = '</span>';
 	return pre + x + pos;
     }
 
