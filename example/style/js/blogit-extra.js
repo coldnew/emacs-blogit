@@ -1,8 +1,18 @@
 
 // Color Bash prompt in example block
 function colorShellPrompt () {
-    var userHighlight  = '<font color=\"lightgreen\">$1</font><font color=\"lightblue\">$2</font>';
-    var rootHighlight  = '<font color=\"crimson\">$1</font><font color=\"lightblue\">$2</font>';
+
+    // prevent selectable in shell prompt
+    function span (x) {
+//	var pre = '<span onmousedown=\"return false;\" onselectstart=\"return false;\">';
+//	var pos = '</span>';
+	var pre = "";
+	var pos = "";
+	return pre + x + pos;
+    }
+
+    var userHighlight  = span ('<font color=\"lightgreen\">$1</font><font color=\"lightblue\">$2</font>');
+    var rootHighlight  = span ('<font color=\"crimson\">$1</font><font color=\"lightblue\">$2</font>');
     var block = document.getElementsByClassName('example');
     for(var i = 0, l = block.length; i < l; i++) {
         // highlight `user@hostname directory $'
