@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="{{{LANGUAGE}}}">
+  {{{PAGE_HEADER}}}
+  <body>
+    {{{PAGE_NAVIGATOR}}}
+    <div class="container">
+
+      <!-- begin blog post content -->
+      <div class="blog-header">
+        <div class="well">
+          <div class="row">
+            <div class="date col-md-1">
+              <div class="date-d">{{{POST_DAY}}}</div>
+              <div class="date-m"><a href="">{{{POST_MONTH_ABBREV}}}</a></div>
+              <div class="date-y"><a href="">{{{POST_YEAR}}}</a></div>
+            </div>
+            <div class="col-md-1"> {{{PLUGIN_QRCODE}}} </div>
+            <h1 class="col-md-offset-1">{{{TITLE}}}</h1>
+          </div>
+        </div>
+      </div>
+
+      <div class="blog-content">
+
+        <!-- Special header for draft type -->
+        <div class="alert-danger alert">
+          <p>
+            This post is under writing, since it will be moved to blog or other category, <b>the link will gone one day</b>. <br>
+	    Please wait for this post be published.
+          </p>
+	  <p>
+	    這邊的文章是我正在撰寫，並寫到某一程度的文章，完成後會將其移至 blog 分類或是其他分類，因此 <b>這邊的文章連結一定會不見</b><br>
+	    請耐心等待草稿的文章變成正式的文章。
+	  </p>
+        </div>
+
+        {{{CONTENT}}}
+      </div>
+
+      <div class="blog-footer">
+        <div class="well">
+          Posted on {{{POST_DATE}}}
+          <nav class="tag-cloud">
+            <h1><i class="icon-tags"></i> related tags</h1>
+            <ul>
+              {{#TAG_LIST}}<li class="label label-inverse small"><a href="{{{TAG_URL}}}">{{{TAG_NAME}}}</a></li>{{/TAG_LIST}}
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <!-- end blog post content -->
+      {{{PAGE_FOOTER}}}
+    </div>
+  </body>
+</html>

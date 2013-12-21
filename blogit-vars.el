@@ -164,10 +164,10 @@ Some option you may set to make blog more complete:
 ;; FIXME: not let anyone modified this ?
 (defvar blogit-type-list
   (list
-   :draft  '(:type draft)
-   :blog   '(:type blog   :root "blog" :filepath "%y/%m"  :filename "%d_%s.html")
-   :static '(:type static :root ""     :filepath ""       :filename "%s.html")
-   :note   '(:type note   :root "note" :filepath ""       :filename "%s.html"))
+   :draft  '(:type draft  :root "draft" :filepath ""       :filename "%d_%s.html")
+   :blog   '(:type blog   :root "blog"  :filepath "%y/%m"  :filename "%d_%s.html")
+   :static '(:type static :root ""      :filepath ""       :filename "%s.html")
+   :note   '(:type note   :root "note"  :filepath ""       :filename "%s.html"))
   "Output dir formate for blogit, use `(blogit-project-info :publishing-directory)' as root when
 this value is empty string.
 
@@ -209,6 +209,7 @@ Currently blogit only support following format:
    :index_post         "index_post.html"
 
    :note_post          "note_post.html"
+   :draft_post         "draft_post.html"
 
    ;; combine other templates
    :blog_post          "blog_post.html"
@@ -220,6 +221,14 @@ Currently blogit only support following format:
    :bootstrap_source   "bootstrap_source.html"
    )
   "Template filename define for blogit to parse.")
+
+;;; Customized Variables
+
+;; TODO: show on tags?
+
+(defvar blogit-publish-draft nil
+  "When t, publish draft type post by draft template, these post will not be log in atom/rss feed.")
+
 
 
 ;;; Internal variables

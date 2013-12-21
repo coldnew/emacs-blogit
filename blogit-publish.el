@@ -326,7 +326,8 @@ Return output file name."
 
     ;; if file is draft, do not publish it
     (if do-publish
-        (when (eq 'draft (blogit--get-post-type nil filename))
+        (when (and (eq 'draft (blogit--get-post-type nil filename))
+		   (not blogit-publish-draft))
           (setq do-publish nil)))
 
     ;; only publish when do-publish is t

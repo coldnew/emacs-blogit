@@ -267,7 +267,7 @@ Get post template in `key' format, all key ends with `_post'. ex: :blog_post"
 	(blogit--string-to-key
 	 (if template template
 	     ;; If no template specify, use `type_post' as template
-	     (format "%s_post" (blogit--get-post-type info filename))))))
+	     (format "%s_post.html" (blogit--get-post-type info filename))))))
 
 (defun blogit--check-post-file (file)
   "If file is valid blogit post, return t, else nil."
