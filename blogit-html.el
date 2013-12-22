@@ -170,6 +170,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "BLOGIT_SOURCE") (blogit-bootstrap-publish-source info value))
      (t (org-html-keyword keyword contents info)))))
 
+(setq org-html-link-use-abs-url t)
+
 (defun org-blogit-html-link (link desc info)
   "Transcode a LINK object from Org to HTML.
 
@@ -180,13 +182,15 @@ INFO is a plist holding contextual information.  See
 In this function, we also add link file"
   (let* ((org-html-link-org-files-as-html nil)
          (type (org-element-property :type link))
-         (raw-path (expand-file-name (org-element-property :path link)))
+	 (raw-link (org-element-property :path link))
+         (raw-path (expand-file-name raw-link))
          (encode-path (expand-file-name (org-link-unescape raw-path)))
          (html-link (org-html-link link desc info))
          (file-dir (file-name-base (blogit--get-post-filename info)))
 	 (root-dir (blogit--path-to-root (blogit--get-post-filename info)))
          (link-prefix "<a href=\"")
          new-path file-to-cache)
+
     ;; file
     (when (string= type "file")
       (cond
@@ -216,6 +220,13 @@ In this function, we also add link file"
         (if (file-name-absolute-p raw-path)
             (setq html-link (s-replace (concat link-prefix "file://") link-prefix html-link)))
 
+	;; FIXME: dirty hack
+	;; Since blogit will modify the file path to new one, we must
+	;; fix some path use org-html-link, convert relative path to
+	;; absolute one like convert src="../a.png" to src="/home/a.png"
+	(setq html-link (s-replace raw-link raw-path html-link))
+	(setq html-link (s-replace "=\"./" "=\"" html-link))
+
 	;; To prevent replace original raw-path failed, we generate
 	;; raw-path-1 to store the file true name.
 	(setq raw-path-1 (file-truename raw-path))
@@ -229,7 +240,6 @@ In this function, we also add link file"
         ;; we also need to modify org-html-link to relative path for our post
         (setq html-link (s-replace (concat "=\"" raw-path) (concat "=\"" new-path) html-link))
         (setq html-link (s-replace (concat "=\"" raw-path-1) (concat "=\"" new-path) html-link))))
-
     ;; done and done, now return our new-link
     html-link))
 
