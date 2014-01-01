@@ -6,3 +6,5 @@
 #+URL:    {{{URL}}}
 #+OPTIONS: num:nil ^:nil
 #+TAGS:
+
+#+BLOGIT_TYPE: draft
