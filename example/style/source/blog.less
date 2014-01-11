@@ -25,7 +25,7 @@
 }
 
 .blog-content {
-    @outlineShift: 2em;
+    @outlineShift: 1em;
     .outline-1 { margin-left: 0 * @outlineShift; }
     .outline-2 { margin-left: 0 * @outlineShift; }
     .outline-3 { margin-left: 1 * @outlineShift; }
@@ -34,22 +34,29 @@
     .outline-6 { margin-left: 4 * @outlineShift; }
 
     h2 {
-	font-size: @base-font-size * 1.40;
-	padding:10px 0 10px 0;
-	border-bottom: 1px solid #ddd;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: @base-font-size * 1.40;
+        padding:10px 0 10px 0;
+        border-bottom: 1px solid #ddd;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         margin-bottom: 15px;
-	color: black;
+        color: black;
         border-bottom: 2px LightGrey solid;
         line-height: @base-line-height 2.5;
     }
 
     h3 {
-        margin-top: 40px;
+        font-size: @base-font-size * 1.2;
         margin-bottom: 15px;
-        border-bottom: 1px LightGrey solid;
-        width: 80%;
-        color: DarkBlue;
+        &:before {
+            background-image: url("/style/icons/bullet-black.png");
+            background-repeat: no-repeat;
+            background-size: 15px;
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+	    content: "";
+            vertical-align: middle;
+        }
     }
 
     h4 {
@@ -58,6 +65,10 @@
         border-bottom: 1px LightGrey solid;
         width: 80%;
         color: DarkBlue;
+    }
+
+    ul {
+        list-style: none;
     }
 }
 
