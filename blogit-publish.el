@@ -386,7 +386,8 @@ list in `blogit-project-alist', do not prompt."
       :newpost
       (blogit--build-context
        nil
-       ("TITLE" (file-name-base (or filename (buffer-file-name) "")))
+       ;; FIXME:
+       ("TITLE" (s-replace ".org" "" (or filename (buffer-file-name) "")))
        ("DATE" (format-time-string (blogit-project-info :blogit-date-format)))
        ("URL" (blogit--sanitize-string filename (blogit-project-info :blogit-sanitize-length)))
        ("LANGUAGE" (or (blogit-project-info :default-language) "en"))))))
