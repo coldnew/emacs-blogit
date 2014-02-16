@@ -82,16 +82,23 @@
 
 ;;;###autoload
 (defun blogit-publish (&optional force)
+  "Published modified blogit files."
   (interactive)
   (blogit--select-project 'blogit--publish-blog))
 
-
 ;;;###autoload
 (defun blogit-republish (&optional force)
+  "Re-publish all blogit files."
   (interactive)
   (flet ((blogit--republish-blog (project-list)
                                  (blogit--publish-blog project-list t)))
     (blogit--select-project 'blogit--republish-blog)))
+
+;;;###autoload
+(defun blogit-update-date ()
+  "Update date option for current buffer."
+  (interactive)
+  (blogit--update-date))
 
 (provide 'blogit)
 ;;; blogit.el ends here.

@@ -697,6 +697,17 @@ If option does not exist, create it automatically."
               (newline-and-indent))
           )))))
 
+;;;; Update function
+
+(defun blogit--update-date (&optional filename)
+  "Update `DATE' option according to file. If file not
+specified, use current buffer instead."
+  (if filename
+      (blogit--file-in-temp-buffer filename blogit--update-date)
+    (blogit--modify-option
+     "DATE"
+     (format-time-string (blogit-project-info :blogit-date-format)))))
+
 (defun blogit--do-copy (src dst &optional copyf args)
   "Copy SRC into DST. If `dired-do-sync' is found it would be
 preferred. Otherwise, `copy-directory' or `copy-files' would be
