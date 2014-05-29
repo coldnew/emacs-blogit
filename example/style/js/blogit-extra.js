@@ -6,7 +6,9 @@ function colorShellPrompt () {
     function span (x) {
 	var pre = '<span onmousedown=\"return false;\" onselectstart=\"return false;\">';
 	var pos = '</span>';
-	return pre + x + pos;
+	// extra is to make commandline can easy copy without copy the prompt
+	var extra = '<span style="width: 0; height: 0; display: inline-block; overflow: hidden;"><span style="display: block;"></span></span>';
+	return pre + x + pos + extra;
     }
 
     var userHighlight  = span ('<font color=\"lightgreen\">$1</font><font color=\"lightblue\">$2</font>');
