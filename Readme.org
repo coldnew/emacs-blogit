@@ -1,4 +1,13 @@
 
+* DEPRECATED NOTE
+
+I no longer mantain this code, since I switch to use Ghost + buster as
+my blog system.
+
+The emacs-blogit project will be migrate as =ghost-blogit-thems= and
+=emacs-blogit-ghost= project.
+
+
 * NOTE
 
 This emacs file is under development, DO NOT use it until it finished.
