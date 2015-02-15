@@ -33,6 +33,13 @@
 (require 'ox-html)
 (require 'ox-publish)
 
+;;;; Group
+
+(defgroup emacs-blogit-pelican nil
+  "."
+  :group 'convenience
+  :link '(url-link :tag "Github" "https://github.com/coldnew/emacs-blogit-for-pelican"))
+
 
 
 ;;;; Backend
