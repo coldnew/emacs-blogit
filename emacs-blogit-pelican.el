@@ -187,9 +187,39 @@ INFO is a plist used as a communication channel."
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (noflet ((org-html--build-meta-info (info)
-                                      (org-blogit-pelican--build-meta-info info)))
-    (org-html-template contents info)))
+  (concat
+   (org-html-doctype info)
+   "\n"
+   (concat "<html"
+           (when (org-html-xhtml-p info)
+             (format
+              " xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\""
+              (plist-get info :language) (plist-get info :language)))
+           ">\n")
+   "<head>\n"
+   (org-blogit-pelican--build-meta-info info)
+   (org-html--build-head info)
+   "</head>\n"
+   "<body>\n"
+   (let ((link-up (org-trim (plist-get info :html-link-up)))
+         (link-home (org-trim (plist-get info :html-link-home))))
+     (unless (and (string= link-up "") (string= link-home ""))
+       (format org-html-home/up-format
+               (or link-up link-home)
+               (or link-home link-up))))
+
+   ;; Document contents.
+   (format "<%s id=\"%s\">\n"
+           (nth 1 (assq 'content org-html-divs))
+           (nth 2 (assq 'content org-html-divs)))
+
+   contents
+   (format "</%s>\n"
+           (nth 1 (assq 'content org-html-divs)))
+
+   ;; Closing document.
+   "</body>\n</html>"))
+
 
 
 ;;; End-user functions
