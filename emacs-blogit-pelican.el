@@ -169,8 +169,7 @@ INFO is a plist used as a communication channel."
           (concat
            (org-html-close-tag "meta"
                                (format " name=\"date\" content=\"%s\"\n"
-                                       ;;(funcall protect-string date)
-                                       date
+                                       (funcall protect-string date)
                                        )
                                info)
            "\n")
@@ -244,6 +243,60 @@ is non-nil."
 ;;;###autoload
 (defun blogit-republish-pelican (&optional force)
   )
+
+
+;;;###autoload
+(defun org-blogit-publish-to-html (plist filename pub-dir)
+  "Publish an org file to HTML.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-publish-org-to 'blogit-pelican filename
+                      (concat "." (or (plist-get plist :html-extension)
+                                      org-html-extension "html"))
+                      plist pub-dir))
+
+(setq blogit-project-alist
+      '(
+        ("base-orgs" ;; an identifier
+         :base-directory "~/Workspace/blog/blog-src" ;; path where I put the articles and pages
+         :base-extension "org" ;; export org files
+         :publishing-function org-blogit-publish-to-html
+         :auto-sitemap nil ;; don't generate a sitemap (kind of an index per folder)
+         :publishing-directory "~/Workspace/blog/test/content/" ;; where to publish those files
+         :recursive t ;; recursively publish the files
+         :headline-levels 4 ;; Just the default for this project.
+         :auto-preamble nil ;; Don't add any kind of html before the content
+         :export-with-tags t
+         :todo-keywords nil
+         ;;:author nil
+         :html-doctype "html5" ;; set doctype to html5
+         :html-html5-fancy t
+         :creator-info nil ;; don't insert creator's info
+         :auto-postamble nil ;; Don't add any kind of html after the content
+         :html-postamble nil ;; same thing
+         :timestamp nil ;;
+         :exclude-tags ("noexport" "todo")) ;; just in case we don't want to publish some part of the files
+        ("blog-static" ;; identifier for static files
+         :base-directory  "~/Workspace/blog/blog-src" ;; path where I put the articles and pages
+         :publishing-directory "~/pelican-site/public_html" ;; where to publish those files
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+         :recursive t
+         :publishing-function org-publish-attachment ;; method to use for publishing those files
+         )
+        ("blog" :components ("base-orgs" "blog-static")) ;; meta identifier to publish everything at once
+        ))
+
+(let ((org-publish-project-alist blogit-project-alist))
+  (org-publish  "blog"))
+
+(defvar blogit-project-alist '())
+
+
+
 
 (provide 'emacs-blogit-pelican)
 ;;; emacs-blogit-pelican.el ends here.
