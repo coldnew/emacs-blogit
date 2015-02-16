@@ -30,6 +30,7 @@
 
 (eval-when-compile (require 'cl-lib))
 
+(require 'noflet)
 (require 'ox-html)
 (require 'ox-publish)
 
@@ -47,11 +48,16 @@
 (org-export-define-derived-backend 'blogit-pelican 'html
   :translate-alist
   '(
+    (template . org-blogit-pelican-template)
     ;; Fix for multibyte language
     (paragraph . org-blogit-pelican-paragraph)
     ;; Fix toc for blogit theme
     (inner-template . org-blogit-pelican-inner-template)
-    ))
+    )
+  :options-alist
+  '((:date "DATE" nil nil)
+    )
+  )
 
 
 ;;;; Paragraph
@@ -110,6 +116,82 @@ contents as a string, or nil if it is empty."
       (format "<div class=\"table-of-contents\">\n\n"))))
 
 
+;;; Template
+
+(defun blogit--parse-date (info)
+  (let ((date (car (plist-get info :date))))
+    (if (stringp date)
+        ;; backward compability with blogit
+        date
+      ;; parse org-timestamp
+      (format-time-string "%Y-%m-%d %H:%M:%S"
+                          (apply 'encode-time (org-parse-time-string
+                                               (org-element-property :raw-value date)))))))
+
+
+(defun org-blogit-pelican--build-meta-info (info)
+  "Return meta tags for exported document.
+INFO is a plist used as a communication channel."
+  (let ((protect-string
+         (lambda (str)
+           (replace-regexp-in-string
+            "\"" "&quot;" (org-html-encode-plain-text str))))
+        (title (org-export-data (plist-get info :title) info))
+        (author (and (plist-get info :with-author)
+                     (let ((auth (plist-get info :author)))
+                       (and auth
+                            ;; Return raw Org syntax, skipping non
+                            ;; exportable objects.
+                            (org-element-interpret-data
+                             (org-element-map auth
+                                 (cons 'plain-text org-element-all-objects)
+                               'identity info))))))
+        (date (blogit--parse-date info))
+        (category (plist-get info :category))
+        (tags (plist-get info :tags))
+        (save-as (plist-get info :save_as))
+        (url (plist-get info :url)))
+    (concat
+     (format "<title>%s</title>\n" title)
+     (when (plist-get info :time-stamp-file)
+       (format-time-string
+        (concat "<!-- " org-html-metadata-timestamp-format " -->\n")))
+     (org-html-close-tag "meta" " name=\"generator\" content=\"blogit\"" info)
+     "\n"
+     (and (org-string-nw-p author)
+          (concat
+           (org-html-close-tag "meta"
+                               (format " name=\"author\" content=\"%s\""
+                                       (funcall protect-string author))
+                               info)
+           "\n"))
+     (and (org-string-nw-p date)
+          (concat
+           (org-html-close-tag "meta"
+                               (format " name=\"date\" content=\"%s\"\n"
+                                       ;;(funcall protect-string date)
+                                       date
+                                       )
+                               info)
+           "\n")
+          )
+     (and (org-string-nw-p category)
+          (concat
+           (org-html-close-tag "meta"
+                               (format " name=\"category\" content=\"%s\""
+                                       (funcall protect-string category))
+                               info)
+           "\n")))))
+
+(defun org-blogit-pelican-template (contents info)
+  "Return complete document string after HTML conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options."
+  (noflet ((org-html--build-meta-info (info)
+                                      (org-blogit-pelican--build-meta-info info)))
+    (org-html-template contents info)))
+
+
 ;;; End-user functions
 
 ;;;###autoload
@@ -121,12 +203,17 @@ Export is done in a buffer named \"*Blogit HTML Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (org-export-to-buffer 'blogit-perlican "*Blogit perlican Export*"
+  (org-export-to-buffer 'blogit-pelican "*Blogit perlican Export*"
     async subtreep visible-only body-only ext-plist
     (lambda () (html-mode))))
 
+;;;###autoload
+(defun blogit-publish-pelican (&optional force)
+  )
 
-
+;;;###autoload
+(defun blogit-republish-pelican (&optional force)
+  )
 
 (provide 'emacs-blogit-pelican)
 ;;; emacs-blogit-pelican.el ends here.
