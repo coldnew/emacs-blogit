@@ -1,0 +1,4 @@
+
+* NOTE
+
+This repo is temporary exist, it will be merge to [[https://github.com/coldnew/emacs-blogit][emacs-blogit]] later.
