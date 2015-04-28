@@ -1,16 +1,10 @@
 
-* DEPRECATED NOTE
+emacs-blogit is a org-mode blog generator written or purely elisp.
 
-I no longer mantain this code, since I switch to use Ghost + buster as
-my blog system.
+However, since I rewrite code to use =pelican= as blog generator, this project
+is marked as deprecated.
 
-The emacs-blogit project will be migrate as =ghost-blogit-thems= and
-=emacs-blogit-ghost= project.
-
-
-* NOTE
-
-This emacs file is under development, DO NOT use it until it finished.
+Please use v2 instead.
 
 * About blogit
 
