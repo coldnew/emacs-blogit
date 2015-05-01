@@ -103,7 +103,7 @@ list in `blogit-project-alist', do not prompt."
         (let ((org-publish-project-alist x)
               ;;(org-publish-timestamp-directory (blogit-project-info :blogit-cache-directory))
               )
-          (org-publish-all)))
+          (org-publish-all force)))
     )))
 
 
@@ -115,11 +115,11 @@ list in `blogit-project-alist', do not prompt."
         ;; without this, it will use `~/.org-timestamp' as cache
         ;; :cache-directory "~/Workspace/blog/test/content/"
         ("post" ;; an identifier
-         :base-directory "~/Workspace/blog/blog-src/blog" ;; path where I put the articles and pages
+         :base-directory "~/Workspace/blog/src/article" ;; path where I put the articles and pages
          :base-extension "org" ;; export org files
          :publishing-function org-pelican-publish-to-html
          :auto-sitemap nil ;; don't generate a sitemap (kind of an index per folder)
-         :publishing-directory "~/Workspace/blog/test/content/article" ;; where to publish those files
+         :publishing-directory "~/Workspace/blog/test/content" ;; where to publish those files
          :recursive t ;; recursively publish the files
          :headline-levels 4 ;; Just the default for this project.
          :auto-preamble nil ;; Don't add any kind of html before the content
@@ -133,7 +133,7 @@ list in `blogit-project-alist', do not prompt."
          :timestamp nil ;;
          :exclude-tags ("noexport" "todo")) ;; just in case we don't want to publish some part of the files
         ("static" ;; identifier for static files
-         :base-directory  "~/Workspace/blog/blog-src" ;; path where I put the articles and pages
+         :base-directory  "~/Workspace/blog/src/data" ;; path where I put the articles and pages
          :publishing-directory "~/Workspace/blog/test/content" ;; where to publish those files
          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
          :recursive t
