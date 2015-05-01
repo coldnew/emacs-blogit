@@ -143,6 +143,38 @@ list in `blogit-project-alist', do not prompt."
 (add-to-list 'blogit-project-alist coldnew-blog-alist)
 
 
+;; (setq coldnew-blog-alist
+;;       '("coldnew's blog" ;; project name
+;;         ;; without this, it will use `~/.org-timestamp' as cache
+;;         ;; :cache-directory "~/Workspace/blog/test/content/"
+;;         ("article" ;; an identifier
+;;          :base-directory "~/Workspace/blog/src/article" ;; path where I put the articles and pages
+;;          :base-extension "org" ;; export org files
+;;          :publishing-function org-pelican-publish-to-html
+;;          :auto-sitemap nil ;; don't generate a sitemap (kind of an index per folder)
+;;          :publishing-directory "~/Workspace/blog/content" ;; where to publish those files
+;;          :recursive t ;; recursively publish the files
+;;          :headline-levels 4 ;; Just the default for this project.
+;;          :auto-preamble nil ;; Don't add any kind of html before the content
+;;          :export-with-tags t
+;;          :todo-keywords nil
+;;          :html-doctype "html5" ;; set doctype to html5
+;;          :html-html5-fancy t
+;;          :creator-info nil ;; don't insert creator's info
+;;          :auto-postamble nil ;; Don't add any kind of html after the content
+;;          :html-postamble nil ;; same thing
+;;          :timestamp nil ;;
+;;          :exclude-tags ("noexport" "todo")) ;; just in case we don't want to publish some part of the files
+;;         ("static" ;; identifier for static files
+;;          :base-directory  "~/Workspace/blog/src/data" ;; path where I put the articles and pages
+;;          :publishing-directory "~/Workspace/blog/content" ;; where to publish those files
+;;          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+;;          :recursive t
+;;          :publishing-function org-publish-attachment ;; method to use for publishing those files
+;;          )
+;;         ))
+;; (add-to-list 'blogit-project-alist coldnew-blog-alist)
+
 
 (provide 'blogit)
 ;;; blogit.el ends here.
