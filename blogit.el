@@ -49,9 +49,13 @@
   :group 'blogit
   :type 'string)
 
-(defcustom blogit-project-alist
-  '()
-  "Project alist like org-project-alist. The meta project need :components key."
+(defcustom blogit-project-alist nil
+  "Project list for blogit, it can contains many project, all
+  project must config like following:
+
+(setq blogit-project-alist
+      '((\"coldnew's blog\" :config \"~/Workspace/blog/config.el\")))
+"
   :type 'list)
 
 
