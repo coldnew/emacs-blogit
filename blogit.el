@@ -75,17 +75,15 @@ list in `blogit-project-alist', do not prompt."
              ;; If this function is called in batch mode,
              ;; project is still a string here.
              (list (assoc project blogit-project-alist)))))
-;;      (message (format "--->%s" project))
-;;      (message (format "--->%s" project-list))
+      ;;      (message (format "--->%s" project))
+      ;;      (message (format "--->%s" project-list))
       (mapc
        (lambda (current-project)
          (message (format "-000000-->%s" (cdr current-project)))
-;;         (message (format "--->%s" current-project))
+         ;;         (message (format "--->%s" current-project))
          (funcall func (cdr current-project))
          )
        (org-publish-expand-projects (car project-list))))))
-
-(blogit--select-project nil)
 
 
 ;;; End-user functions
@@ -96,15 +94,15 @@ list in `blogit-project-alist', do not prompt."
   (interactive)
   ;; TODO: enable force rebuild project
   (let ((org-publish-project-alist blogit-project-alist))
-;;    (blogit--select-project '(lambda (x) (message (format "%s" x))))
-;;    (blogit--select-project 'org-publish-all)
+    ;;    (blogit--select-project '(lambda (x) (message (format "%s" x))))
+    ;;    (blogit--select-project 'org-publish-all)
     (blogit--select-project
      '(lambda (x);; (message (format "%s" x))
         (let ((org-publish-project-alist x)
               ;;(org-publish-timestamp-directory (blogit-project-info :blogit-cache-directory))
               )
           (org-publish-all force)))
-    )))
+     )))
 
 
 
@@ -114,12 +112,12 @@ list in `blogit-project-alist', do not prompt."
       '("coldnew's blog" ;; project name
         ;; without this, it will use `~/.org-timestamp' as cache
         ;; :cache-directory "~/Workspace/blog/test/content/"
-        ("post" ;; an identifier
+        ("article" ;; an identifier
          :base-directory "~/Workspace/blog/src/article" ;; path where I put the articles and pages
          :base-extension "org" ;; export org files
          :publishing-function org-pelican-publish-to-html
          :auto-sitemap nil ;; don't generate a sitemap (kind of an index per folder)
-         :publishing-directory "~/Workspace/blog/test/content" ;; where to publish those files
+         :publishing-directory "~/Workspace/blog/content" ;; where to publish those files
          :recursive t ;; recursively publish the files
          :headline-levels 4 ;; Just the default for this project.
          :auto-preamble nil ;; Don't add any kind of html before the content
@@ -134,7 +132,7 @@ list in `blogit-project-alist', do not prompt."
          :exclude-tags ("noexport" "todo")) ;; just in case we don't want to publish some part of the files
         ("static" ;; identifier for static files
          :base-directory  "~/Workspace/blog/src/data" ;; path where I put the articles and pages
-         :publishing-directory "~/Workspace/blog/test/content" ;; where to publish those files
+         :publishing-directory "~/Workspace/blog/content" ;; where to publish those files
          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
          :recursive t
          :publishing-function org-publish-attachment ;; method to use for publishing those files
