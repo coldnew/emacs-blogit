@@ -55,6 +55,19 @@
   :type 'list)
 
 
+;;;; Internal Variables
+
+(defvar blogit-template-directory nil
+  "This variable should be defined in user's blogit config.el.")
+
+(defvar blogit-cache-directory nil
+  "Change org-mode's `~/.org-timestamp' storage path.This
+  variable should be defined in user's blogit config.el.")
+
+(defvar blogit-publish-project-alist nil
+  "This variable should be defined in user's blogit config.el.")
+
+
 ;;;; Internal Functions
 
 (defun blogit--select-project (func &optional msg)
@@ -70,20 +83,21 @@ list in `blogit-project-alist', do not prompt."
                    blogit-project-alist)
             current-prefix-arg))))
 
-    (let ((project-list
-           (if (not (stringp project)) (list project)
-             ;; If this function is called in batch mode,
-             ;; project is still a string here.
-             (list (assoc project blogit-project-alist)))))
+    ;; load config according blogit-project-list
+    ;; FIXME: what if config file not exist?
+    (let ((config (plist-get (cdar project) :config)))
+      (if config (load config)
+        (error (format "config %s not exist") config)))
+    (let ((project-list (list blogit-publish-project-alist)))
       ;;      (message (format "--->%s" project))
       ;;      (message (format "--->%s" project-list))
       (mapc
        (lambda (current-project)
-         (message (format "-000000-->%s" (cdr current-project)))
+         ;;         (message (format "-000000-->%s" (plist-get (cdr current-project) :config)))
          ;;         (message (format "--->%s" current-project))
-         (funcall func (cdr current-project))
-         )
-       (org-publish-expand-projects (car project-list))))))
+         (funcall func current-project))
+
+       (org-publish-expand-projects project-list)))))
 
 
 ;;; End-user functions
@@ -99,8 +113,8 @@ list in `blogit-project-alist', do not prompt."
     (blogit--select-project
      '(lambda (x);; (message (format "%s" x))
         (let ((org-publish-project-alist x)
-              ;;(org-publish-timestamp-directory (blogit-project-info :blogit-cache-directory))
-              )
+              (org-publish-timestamp-directory
+               (file-name-as-directory blogit-cache-directory)))
           (org-publish-all force)))
      )))
 
@@ -108,73 +122,14 @@ list in `blogit-project-alist', do not prompt."
 
 ;;; Test
 
-(setq coldnew-blog-alist
-      '("coldnew's blog" ;; project name
-        ;; without this, it will use `~/.org-timestamp' as cache
-        ;; :cache-directory "~/Workspace/blog/test/content/"
-        ("article" ;; an identifier
-         :base-directory "~/Workspace/blog/src/article" ;; path where I put the articles and pages
-         :base-extension "org" ;; export org files
-         :publishing-function org-pelican-publish-to-html
-         :auto-sitemap nil ;; don't generate a sitemap (kind of an index per folder)
-         :publishing-directory "~/Workspace/blog/content" ;; where to publish those files
-         :recursive t ;; recursively publish the files
-         :headline-levels 4 ;; Just the default for this project.
-         :auto-preamble nil ;; Don't add any kind of html before the content
-         :export-with-tags t
-         :todo-keywords nil
-         :html-doctype "html5" ;; set doctype to html5
-         :html-html5-fancy t
-         :creator-info nil ;; don't insert creator's info
-         :auto-postamble nil ;; Don't add any kind of html after the content
-         :html-postamble nil ;; same thing
-         :timestamp nil ;;
-         :exclude-tags ("noexport" "todo")) ;; just in case we don't want to publish some part of the files
-        ("static" ;; identifier for static files
-         :base-directory  "~/Workspace/blog/src/data" ;; path where I put the articles and pages
-         :publishing-directory "~/Workspace/blog/content" ;; where to publish those files
-         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-         :recursive t
-         :publishing-function org-publish-attachment ;; method to use for publishing those files
-         )
-        ))
-
 (setq blogit-project-alist nil)
-(add-to-list 'blogit-project-alist coldnew-blog-alist)
+;;(add-to-list 'blogit-project-alist coldnew-blog-alist)
 
-
-;; (setq coldnew-blog-alist
-;;       '("coldnew's blog" ;; project name
-;;         ;; without this, it will use `~/.org-timestamp' as cache
-;;         ;; :cache-directory "~/Workspace/blog/test/content/"
-;;         ("article" ;; an identifier
-;;          :base-directory "~/Workspace/blog/src/article" ;; path where I put the articles and pages
-;;          :base-extension "org" ;; export org files
-;;          :publishing-function org-pelican-publish-to-html
-;;          :auto-sitemap nil ;; don't generate a sitemap (kind of an index per folder)
-;;          :publishing-directory "~/Workspace/blog/content" ;; where to publish those files
-;;          :recursive t ;; recursively publish the files
-;;          :headline-levels 4 ;; Just the default for this project.
-;;          :auto-preamble nil ;; Don't add any kind of html before the content
-;;          :export-with-tags t
-;;          :todo-keywords nil
-;;          :html-doctype "html5" ;; set doctype to html5
-;;          :html-html5-fancy t
-;;          :creator-info nil ;; don't insert creator's info
-;;          :auto-postamble nil ;; Don't add any kind of html after the content
-;;          :html-postamble nil ;; same thing
-;;          :timestamp nil ;;
-;;          :exclude-tags ("noexport" "todo")) ;; just in case we don't want to publish some part of the files
-;;         ("static" ;; identifier for static files
-;;          :base-directory  "~/Workspace/blog/src/data" ;; path where I put the articles and pages
-;;          :publishing-directory "~/Workspace/blog/content" ;; where to publish those files
-;;          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-;;          :recursive t
-;;          :publishing-function org-publish-attachment ;; method to use for publishing those files
-;;          )
-;;         ))
-;; (add-to-list 'blogit-project-alist coldnew-blog-alist)
-
+(setq blogit-project-alist
+      '(
+        ("coldnew's blog" :config "~/Workspace/blog/config.el")
+        ;;        ("coldnew's blog2" :config "~/Workspace/blog/config.el")
+        ))
 
 (provide 'blogit)
 ;;; blogit.el ends here.
