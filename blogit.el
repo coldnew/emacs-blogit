@@ -60,23 +60,32 @@
 (defun blogit--select-project (func &optional msg)
   "Prompt to select project to publish. If only one project
 list in `blogit-project-alist', do not prompt."
-  (let ((meta-project-name-alist '()))
-    ;; build meta project name alist
-    (dolist (p blogit-project-alist)
-      (let ((name (car p))
-            (meta? (plist-get (cdr p) :components)))
-        (if meta?
-            (add-to-list 'meta-project-name-alist name))))
+  (let ((project
+         (if (= (length blogit-project-alist) 1)
+             (list (car blogit-project-alist))
+           (list
+            (assoc (org-icompleting-read
+                    (or msg "Publish blogit project: ")
+                    blogit-project-alist nil t)
+                   blogit-project-alist)
+            current-prefix-arg))))
 
-    ;; FIXME: if no project name find, throw error
+    (let ((project-list
+           (if (not (stringp project)) (list project)
+             ;; If this function is called in batch mode,
+             ;; project is still a string here.
+             (list (assoc project blogit-project-alist)))))
+;;      (message (format "--->%s" project))
+;;      (message (format "--->%s" project-list))
+      (mapc
+       (lambda (current-project)
+         (message (format "-000000-->%s" (cdr current-project)))
+;;         (message (format "--->%s" current-project))
+         (funcall func (cdr current-project))
+         )
+       (org-publish-expand-projects (car project-list))))))
 
-    ;; ask for project to publish
-    (let ((project-name
-           (org-icompleting-read
-            (or msg "Publish blogit project:")
-            meta-project-name-alist nil t)))
-
-      (funcall func project-name))))
+(blogit--select-project nil)
 
 
 ;;; End-user functions
@@ -87,16 +96,25 @@ list in `blogit-project-alist', do not prompt."
   (interactive)
   ;; TODO: enable force rebuild project
   (let ((org-publish-project-alist blogit-project-alist))
-    (blogit--select-project 'org-publish)))
+;;    (blogit--select-project '(lambda (x) (message (format "%s" x))))
+;;    (blogit--select-project 'org-publish-all)
+    (blogit--select-project
+     '(lambda (x);; (message (format "%s" x))
+        (let ((org-publish-project-alist x)
+              ;;(org-publish-timestamp-directory (blogit-project-info :blogit-cache-directory))
+              )
+          (org-publish-all)))
+    )))
 
 
 
 ;;; Test
 
-
-(setq blogit-project-alist
-      '(
-        ("base-orgs" ;; an identifier
+(setq coldnew-blog-alist
+      '("coldnew's blog" ;; project name
+        ;; without this, it will use `~/.org-timestamp' as cache
+        ;; :cache-directory "~/Workspace/blog/test/content/"
+        ("post" ;; an identifier
          :base-directory "~/Workspace/blog/blog-src/blog" ;; path where I put the articles and pages
          :base-extension "org" ;; export org files
          :publishing-function org-pelican-publish-to-html
@@ -114,16 +132,18 @@ list in `blogit-project-alist', do not prompt."
          :html-postamble nil ;; same thing
          :timestamp nil ;;
          :exclude-tags ("noexport" "todo")) ;; just in case we don't want to publish some part of the files
-        ("blog-static" ;; identifier for static files
+        ("static" ;; identifier for static files
          :base-directory  "~/Workspace/blog/blog-src" ;; path where I put the articles and pages
          :publishing-directory "~/Workspace/blog/test/content" ;; where to publish those files
          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
          :recursive t
          :publishing-function org-publish-attachment ;; method to use for publishing those files
          )
-        ("blog-asd" :components ("base-orgs")) ;; meta identifier to publish everything at once
-        ("blog2" :components ("base-orgs" "blog-static")) ;; meta identifier to publish everything at once
         ))
+
+(setq blogit-project-alist nil)
+(add-to-list 'blogit-project-alist coldnew-blog-alist)
+
 
 
 (provide 'blogit)
