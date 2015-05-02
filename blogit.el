@@ -56,12 +56,21 @@
 (setq blogit-project-alist
       '((\"coldnew's blog\" :config \"~/Workspace/blog/config.el\")))
 "
+  :group 'blogit
   :type 'list)
+
+(defcustom blogit-clear-ouput-when-republish nil
+  "When t, clean files in `blogit-ouput-directory' when republish project."
+  :group 'blogit
+  :type 'bool)
 
 
 ;;;; Internal Variables
 
 (defvar blogit-template-directory nil
+  "This variable should be defined in user's blogit config.el.")
+
+(defvar blogit-output-directory nil
   "This variable should be defined in user's blogit config.el.")
 
 (defvar blogit-cache-directory nil
@@ -123,9 +132,24 @@ When force is t, re-publish all blogit project."
     ;; file store in `blogit-cache-filelist'
     (when force
       (dolist (c blogit-cache-filelist)
-        (delete-file c)))
+        (if (file-exists-p c) (delete-file c)))
+      ;; if option on, clean all files in `blogit-output-directory'.
+      (when blogit-clear-ouput-when-republish
+        (cond
+         ;; if target is symlink, remove symlink dir and recreate it
+         ((f-symlink? blogit-output-directory)
+          (f-delete (file-symlink-p blogit-output-directory) t)
+          (f-mkdir  (file-symlink-p blogit-output-directory)))
+         ;; delete directory and recreate it
+         ((f-directory? blogit-output-directory)
+          (f-delete blogit-output-directory t)
+          (f-mkdir blogit-output-directory))
+         (t (error "BUG: unknown remove blogit-output-directory methd."))
+         )))
 
     (org-publish-all force)))
+
+;;(directory-files blogit-output-directory)
 
 
 ;;; End-user functions
