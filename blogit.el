@@ -122,18 +122,5 @@ list in `blogit-project-alist', do not prompt."
           (org-publish-all force)))
      )))
 
-
-
-;;; Test
-
-(setq blogit-project-alist nil)
-;;(add-to-list 'blogit-project-alist coldnew-blog-alist)
-
-(setq blogit-project-alist
-      '(
-        ("coldnew's blog" :config "~/Workspace/blog/config.el")
-        ;;        ("coldnew's blog2" :config "~/Workspace/blog/config.el")
-        ))
-
 (provide 'blogit)
 ;;; blogit.el ends here.
