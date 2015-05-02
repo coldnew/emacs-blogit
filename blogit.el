@@ -109,6 +109,24 @@ list in `blogit-project-alist', do not prompt."
 
        (org-publish-expand-projects project-list)))))
 
+
+(defun blogit--publish-project (project &optional force)
+  "Publush all blogit post, if post already posted and not modified,
+skip it.
+
+When force is t, re-publish all blogit project."
+  (let ((org-publish-project-alist project)
+        (org-publish-timestamp-directory
+         (file-name-as-directory blogit-cache-directory)))
+
+    ;; when repiblish blogit project, we need to remove all already exist cache
+    ;; file store in `blogit-cache-filelist'
+    (when force
+      (dolist (c blogit-cache-filelist)
+        (delete-file c)))
+
+    (org-publish-all force)))
+
 
 ;;; End-user functions
 
@@ -116,17 +134,16 @@ list in `blogit-project-alist', do not prompt."
 (defun blogit-publish (&optional force)
   "Published modified blogit files."
   (interactive)
-  ;; TODO: enable force rebuild project
-  (let ((org-publish-project-alist blogit-project-alist))
-    ;;    (blogit--select-project '(lambda (x) (message (format "%s" x))))
-    ;;    (blogit--select-project 'org-publish-all)
-    (blogit--select-project
-     '(lambda (x);; (message (format "%s" x))
-        (let ((org-publish-project-alist x)
-              (org-publish-timestamp-directory
-               (file-name-as-directory blogit-cache-directory)))
-          (org-publish-all force)))
-     )))
+  (blogit--select-project 'blogit--publish-project))
+
+;;;###autoload
+(defun blogit-republish (&optional force)
+  "Force republish project."
+  (interactive)
+  (noflet ((blogit--republish-project
+            (project-list)
+            (blogit--publish-project project-list t)))
+    (blogit--select-project 'blogit--republish-project)))
 
 (provide 'blogit)
 ;;; blogit.el ends here.
