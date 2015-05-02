@@ -144,12 +144,9 @@ When force is t, re-publish all blogit project."
                 (t (error "BUG: unknown remove blogit-output-directory methd.")))))
           ;; delete target-dir and recreate it
           (f-delete target-dir t)
-          (f-mkdir target-dir)
-          )))
+          (f-mkdir target-dir))))
 
     (org-publish-all force)))
-
-;;(directory-files blogit-output-directory)
 
 
 ;;; End-user functions
