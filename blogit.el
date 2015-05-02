@@ -68,6 +68,9 @@
   "Change org-mode's `~/.org-timestamp' storage path.This
   variable should be defined in user's blogit config.el.")
 
+(defvar blogit-cache-filelist nil
+  "List to storage where to remove the cache file. This variable will be rebuilf in `blogit--select-project'")
+
 (defvar blogit-publish-project-alist nil
   "This variable should be defined in user's blogit config.el.")
 
@@ -88,17 +91,20 @@ list in `blogit-project-alist', do not prompt."
             current-prefix-arg))))
 
     ;; load config according blogit-project-list
-    ;; FIXME: what if config file not exist?
     (let ((config (plist-get (cdar project) :config)))
       (if config (load config)
         (error (format "config %s not exist") config)))
+
     (let ((project-list (list blogit-publish-project-alist)))
-      ;;      (message (format "--->%s" project))
-      ;;      (message (format "--->%s" project-list))
+      ;; rebuild cache filelist
+      (setq blogit-cache-filelist nil)
+      (dolist (c (car project-list))
+        (add-to-list
+         'blogit-cache-filelist
+         (f-join blogit-cache-directory (concat (car c) ".cache"))))
+
       (mapc
        (lambda (current-project)
-         ;;         (message (format "-000000-->%s" (plist-get (cdr current-project) :config)))
-         ;;         (message (format "--->%s" current-project))
          (funcall func current-project))
 
        (org-publish-expand-projects project-list)))))
