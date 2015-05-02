@@ -135,17 +135,17 @@ When force is t, re-publish all blogit project."
         (if (file-exists-p c) (delete-file c)))
       ;; if option on, clean all files in `blogit-output-directory'.
       (when blogit-clear-ouput-when-republish
-        (cond
-         ;; if target is symlink, remove symlink dir and recreate it
-         ((f-symlink? blogit-output-directory)
-          (f-delete (file-symlink-p blogit-output-directory) t)
-          (f-mkdir  (file-symlink-p blogit-output-directory)))
-         ;; delete directory and recreate it
-         ((f-directory? blogit-output-directory)
-          (f-delete blogit-output-directory t)
-          (f-mkdir blogit-output-directory))
-         (t (error "BUG: unknown remove blogit-output-directory methd."))
-         )))
+        (let ((target-dir
+               (cond
+                ;; if target is symlink, remove symlink dir and recreate it
+                ((f-symlink? blogit-output-directory) (file-symlink-p blogit-output-directory))
+                ;; delete directory and recreate it
+                ((f-directory? blogit-output-directory) blogit-output-directory)
+                (t (error "BUG: unknown remove blogit-output-directory methd.")))))
+          ;; delete target-dir and recreate it
+          (f-delete target-dir t)
+          (f-mkdir target-dir)
+          )))
 
     (org-publish-all force)))
 
