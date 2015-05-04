@@ -64,6 +64,13 @@
   :group 'blogit
   :type 'bool)
 
+
+(defvar blogit-publish-before-hook nil)
+(defvar blogit-publish-after-hook nil)
+
+(defvar blogit-republish-before-hook nil)
+(defvar blogit-republish-after-hook nil)
+
 
 ;;;; Internal Variables
 
@@ -128,9 +135,12 @@ When force is t, re-publish all blogit project."
         (org-publish-timestamp-directory
          (file-name-as-directory blogit-cache-directory)))
 
+    (run-hooks blogit-publish-before-hook)
+
     ;; when repiblish blogit project, we need to remove all already exist cache
     ;; file store in `blogit-cache-filelist'
     (when force
+      (run-hooks blogit-republish-before-hook)
       (dolist (c blogit-cache-filelist)
         (if (file-exists-p c) (delete-file c)))
       ;; if option on, clean all files in `blogit-output-directory'.
@@ -144,9 +154,14 @@ When force is t, re-publish all blogit project."
                 (t (error "BUG: unknown remove blogit-output-directory methd.")))))
           ;; delete target-dir and recreate it
           (f-delete target-dir t)
-          (f-mkdir target-dir))))
+          (f-mkdir target-dir)))
 
-    (org-publish-all force)))
+      (run-hooks blogit-republish-after-hook))
+
+    ;; publish all current project
+    (org-publish-all force)
+
+    (run-hooks blogit-publish-after-hook)))
 
 
 ;;; End-user functions
