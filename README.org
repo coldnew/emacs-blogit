@@ -1,6 +1,6 @@
 #+TITLE: emacs-blogit -- org-publish wrapper for static stite
 
-emacs-blogit is an org-publish wrapper for generate static site, it use pelican
-as backend currently.
+emacs-blogit is an org-publish wrapper for generate static site, for real-life
+example, please see [[https://github.com/coldnew/coldnew.github.io][coldnew's blog sources]].
 
 Currently this repo is under =EXPERIMENTAL= state, do not use it now.
