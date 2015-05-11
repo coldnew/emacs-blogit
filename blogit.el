@@ -140,12 +140,12 @@ When force is t, re-publish all blogit project."
         (org-publish-timestamp-directory
          (file-name-as-directory blogit-cache-directory)))
 
-    (run-hooks blogit-before-publish-hook)
+    (run-hooks 'blogit-before-publish-hook)
 
     ;; when repiblish blogit project, we need to remove all already exist cache
     ;; file store in `blogit-cache-filelist'
     (when force
-      (run-hooks blogit-before-republish-hook)
+      (run-hooks 'blogit-before-republish-hook)
       (dolist (c blogit-cache-filelist)
         (if (file-exists-p c) (delete-file c)))
       ;; if option on, clean all files in `blogit-output-directory'.
@@ -161,12 +161,12 @@ When force is t, re-publish all blogit project."
           (f-delete target-dir t)
           (f-mkdir target-dir)))
 
-      (run-hooks blogit-after-republish-hook))
+      (run-hooks 'blogit-after-republish-hook))
 
     ;; publish all current project
     (org-publish-all force)
 
-    (run-hooks blogit-after-publish-hook)))
+    (run-hooks 'blogit-after-publish-hook)))
 
 
 ;;; End-user functions
