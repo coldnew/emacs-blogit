@@ -64,18 +64,6 @@
   :group 'blogit
   :type 'bool)
 
-(defvar blogit-before-publish-hook nil
-  "Hook before publish blogit files.")
-
-(defvar blogit-after-publish-hook nil
-  "Hook after publish blogit files.")
-
-(defvar blogit-before-republish-hook nil
-  "Hook before republish blogit files.")
-
-(defvar blogit-after-republish-hook nil
-  "Hook after republish blogit files.")
-
 
 ;;;; Internal Variables
 
@@ -95,8 +83,31 @@
 (defvar blogit-publish-project-alist nil
   "This variable should be defined in user's blogit config.el.")
 
+(defvar blogit-before-publish-hook nil
+  "Hook before publish blogit files.")
+
+(defvar blogit-after-publish-hook nil
+  "Hook after publish blogit files.")
+
+(defvar blogit-before-republish-hook nil
+  "Hook before republish blogit files.")
+
+(defvar blogit-after-republish-hook nil
+  "Hook after republish blogit files.")
+
 
 ;;;; Internal Functions
+(defun blogit--clear-private-variables ()
+  "Clear all private variables in blogit."
+  (setq blogit-template-directory nil
+        blogit-output-directory nil
+        blogit-cache-directory nil
+        blogit-cache-filelist nil
+        blogit-publish-project-alist nil
+        blogit-before-publish-hook nil
+        blogit-after-publish-hook nil
+        blogit-before-republish-hook nil
+        blogit-after-republish-hook nil))
 
 (defun blogit--select-project (func &optional msg)
   "Prompt to select project to publish. If only one project
@@ -110,7 +121,8 @@ list in `blogit-project-alist', do not prompt."
                     blogit-project-alist nil t)
                    blogit-project-alist)
             current-prefix-arg))))
-
+    ;; clear all private variable before load config file.
+    (blogit--clear-private-variables)
     ;; load config according blogit-project-list
     (let ((config (plist-get (cdar project) :config)))
       (if config (load config)
