@@ -1,4 +1,4 @@
-;;; blogit.el --- Export org-mode to pelican.
+;;; blogit.el --- org-publish wrapper for multi project handle.
 
 ;; Copyright (c) 2015 Yen-Chin, Lee. (coldnew) <coldnew.tw@gmail.com>
 ;;
