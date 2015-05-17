@@ -54,7 +54,8 @@
   :type 'list)
 
 (defcustom blogit-clear-ouput-when-republish nil
-  "When t, clean files in `blogit-ouput-directory' when republish project."
+  "When t, clean files in `blogit-ouput-directory' when republish
+project."
   :group 'blogit
   :type 'bool)
 
@@ -63,7 +64,8 @@
 
 (defcustom blogit-default-template-directory
   (f-join (file-name-directory (or load-file-name (buffer-file-name))) "template")
-  "Get the absolute path of template directory. This directory contains some template for create new project.")
+  "Get the absolute path of template directory. This directory
+  contains some template for create new project.")
 
 (defconst blogit-default-template-list
   (list
@@ -84,7 +86,8 @@
   variable should be defined in user's blogit config.el.")
 
 (defvar blogit-cache-filelist nil
-  "List to storage where to remove the cache file. This variable will be rebuilf in `blogit--select-project'")
+  "List to storage where to remove the cache file. This variable
+  will be rebuilf in `blogit--select-project'")
 
 (defvar blogit-publish-project-alist nil
   "This variable should be defined in user's blogit config.el.")
@@ -158,7 +161,7 @@ list in `blogit-project-alist', do not prompt."
   "Publush all blogit post, if post already posted and not modified,
 skip it.
 
-When force is t, re-publish all blogit project."
+When force is t, re-publish selected blogit project."
   (let ((org-publish-project-alist project)
         (org-publish-timestamp-directory
          (file-name-as-directory blogit-cache-directory)))
