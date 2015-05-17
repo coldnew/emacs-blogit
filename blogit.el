@@ -6,7 +6,7 @@
 ;; Keywords:
 ;; X-URL: http://github.com/coldnew/emacs-blogit
 ;; Version: 0.1
-;; Package-Requires: ((org "8.0") (cl-lib "0.5") (f "0.17.2") (org-pelican "0.1"))
+;; Package-Requires: ((org "8.0") (cl-lib "0.5") (f "0.17.2"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -32,7 +32,6 @@
 
 (require 'noflet)
 (require 'f)
-(require 'ox-pelican)
 
 ;;;; Group
 
@@ -42,12 +41,6 @@
   :link '(url-link :tag "Github" "https://github.com/coldnew/emacs-blogit"))
 
 ;;;; Customize
-
-(defcustom blogit-template-directory
-  (f-join (file-name-directory (or load-file-name (buffer-file-name))) "template")
-  "Get the absolute path of template directory. This directory contains some template for create new project."
-  :group 'blogit
-  :type 'string)
 
 (defcustom blogit-project-alist nil
   "Project list for blogit, it can contains many project, all
@@ -63,6 +56,18 @@
   "When t, clean files in `blogit-ouput-directory' when republish project."
   :group 'blogit
   :type 'bool)
+
+
+;;;; Default Variables
+
+(defcustom blogit-default-template-directory
+  (f-join (file-name-directory (or load-file-name (buffer-file-name))) "template")
+  "Get the absolute path of template directory. This directory contains some template for create new project.")
+
+(defconst blogit-default-template-list
+  (list
+   :newpost  "newpost.org"
+   ))
 
 
 ;;;; Internal Variables
@@ -95,19 +100,25 @@
 (defvar blogit-after-republish-hook nil
   "Hook after republish blogit files.")
 
+(defvar blogit-tempate-list nil
+  )
+
 
 ;;;; Internal Functions
 (defun blogit--clear-private-variables ()
   "Clear all private variables in blogit."
-  (setq blogit-template-directory nil
-        blogit-output-directory nil
+  (setq blogit-output-directory nil
         blogit-cache-directory nil
         blogit-cache-filelist nil
         blogit-publish-project-alist nil
         blogit-before-publish-hook nil
         blogit-after-publish-hook nil
         blogit-before-republish-hook nil
-        blogit-after-republish-hook nil))
+        blogit-after-republish-hook nil
+        ;; restore to default value
+        blogit-template-directory blogit-default-template-directory
+        blogit-tempate-list
+        ))
 
 (defun blogit--select-project (func &optional msg)
   "Prompt to select project to publish. If only one project
@@ -141,7 +152,6 @@ list in `blogit-project-alist', do not prompt."
          (funcall func current-project))
 
        (org-publish-expand-projects project-list)))))
-
 
 (defun blogit--publish-project (project &optional force)
   "Publush all blogit post, if post already posted and not modified,
@@ -180,6 +190,58 @@ When force is t, re-publish all blogit project."
 
     (run-hooks 'blogit-after-publish-hook)))
 
+(defun blogit--new-post (project)
+  "Create new post according to project."
+  (let ((filename (read-input "Title for new post: ")))
+    (find-file (concat
+
+                ))
+    ;;(blogit--insert-newpost-template filename)
+    )
+  )
+
+(defun blogit--insert-newpost-template (&optional filename)
+  "Insert blogit newpost template."
+  (save-excursion
+    (widen)
+    (goto-char (point-min))
+;;    (insert)
+    )
+  (end-of-buffer)
+  (newline-and-indent))
+
+
+;;; Extra functions
+
+(defun blogit--modify-option (option value)
+  "Modify option value of org file opened in current buffer.
+If option does not exist, create it automatically."
+  (let ((match-regexp (org-make-options-regexp `(,option)))
+        (blank-regexp "^#\\+\\(\\w*\\):[        ]*\\(.*\\)")
+        (insert-option '(insert (concat "#+" option ": " value)))
+        (mpoint))
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward match-regexp nil t)
+          (progn
+            (goto-char (point-at-bol))
+            (kill-line)
+            (eval insert-option))
+        ;; no option found, insert it
+        (progn
+          (goto-char (point-min))
+          (while (re-search-forward blank-regexp nil t)
+            (setq mpoint (point)))
+          (if (not mpoint) (setq mpoint (point-min)))
+          (goto-char mpoint)
+          (when (not (= mpoint (point-min)))
+            (goto-char (point-at-eol))
+            (newline-and-indent))
+          (eval insert-option)
+          (if (= mpoint (point-min))
+              (newline-and-indent))
+          )))))
+
 
 ;;; End-user functions
 
@@ -197,6 +259,18 @@ When force is t, re-publish all blogit project."
             (project-list)
             (blogit--publish-project project-list t)))
     (blogit--select-project 'blogit--republish-project)))
+
+;;;###autoload
+(defun blogit-new-post ()
+  "Create a new post according to project and templates."
+  (interactive)
+  (blogit--select-project 'blogit--new-post))
+
+;;;###autoload
+(defun blogit-insert-newpost-template (&optional filename)
+  "Insert blogit newpost template."
+  (interactive)
+  (blogit--select-project 'blogit--insert-newpost-template))
 
 (provide 'blogit)
 ;;; blogit.el ends here.
