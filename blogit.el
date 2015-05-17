@@ -234,11 +234,11 @@ When force is t, re-publish all blogit project."
 (defun blogit-set-option (key value)
   "Modify option value of org file opened in current buffer.
 If option does not exist, create it automatically."
-  (let ((option (blogit-key-to-string key))
-        (match-regexp (org-make-options-regexp `(,option)))
-        (blank-regexp "^#\\+\\(\\w*\\):[        ]*\\(.*\\)")
-        (insert-option '(insert (concat "#+" option ": " value)))
-        (mpoint))
+  (let* ((option (upcase (blogit-key-to-string key)))
+         (match-regexp (org-make-options-regexp `(,option)))
+         (blank-regexp "^#\\+\\(\\w*\\):[        ]*\\(.*\\)")
+         (insert-option '(insert (concat "#+" option ": " value)))
+         (mpoint))
     (save-excursion
       (goto-char (point-min))
       (if (re-search-forward match-regexp nil t)
@@ -267,7 +267,7 @@ If option does not exist, create it automatically."
 This function will first use the standard way to parse org-option.
 If parsing failed, use regexp to get the options, else return nil.
 "
-  (let* ((option (blogit-key-to-string key))
+  (let* ((option (upcase (blogit-key-to-string key)))
          (match-regexp (org-make-options-regexp `(,option))))
 
     ;; use regexp to find options
