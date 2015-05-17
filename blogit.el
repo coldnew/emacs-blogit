@@ -118,7 +118,7 @@
         blogit-after-republish-hook nil
         ;; restore to default value
         blogit-template-directory blogit-default-template-directory
-        blogit-tempate-list
+        blogit-tempate-list nil
         ))
 
 (defun blogit--select-project (func &optional msg)
