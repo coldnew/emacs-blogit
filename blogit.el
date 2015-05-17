@@ -32,6 +32,7 @@
 
 (require 'noflet)
 (require 'f)
+(require 's)
 
 ;;;; Group
 
@@ -205,7 +206,7 @@ When force is t, re-publish all blogit project."
   (save-excursion
     (widen)
     (goto-char (point-min))
-;;    (insert)
+    ;;    (insert)
     )
   (end-of-buffer)
   (newline-and-indent))
@@ -213,10 +214,28 @@ When force is t, re-publish all blogit project."
 
 ;;; Extra functions
 
-(defun blogit--modify-option (option value)
+(defun blogit-string-to-key (string)
+  "Conver string to key. eq: \"test\" -> :test"
+  (intern (format ":%s" string)))
+
+(defun blogit-symbol-to-key (symbol)
+  "Conver symbol to key. eq: test -> :test"
+  (blogit-string-to-key (symbol-name symbol)))
+
+(defun blogit-key-to-string (key)
+  "Conver key to string. eq: :test -> \"test\""
+  (let ((key-str (symbol-name key)))
+    (s-right (- (length key-str) 1) key-str)))
+
+(defun blogit-key-to-symbol (key)
+  "Conver key to symbol. eq: test -> :test"
+  (intern (blogit-key-to-string key)))
+
+(defun blogit-set-option (key value)
   "Modify option value of org file opened in current buffer.
 If option does not exist, create it automatically."
-  (let ((match-regexp (org-make-options-regexp `(,option)))
+  (let ((option (blogit-key-to-string key))
+        (match-regexp (org-make-options-regexp `(,option)))
         (blank-regexp "^#\\+\\(\\w*\\):[        ]*\\(.*\\)")
         (insert-option '(insert (concat "#+" option ": " value)))
         (mpoint))
@@ -241,6 +260,21 @@ If option does not exist, create it automatically."
           (if (= mpoint (point-min))
               (newline-and-indent))
           )))))
+
+(defun blogit-get-option (key)
+  "Read option value of org file opened in current buffer.
+
+This function will first use the standard way to parse org-option.
+If parsing failed, use regexp to get the options, else return nil.
+"
+  (let* ((option (blogit-key-to-string key))
+         (match-regexp (org-make-options-regexp `(,option))))
+
+    ;; use regexp to find options
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward match-regexp nil t)
+        (match-string-no-properties 2 nil)))))
 
 
 ;;; End-user functions
