@@ -78,6 +78,9 @@ project."
 (defvar blogit-template-directory nil
   "This variable should be defined in user's blogit config.el.")
 
+(defvar blogit-config-directory nil
+  "Directory contains current blogit config file.")
+
 (defvar blogit-output-directory nil
   "This variable should be defined in user's blogit config.el.")
 
@@ -111,7 +114,8 @@ project."
 ;;;; Internal Functions
 (defun blogit--clear-private-variables ()
   "Clear all private variables in blogit."
-  (setq blogit-output-directory nil
+  (setq blogit-config-directory nil
+        blogit-output-directory nil
         blogit-cache-directory nil
         blogit-cache-filelist nil
         blogit-publish-project-alist nil
