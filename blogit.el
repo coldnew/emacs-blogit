@@ -286,6 +286,12 @@ If parsing failed, use regexp to get the options, else return nil.
 
 ;;; End-user functions
 
+;; TODO:
+;; rename function, it should like following
+;; blogit-publish : publish current org-mode file <-- need to detect which project it stands for ?
+;; blogit-publish-project : publish whole project (may be slow)
+;; blogit-republish-project : republish whole project (omg slow)
+
 ;;;###autoload
 (defun blogit-publish (&optional force)
   "Published modified blogit files."
